@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>vizuly2.- Scatter Plot</title>
+
+    <!-- We use google fonts for many of the examples, but they are not necessary -->
+    <link href='https://fonts.googleapis.com/css?family=Raleway:600,400,200' rel='stylesheet' type='text/css'>
+
+    <!-- vizuly2.specific style sheets -->
+    <link rel="stylesheet" href="../lib/styles/vizuly.css">
+
+    <script src="../lib/d3.min.js"></script>
+
+    <script src="../lib/vizuly2_core.min.js"></script>
+    <script src="../src/ScatterPlot.js"></script>
+</head>
+
+<body>
+
+<!-- Our main content container-->
+<div class="container" style="width:100%;">
+    <div id="viz_container" class="z-depth-3" style="width:1000px; height:600px; border-radius:10px; overflow:hidden">
+    </div>
+</div>
+
+<!-- DEMO CODE:START -->
+<link rel="stylesheet" href="demo/scripts/cssmenu.css">
+<script type="text/javascript" src="demo/scripts/jquery-2.1.1.min.js"></script>
+<script src="demo/scripts/cssmenu.js"></script>
+<script src="demo/ScatterPlotDemo.js"></script>
+<!-- DEMO CODE: END -->
+
+<script id="testscript">
+
+	// our radial components and an array to hold them
+	var viz = vizuly2.viz.ScatterPlot(document.getElementById("viz_container"));
+
+	// This example uses two data sources.  One is static and one is live
+	// Each data source has different payload structures.  We abstract the required properties for us to visualize into
+	// 'staticData' and 'liveData' objects which we store in the 'sources' object.  This allows us to easily toggle between them.
+
+
+	// Test data
+    /*
+	var staticData = {
+		name: "can_nam",
+		date: "exp_dat",
+		dateParser: d3.time.format("%m/%d/%Y").parse,
+		amount: "exp_amo",
+		com_nam: "spe_nam",
+		pty: "can_par_aff",
+		url: "data/scatter_expenditure.csv"
+	};
+*/
+	var data;
+
+	var initialize = function () {
+
+		d3.csv('data/scatter_expenditure.csv', function (err, csv) {
+			if (err) {
+				console.log("Could not load live data for scatter plot chart.")
+			}
+
+			data = csv;
+
+			data.forEach(function (d) {
+				// Use regex to clean strings as needed for our keys
+				var can = vizuly2.core.util.createCSSKey(String(d.can_nam));
+				d.exp_dat = d3.timeParse("%m/%d/%Y")(d.exp_dat);
+				d.key = can;
+			});
+
+            viz.data(data)
+             .width(600)
+             .height(600)                       // initial component display size
+             .y(function (d, i) {
+                 return Number(d.exp_amo);      // property for y axis plot
+             })
+             .x(function (d, i) {
+                 return d.exp_dat;              // property for x axis plot
+             })
+             .r(function (d, i) {
+                 return Number(d.exp_amo);      // property for node radius plot
+             })
+             .rScale(d3.scalePow().exponent(.3))
+             .yScale(d3.scalePow().exponent(.5))
+             .xTickFormat(function (d) { return d3.timeFormat('%-m/%y')(d)})
+             .yTickFormat(function (d) { return '$' + d3.format(',')(Math.round(d/1000000)) + 'M'})
+             .dataTipRenderer(dataTipRenderer)
+
+            viz.update();
+
+			if (runDemo) runDemo();
+
+
+		});
+
+	};
+
+	function dataTipRenderer(tip,e,d,i,x,y) {
+
+		    var html = '<div class="header1">HEADER1</div>' +
+				     '<div class="header-rule"></div>' +
+				     '<div class="header2"> HEADER2 </div>' +
+				     '<div class="header-rule"></div>' +
+				     '<div class="header3" style="font-size:12px;"> HEADER3 </div>' +
+				     '<div class="header3" style="margin-top:5px"> HEADER4 </div>';
+
+			var h1 = d3.timeFormat('%b %d, 20%y')(d.exp_dat);
+			var h2 = d.can_nam;
+			var h3 = String(d.pur).substr(0,40);
+			var h4 = '$' + d3.format(',')(d.exp_amo);
+
+			html = html.replace("HEADER1", h1);
+			html = html.replace("HEADER2", h2);
+			html = html.replace("HEADER3", h3);
+			html = html.replace("HEADER4", h4);
+
+			tip.style('height','120px').html(html);
+
+			return [x-70, y-140];
+
+		}
+
+
+	function formatTip(val) {
+		var fc = d3.format(".2f");
+		var fv = d3.format(",");
+		return (field != "Volume") ? "$" + fc(val) : fv(Math.round(val / 1000)) + "K";
+	}
+
+
+	initialize();
+
+</script>
+
+</body>
+
+</html>

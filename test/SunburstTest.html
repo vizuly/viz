@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>vizuly2.- Sunburst</title>
+
+    <!-- We use google fonts for many of the examples, but they are not necessary -->
+    <link href='https://fonts.googleapis.com/css?family=Raleway:600,400,200' rel='stylesheet' type='text/css'>
+
+    <!-- vizuly2.specific style sheets -->
+    <link rel="stylesheet" href="../lib/styles/vizuly.css">
+
+    <script src="../lib/d3.min.js"></script>
+
+    <script src="../lib/vizuly2_core.min.js"></script>
+    <script src="../src/SunBurst.js"></script>
+
+    <style>
+        span.drill-label {
+            filter: brightness(80%);
+        }
+        span.drill-label:last-child {
+            font-weight:bold;
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- Our main content container-->
+<div class="container" style="width:100%; overflow:visible">
+    <div id="viz_container" class="z-depth-3" style="width:1000px; height:1000px; position:relative;">
+        <div id="label" style="z-index:100; padding:15px; font-size:12px; text-transform: uppercase; position:absolute; top:0px; left:0px;"></div>
+    </div>
+</div>
+
+<!-- DEMO CODE:START -->
+<link rel="stylesheet" href="demo/scripts/cssmenu.css">
+<script type="text/javascript" src="demo/scripts/jquery-2.1.1.min.js"></script>
+<script src="demo/scripts/cssmenu.js"></script>
+<script src="demo/SunBurstDemo.js"></script>
+<!-- DEMO CODE: END -->
+
+<script id="testscript">
+
+    var d3 = vizuly2.d3;
+
+	// our radial components and an array to hold them
+	var viz = vizuly2.viz.Sunburst(document.getElementById("viz_container"));
+
+	var data = {};
+
+	// stores the currently selected value field
+	var valueField = "Federal";
+	var valueFields = ["Federal", "State", "Local"];
+
+
+	var formatCurrency = function (d) {
+		if (isNaN(d)) d = 0;
+		return "$" + d3.format(",.2f")(d) + " Billion";
+	};
+
+
+	var initialize = function () {
+
+		d3.csv("data/sunburst_federal_budget.csv", function (csv) {
+
+			data.values = prepData(csv);
+
+			viz.data(data)                                                      // Expects hierarchical array of objects.
+				.width(1000)                                                     // Width of component
+				.height(1000)                                                    // Height of component
+				.children(function (d) {
+					return d.values
+				})                     // Denotes the property that holds child object array
+				.key(function (d) {
+					return d.id
+				})                              // Unique key
+				.value(function (d) {
+					return Number(d["agg_" + valueField])
+				})                    // The property of the datum that will be used for the branch and node size
+				.label(function (d) {                                           // returns label for each node.
+					return trimLabel(d.key || (d.Category))
+				})
+                .on('update', function () { updateLabel(data) })
+				.on("mouseover", onMouseOver)                                    // mouseover callback - all viz components issue these events
+				.on("mouseout", onMouseOut)   // mouseout callback - all viz components issue these events
+				.on("click", onClick);
+
+			viz.update();
+
+			if (runDemo) runDemo();
+
+		});
+	};
+
+	function prepData(csv) {
+
+		var values = [];
+
+		//Clean federal budget data and remove all rows where all values are zero or no labels
+		csv.forEach(function (d, i) {
+			var t = 0;
+			d.key = d.Category;
+			for (var i = 0; i < valueFields.length; i++) {
+				t += Number(d[valueFields[i]]);
+			}
+			if (t > 0) {
+				values.push(d);
+			}
+		})
+
+		//Make our data into a nested tree.  If you already have a nested structure you don't need to do this.
+		var nest = d3.nest()
+			.key(function (d) {
+				return d.Level1;
+			})
+			.key(function (d) {
+				return d.Level2;
+			})
+			.key(function (d) {
+				return d.Level3;
+			})
+			.entries(values);
+
+
+		//This will be a viz.data function;
+		vizuly2.core.util.aggregateNest(nest, valueFields, function (a, b) {
+			return Number(a) + Number(b);
+		});
+
+		//Remove empty child nodes left at end of aggregation and add unqiue ids
+		function removeEmptyNodes(node, parentId, childId) {
+			if (!node) return;
+			node.id = parentId + "_" + childId;
+			if (node.values) {
+				for (var i = node.values.length - 1; i >= 0; i--) {
+					node.id = parentId + "_" + i;
+					if (!node.values[i].key && !node.values[i].Level4) {
+						node.values.splice(i, 1);
+					}
+					else {
+						removeEmptyNodes(node.values[i], node.id, i)
+					}
+				}
+			}
+		}
+
+		var node = {};
+		node.values = nest;
+		removeEmptyNodes(node, "0", "0");
+		return nest;
+
+	}
+	function trimLabel(label) {
+		return (String(label).length > 20) ? String(label).substr(0, 17) + "..." : label;
+	}
+
+	function onMouseOver(e, d, i) {
+		console.log("onMouseOver " + d.key);
+	}
+
+	function onMouseOut(e, d, i) {
+       console.log("onMouseOver " + d.key);
+	}
+
+
+	//We can capture click events and respond to them
+	function onClick(g, d, i, datum) {
+		updateLabel(datum)
+	}
+
+	function updateLabel(datum) {
+        var key = createKeyPath(datum, '');
+        d3.select('#label').html(key)
+    }
+
+
+	function createKeyPath(datum, path) {
+		var key = (datum.depth > 0) ? datum.data.key : valueField + ' Budget';
+		var color = '#000';
+
+		if (datum.depth > 0) {
+          var color = viz.getStyle('fill',[datum]);
+        }
+
+		console.log(color);
+		path = '<span class="drill-label" style="color:' + color + '">' + key + ((path.length > 0) ? ' > </span>' : '');
+		if (datum.parent) {
+			path = createKeyPath(datum.parent, path) + path;
+        }
+        return path;
+    }
+
+	initialize();
+
+</script>
+
+</body>
+
+</html>

@@ -1,0 +1,158 @@
+[
+  [
+    {
+      "country": "USA",
+      "category": "Gold",
+      "value": "1072"
+    },
+    {
+      "country": "USSR",
+      "category": "Gold",
+      "value": "473"
+    },
+    {
+      "country": "GB",
+      "category": "Gold",
+      "value": "246"
+    },
+    {
+      "country": "GER",
+      "category": "Gold",
+      "value": "252"
+    },
+    {
+      "country": "FR",
+      "category": "Gold",
+      "value": "233"
+    },
+    {
+      "country": "ITL",
+      "category": "Gold",
+      "value": "235"
+    },
+    {
+      "country": "SWE",
+      "category": "Gold",
+      "value": "193"
+    },
+    {
+      "country": "CHINA",
+      "category": "Gold",
+      "value": "213"
+    },
+    {
+      "country": "RU",
+      "category": "Gold",
+      "value": "182"
+    },
+    {
+      "country": "E. GER",
+      "category": "Gold",
+      "value": "192"
+    }
+  ],
+  [
+    {
+      "country": "USA",
+      "category": "Silver",
+      "value": "859"
+    },
+    {
+      "country": "USSR",
+      "category": "Silver",
+      "value": "376"
+    },
+    {
+      "country": "GB",
+      "category": "Silver",
+      "value": "276"
+    },
+    {
+      "country": "GER",
+      "category": "Silver",
+      "value": "260"
+    },
+    {
+      "country": "FR",
+      "category": "Silver",
+      "value": "254"
+    },
+    {
+      "country": "ITL",
+      "category": "Silver",
+      "value": "200"
+    },
+    {
+      "country": "SWE",
+      "category": "Silver",
+      "value": "204"
+    },
+    {
+      "country": "CHINA",
+      "category": "Silver",
+      "value": "167"
+    },
+    {
+      "country": "RU",
+      "category": "Silver",
+      "value": "161"
+    },
+    {
+      "country": "E. GER",
+      "category": "Silver",
+      "value": "165"
+    }
+  ],
+  [
+    {
+      "country": "USA",
+      "category": "Bronze",
+      "value": "749"
+    },
+    {
+      "country": "USSR",
+      "category": "Bronze",
+      "value": "355"
+    },
+    {
+      "country": "GB",
+      "category": "Bronze",
+      "value": "284"
+    },
+    {
+      "country": "GER",
+      "category": "Bronze",
+      "value": "270"
+    },
+    {
+      "country": "FR",
+      "category": "Bronze",
+      "value": "293"
+    },
+    {
+      "country": "ITL",
+      "category": "Bronze",
+      "value": "228"
+    },
+    {
+      "country": "SWE",
+      "category": "Bronze",
+      "value": "230"
+    },
+    {
+      "country": "CHINA",
+      "category": "Bronze",
+      "value": "146"
+    },
+    {
+      "country": "RU",
+      "category": "Bronze",
+      "value": "177"
+    },
+    {
+      "country": "E. GER",
+      "category": "Bronze",
+      "value": "162"
+    }
+  ]
+]

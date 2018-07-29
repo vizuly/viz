@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Vizuly 2.0 - WordCloud</title>
+
+    <!-- We use google fonts for many of the examples, but they are not necessary -->
+    <link href='https://fonts.googleapis.com/css?family=Raleway:600,400,200' rel='stylesheet' type='text/css'>
+
+    <!-- vizuly2.specific style sheets -->
+    <link rel="stylesheet" href="../lib/styles/vizuly.css">
+
+    <script src="../lib/d3.min.js"></script>
+
+    <script src="../lib/vizuly2_core.min.js"></script>
+    <script src="../src/WordCloud.js"></script>
+</head>
+
+<body>
+
+<!-- Our main content container-->
+<div class="container" style="width:100%;">
+    <div id="viz_container" class="z-depth-3" style="width:1000px; height:600px; border-radius:10px; overflow:hidden">
+    </div>
+</div>
+
+<!-- DEMO CODE:START -->
+<link rel="stylesheet" href="demo/scripts/cssmenu.css">
+<script type="text/javascript" src="demo/scripts/jquery-2.1.1.min.js"></script>
+<script src="demo/scripts/cssmenu.js"></script>
+<script src="demo/WordCloudDemo.js"></script>
+<!-- DEMO CODE: END -->
+
+<script id="testscript">
+
+    // our radial components and an array to hold them
+	var viz = vizuly2.viz.WordCloud(document.getElementById("viz_container"));
+
+    var text = "Of course that’s your contention. You’re a first year grad student. You just got finished readin’ some Marxian historian, Pete Garrison probably. You’re gonna be convinced of that ’til next month when you get to James Lemon and then you’re gonna be talkin’ about how the economies of Virginia and Pennsylvania were entrepreneurial and capitalist way back in 1740. That’s gonna last until next year. You’re gonna be in here regurgitating Gordon Wood, talkin’ about, you know, the Pre-Revolutionary utopia and the capital-forming effects of military mobilization… ‘Wood drastically underestimates the impact of social distinctions predicated upon wealth, especially inherited wealth.’ You got that from Vickers, Work in Essex County, page 98, right? Yeah, I read that, too. Were you gonna plagiarize the whole thing for us? Do you have any thoughts of your own on this matter? Or do you, is that your thing? You come into a bar. You read some obscure passage and then pretend, you pawn it off as your own, as your own idea just to impress some girls and embarrass my friend? See, the sad thing about a guy like you is in 50 years, you’re gonna start doin’ some thinkin’ on your own and you’re gonna come up with the fact that there are two certainties in life. One: don’t do that. And two: you dropped a hundred and fifty grand on a fuckin’ education you coulda got for a dollar fifty in late charges at the public library.";
+
+    var data = {};
+
+	var initialize = function () {
+
+      viz
+       .data(text)
+       .width(600)
+       .height(200)
+       .on('mouseover', onMouseOver)
+       .on('mouseout', onMouseOut)
+       .on('click', onClick)
+
+      viz.update();
+
+      if (runDemo) runDemo();
+
+	};
+
+	initialize();
+
+	function onMouseOver(e, d, i) {
+		console.log('onMouseOver ' + d.key)
+    }
+
+    function onMouseOut(e, d, i) {
+	    console.log('onMouseOut ' + d.key)
+    }
+
+    function onClick(e, d, i) {
+	    console.log('onClick ' + d.key)
+    }
+
+
+</script>
+
+</body>
+
+</html>

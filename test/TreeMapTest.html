@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Vizuly 2.0 - TreeMap</title>
+
+    <!-- We use google fonts for many of the examples, but they are not necessary -->
+    <link href='https://fonts.googleapis.com/css?family=Raleway:600,400,200' rel='stylesheet' type='text/css'>
+
+    <!-- vizuly2.specific style sheets -->
+    <link rel="stylesheet" href="../lib/styles/vizuly.css">
+
+    <script src="../lib/d3.min.js"></script>
+
+    <script src="../lib/vizuly2_core.min.js"></script>
+    <script src="../src/svg/Text.js"></script>
+    <script src="../src/TreeMap.js"></script>
+</head>
+
+<body>
+
+<!-- Our main content container-->
+<div class="container" style="width:100%;">
+    <div id="viz_container" class="z-depth-3" style="width:1000px; height:600px; border-radius:10px; overflow:hidden">
+    </div>
+</div>
+
+<!-- DEMO CODE:START -->
+<link rel="stylesheet" href="demo/scripts/cssmenu.css">
+<script type="text/javascript" src="demo/scripts/jquery-2.1.1.min.js"></script>
+<script src="demo/scripts/cssmenu.js"></script>
+<script src="demo/TreeMapDemo.js"></script>
+<!-- DEMO CODE: END -->
+
+<script id="testscript">
+
+    // our radial components and an array to hold them
+	var viz = vizuly2.viz.TreeMap(document.getElementById("viz_container"));
+
+	var data = {};
+
+	var initialize = function () {
+
+		/*
+      d3.json('data/treemap_flare.json', function (json) {
+      	data = json;
+      	viz.data(data)
+         .key(function (d) { return d.name })
+         .label(function (d) { return d.name });
+
+        if (runDemo) runDemo();
+      })
+			*/
+
+    d3.csv('data/treemap_boise.csv', function (error, csv) {
+
+    	var valueFields = ["TotalCost"]
+
+        //remove programs with no cost
+
+      csv = csv.filter(function (d) {
+      	return (Number(d.TotalCost) > 0)
+      })
+
+	    var nest = d3.nest()
+	     .key(function (d) {
+		     return d.Department;
+	     })
+	     .key(function (d) {
+		     return d.Division;
+	     })
+         .key(function (d) {
+             return d.Program;
+         })
+	     .entries(csv);
+
+        viz.data({key: 'root', values: nest})
+         .children(function (d) { return d.values })
+         .value(function (d) { return d.TotalCost })
+         .key(function (d) { return (d.key) ? d.key : d.Program })
+         .label(function (d) { return (d.key) ? d.key : d.Program });
+
+        if (runDemo) runDemo();
+    })
+
+	}
+
+	initialize();
+
+</script>
+
+</body>
+
+</html>

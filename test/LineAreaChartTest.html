@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>vizuly 2.0 - Line Area Chart</title>
+
+    <!-- We use google fonts for many of the examples, but they are not necessary -->
+    <link href='https://fonts.googleapis.com/css?family=Raleway:600,400,200' rel='stylesheet' type='text/css'>
+
+    <!-- vizuly2.specific style sheets -->
+    <link rel="stylesheet" href="../lib/styles/vizuly.css">
+
+    <script src="../lib/d3.min.js"></script>
+
+    <script src="../lib/vizuly2_core.min.js"></script>
+    <script src="../src/LineAreaChart.js"></script>
+</head>
+
+<body>
+
+<!-- Our main content container-->
+<div class="container" style="width:100%;">
+    <div id="viz_container" class="z-depth-3" style="width:1000px; height:600px; border-radius:10px; overflow:hidden">
+    </div>
+</div>
+
+<!-- DEMO CODE:START -->
+<link rel="stylesheet" href="demo/scripts/cssmenu.css">
+<script type="text/javascript" src="demo/scripts/jquery-2.1.1.min.js"></script>
+<script src="demo/scripts/cssmenu.js"></script>
+<script src="demo/LineAreaChartDemo.js"></script>
+<!-- DEMO CODE: END -->
+
+<script id="testscript">
+
+	// our radial components and an array to hold them
+	var viz = vizuly2.viz.LineAreaChart(document.getElementById("viz_container"));
+
+	var data = {};
+
+	var initialize = function () {
+
+		d3.csv("data/lineareachart_stocks.csv", function (csv) {
+
+			// We have to do some prep on the data to create make it ready for our display
+			// The data comes in as one set of rows, but the linearea chart expects each series (line/area)
+			// to come in its own array, so we use filter to seperate out the data.
+			// We also need to clean the data to make sure the data values are of the appropriate value type
+
+			// Parser we use to convert string values into date values
+			var parse = d3.timeParse("%m/%d/%y");
+			var series = [];
+
+			// Our filters
+			var google = csv.filter(function (d) {
+				return (d.symbol == "GOOGL")
+			}).slice(1, 300);
+			var apple = csv.filter(function (d) {
+				return (d.symbol == "AAPL")
+			}).slice(1, 300);
+			var adobe = csv.filter(function (d) {
+				return (d.symbol == "ADBE")
+			}).slice(1, 300);
+			var msft = csv.filter(function (d) {
+				return (d.symbol == "MSFT")
+			}).slice(1, 300);
+			var amzn = csv.filter(function (d) {
+				return (d.symbol == "AMZN")
+			}).slice(1, 300);
+
+			series.push(apple, google, adobe, msft, amzn);
+
+			// Cleaning data to create appropriate value types
+			series.forEach(function (company) {
+				company.forEach(function (row) {
+					row.date = parse(row.date);
+					row.Close = Number(row.Close);
+					row.High = Number(row.High);
+					row.Low = Number(row.Low);
+					row.Open = Number(row.Open);
+					row.Volume = Number(row.Volume);
+				})
+			});
+
+			data = series;
+
+			viz.data(data)
+			 .width(1000).height(600)                     // initial component display size
+			 .y(function (d, i) {
+				 return d.Volume;
+			 })    // property for y axis plot
+			 .x(function (d, i) {
+				 return d.date;
+			 })      // property for x axis plot
+             .seriesLabel (function (d,i) {
+             	return d.name;
+             })
+			 .on("mouseover", onMouseOver)// callback for mouseover event
+			 .on("mouseout", onMouseOut)
+             .xTickFormat(vizuly2.core.util.format_YEAR_Mon_MonDay)
+		     .yTickFormat(function (d) { return (Math.round(d / 1000000)) + "M"; });
+
+			viz.update();
+
+			if (runDemo) runDemo();
+
+		});
+	};
+
+	// When the user mouses over a given data point we want to create a datatip.
+	function onMouseOver(e, d, i, j) {
+		console.log('onMouseOver ' + d.name);
+	}
+
+	// Remove any data tips when we mouseout.
+	function onMouseOut(d, i) {
+        console.log('onMouseOver ' + d.name);
+	}
+
+
+
+
+	initialize();
+
+</script>
+
+</body>
+
+</html>
