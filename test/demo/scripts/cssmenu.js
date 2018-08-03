@@ -122,11 +122,7 @@ function createDemoMenu(options, w, h, title) {
 			list.append('li').attr("class",function() { return (value.selected) ? 'selected' : null }).attr('item_value',value.value).append('a').text(value.label);
 		})
 	})
-
-	viz_container = d3.selectAll('#viz_container')
-		.style('width', w + 'px')
-		.style('height', '600px');
-
+	
 	d3.select('#menu-Display')
 		.insert('li')
 		.attr('item_value', w + ',' + h)

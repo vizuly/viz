@@ -118,7 +118,7 @@ vizuly2.viz.ScatterPlot = function (parent) {
 		viz.validate();
 		
 		// Get our size based on height, width, and margin
-		size = vizuly2.core.util.size(scope.margin, scope.width, scope.height);
+		size = vizuly2.core.util.size(scope.margin, scope.width, scope.height, scope.parent);
 		
 		// If our scales have not been defined yet, then we will default them based on the data values.
 		if (scope.xScale == "undefined") {
@@ -148,7 +148,7 @@ vizuly2.viz.ScatterPlot = function (parent) {
 		
 		// Default our x and y axis
 		scope.xAxis.scale(scope.xScale).tickFormat(scope.xTickFormat)
-		scope.yAxis.scale(scope.yScale).tickFormat(scope.yTickFormat).tickSize(-vizuly2.core.util.size(scope.margin, scope.width, scope.height).width).ticks(5)
+		scope.yAxis.scale(scope.yScale).tickFormat(scope.yTickFormat).tickSize(-vizuly2.core.util.size(scope.margin, size.measuredWidth, size.measuredHeight).width).ticks(5)
 		
 		// Tell everyone we are done making our measurements
 		scope.dispatch.apply('measure', viz);
@@ -164,8 +164,8 @@ vizuly2.viz.ScatterPlot = function (parent) {
 		measure();
 		
 		// Layout all of our primary SVG d3.elements.
-		svg.attr("width", scope.width).attr("height", scope.height);
-		background.attr("width", scope.width).attr("height", scope.height);
+		svg.attr("width", size.measuredWidth).attr("height", size.measuredHeight);
+		background.attr("width", size.measuredWidth).attr("height", size.measuredHeight);
 		plot.style("width", size.width).style("height", size.height).attr("transform", "translate(" + (size.left + plotMaxRadius) + "," + size.top + ")");
 		bottomAxis.attr("transform", "translate(" + (size.left) + "," + (size.height + size.top) + ")");
 		leftAxis.attr("transform", "translate(" + size.left + "," + size.top + ")");
@@ -278,7 +278,7 @@ vizuly2.viz.ScatterPlot = function (parent) {
 		styles_backgroundGradient = vizuly2.svg.gradient.blend(viz, viz.getStyle('fill-bottom'), viz.getStyle('fill-top'));
 		
 		// Update the background
-		selection.selectAll(".vz-background").attr("fill", function () {
+		selection.selectAll(".vz-background").style("fill", function () {
 			return "url(#" + styles_backgroundGradient.attr("id") + ")";
 		});
 		

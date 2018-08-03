@@ -13,7 +13,6 @@
     <script src="../lib/d3.min.js"></script>
 
     <script src="../lib/vizuly2_core.min.js"></script>
-    <script src="../src/svg/Text.js"></script>
     <script src="../src/TreeMap.js"></script>
 </head>
 
@@ -74,7 +73,10 @@
          })
 	     .entries(csv);
 
-        viz.data({key: 'root', values: nest})
+        viz
+         .data({key: 'root', values: nest})
+         .width('100%')
+         .height('100%')
          .children(function (d) { return d.values })
          .value(function (d) { return d.TotalCost })
          .key(function (d) { return (d.key) ? d.key : d.Program })

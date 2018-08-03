@@ -101,7 +101,7 @@ vizuly2.viz.TreeMap = function (parent) {
 		viz.validate();
 		
 		// Get our size based on height, width, and margin
-		size = vizuly2.core.util.size(scope.margin, scope.width, scope.height);
+		size = vizuly2.core.util.size(scope.margin, scope.width, scope.height, scope.parent);
 		
 		
 		root = d3.hierarchy(scope.data, scope.children)
@@ -130,8 +130,8 @@ vizuly2.viz.TreeMap = function (parent) {
 		measure();
 		
 		// Layout all of our primary SVG d3.elements.
-		svg.attr('width', scope.width).attr('height', scope.height);
-		background.attr('width', scope.width).attr('height', scope.height);
+		svg.attr('width', size.measuredWidth).attr('height', size.measuredHeight);
+		background.attr('width', size.measuredWidth).attr('height', size.measuredHeight);
 		plot.attr('transform', 'translate(' + size.left + ',' + size.top + ')');
 		
 		var cellOffset = 5;

@@ -6,8 +6,6 @@ function changeSize(val) {
 	var s = String(val).split(",");
 	d3.select('#viz_container').style('width', s[0] + 'px').style('height', s[1] + 'px');
 	viz
-	 .width(s[0])
-	 .height(s[1])
 	 .fontSizeMax(Math.max(30,s[1] * .1))
 	 .update();
 }

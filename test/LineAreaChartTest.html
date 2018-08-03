@@ -40,6 +40,8 @@
 
 	var initialize = function () {
 
+		console.log("NEED TO MAKE DATA INTO JSON")
+
 		d3.csv("data/lineareachart_stocks.csv", function (csv) {
 
 			// We have to do some prep on the data to create make it ready for our display
@@ -85,7 +87,7 @@
 			data = series;
 
 			viz.data(data)
-			 .width(1000).height(600)                     // initial component display size
+			 .width('100%').height('100%')                     // initial component display size
 			 .y(function (d, i) {
 				 return d.Volume;
 			 })    // property for y axis plot
