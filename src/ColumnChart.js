@@ -52,15 +52,24 @@ vizuly2.viz.ColumnChart = function (parent) {
 		"yAxis": d3.axisLeft(),                  // Default yAxis (can be overridden after 'validate' event via callback)
 		"yTickFormat": function (d) { return d },
 		"xTickFormat": function (d) { return d },
-		"dataTipRenderer": dataTipRenderer
+		"dataTipRenderer": dataTipRenderer,
+		"labelFormat": function (d) { return d }
 	};
 	
 	var styles = {
 		'label-color': '#FFF',
 		'label-over-color': '#02C3FF',
+		'label-font-size': function () {
+			return Math.max(8, Math.round(size.width /85))
+		},
+		'label-font-weight': 400,
+		'show-value-labels': true,
 		'background-gradient-bottom': '#039FDB',
 		'background-gradient-top': '#021F51',
 		'bar-stroke': '#FFF',
+		'bar-stroke-width': function (d,i) {
+			return (this.width() / 800) + "px";
+		},
 		'bar-stroke-opacity': function (d, i) {
 			return (scope.layout == vizuly2.viz.layout.STACKED) ? '1' : '0'
 		},
@@ -76,6 +85,10 @@ vizuly2.viz.ColumnChart = function (parent) {
 		'axis-font-size': function () {
 			return Math.max(8, Math.round(size.width / 65))
 		},
+		'show-y-axis-labels': true,
+		'show-x-axis-labels': true,
+		'y-axis-font-style': 'normal',
+		'x-axis-font-style': 'normal',
 		'axis-stroke': '#FFF',
 		'axis-opacity': .5
 	}
@@ -90,7 +103,7 @@ vizuly2.viz.ColumnChart = function (parent) {
 	var groupWidth;     // measured bar group width
 	var barPadding;
 	var groupPadding;
-	var seriesScalePadding = 0; //Used for scaleoffset
+	var seriesOffset = 0; //Used for scaleoffset
 	var stack;          // used for the stacked bar layout
 	var stackSeries;
 	var axisFontSize;
@@ -126,15 +139,17 @@ vizuly2.viz.ColumnChart = function (parent) {
 		viz.validate();
 		
 		// Get our size based on height, width, and margin
-		size = vizuly2.core.util.size(scope.margin, scope.width, scope.height);
+		size = vizuly2.core.util.size(scope.margin, scope.width, scope.height, scope.parent);
 		
 		//If we have fixed bar width then we will override the height of the component
 		if (scope.barWidth > 0) {
 			barWidth = scope.barWidth;
 			barPadding = calculatePadding(scope.barPadding, barWidth);
-			groupWidth = (barWidth + barPadding) * scope.data.length;
+			groupWidth = (scope.layout == vizuly2.viz.layout.STACKED) ? (barWidth + barPadding) : (barWidth + barPadding) * scope.data.length;
 			groupPadding = calculatePadding(scope.groupPadding, groupWidth);
 			size.width = (groupWidth + groupPadding) * scope.data[0].length;
+			size.left = (size.measuredWidth - size.width)/2;
+			size.right = size.left;
 		}
 		else {
 			// The width of each group of bars for a given data point and all of series
@@ -143,9 +158,11 @@ vizuly2.viz.ColumnChart = function (parent) {
 			groupWidth = groupWidth - groupPadding;
 			// The width of an individual bar for a given data point a single series
 			barWidth = (scope.layout == vizuly2.viz.layout.STACKED) ? groupWidth : (groupWidth / scope.data.length);
-			barPadding = calculatePadding(scope.barPadding, barWidth);
+			barPadding = calculatePadding((scope.layout == vizuly2.viz.layout.STACKED)  ? 0 : scope.barPadding, barWidth);
+			if (barPadding > barWidth) barPadding = barWidth-2;
 			barWidth = barWidth - barPadding;
 		}
+		
 		
 		// If we don't have a defined x-scale then determine one
 		if (scope.xScale == "undefined") {
@@ -213,13 +230,16 @@ vizuly2.viz.ColumnChart = function (parent) {
 		// Set our ranges for each scale
 		scope.yScale.range([size.height, 0]);
 		
-		seriesScalePadding = 0;
+		seriesOffset = 0;
+		
+		var xScaleOffset = 0;
 		
 		if (typeof scope.xScale.clamp != 'undefined') {
-			seriesScalePadding = (size.width / scope.data[0].length) - barPadding;
+			seriesOffset = (groupWidth + groupPadding)/2;
+			xScaleOffset = groupWidth;
 		}
 		
-		scope.xScale.range([0, ((groupWidth + groupPadding) * scope.data[0].length) - seriesScalePadding]);
+		scope.xScale.range([0, size.width - xScaleOffset]);
 		
 		scope.xAxis.scale(scope.xScale);
 		scope.yAxis.scale(scope.yScale);
@@ -255,10 +275,10 @@ vizuly2.viz.ColumnChart = function (parent) {
 		measure();
 		
 		// Layout all of our primary SVG d3.elements.
-		svg.attr("width", scope.width).attr("height", scope.height);
-		background.attr("width", scope.width).attr("height", scope.height);
+		svg.attr("width", size.measuredWidth).attr("height", size.measuredHeight);
+		background.attr("width", size.measuredWidth).attr("height", size.measuredHeight);
 		plot.style("width", size.width).style("height", size.height).attr("transform", "translate(" + (size.left) + "," + (size.top) + ")");
-		bottomAxis.attr("transform", "translate(" + (size.left + seriesScalePadding/2 ) + "," + (scope.height - (scope.height - size.height)/2) + ")");
+		bottomAxis.attr("transform", "translate(" + (size.left + seriesOffset) + "," + (size.measuredHeight - (size.measuredHeight - size.height)/2) + ")");
 		leftAxis.attr("transform", "translate(" + size.left + "," + size.top + ")");
 		plotBackground.attr("width", size.width).attr("height", size.height);
 		
@@ -311,8 +331,36 @@ vizuly2.viz.ColumnChart = function (parent) {
 				 return scope.yScale(d[1]);
 			 });
 			
+			var labels = d3.select(this).selectAll(".vz-bar-label").data(stackSeries.map(function (series, i) {
+				return series[index];
+			}));
+			
+			labels.exit().remove();
+			
+			labels = labels.enter().append("text").attr("class", "vz-bar-label")
+			 .attr("x", function (d, i) {
+				 return i * (barWidth + barPadding);
+			 })
+			 .attr("y", size.height)
+			 .text(function (d,i) { return scope.labelFormat(scope.y(d.data['series' + i].data)) })
+			 .merge(labels);
+			
+			labels.attr("x",0);
+			
+			labels.transition().duration(scope.duration)
+			 .attr("x", function (d, i) {
+				 var datum = d.data['series' + i].data;
+				 var fs = viz.getStyle('label-font-size',[datum, i, scope.xScale.domain().indexOf(scope.x(datum)), this]);
+				 return (scope.layout == vizuly2.viz.layout.STACKED) ?  fs/2 + barWidth:  i * (barWidth + barPadding) + (barWidth/2);
+			 })
+			 .attr("y", function (d, i) {
+				 var datum = d.data['series' + i].data;
+				 var fs = viz.getStyle('label-font-size',[datum, i, scope.xScale.domain().indexOf(scope.x(datum)), this]);
+				 return (scope.layout == vizuly2.viz.layout.STACKED) ? scope.yScale(d[1] - fs/2) : scope.yScale(d[1]) - fs/2;
+			 })
+			
 			group.attr("transform", function (d, i) {
-				return "translate(" + (scope.xScale(scope.x(datum.data['series0'].data)) + groupPadding/2) +  ",0)"
+				return "translate(" + (scope.xScale(scope.x(datum.data['series0'].data)) + (groupPadding + barPadding)/2) +  ",0)"
 			});
 			
 			
@@ -353,8 +401,8 @@ vizuly2.viz.ColumnChart = function (parent) {
 		if (!scope.styles || scope.styles == null) return;
 		
 		// The width and height of the viz
-		var w = scope.width;
-		var h = scope.height;
+		var w = size.measuredWidth;
+		var h = size.measuredHeight;
 		
 		// Grab the d3.selection from the viz so we can operate on it.
 		var selection = scope.selection;
@@ -370,14 +418,6 @@ vizuly2.viz.ColumnChart = function (parent) {
 		// Hide the plot background
 		selection.selectAll(".vz-plot-background").style("opacity", 0);
 		
-		//Making sure all of our bars/columns have a white stroke, which is universal to the theme.
-		var bar = selection.selectAll(".vz-plot .vz-bar")
-		 .style("stroke", "#FFF");
-		
-		bar.style("stroke-width", function () {
-			 return (w / 800) + "px";
-		 })
-		 .style("stroke-opacity", viz.getStyle('bar-stroke-opacity'));
 		
 		//Here we select all the bars and apply filters and fills.  In the case of these styless
 		//we are using **svg drop-shadow filters** and **linear gradients** for the fills.
@@ -400,10 +440,35 @@ vizuly2.viz.ColumnChart = function (parent) {
 					var datum = d.data['series' + i].data;
 					return viz.getStyle('bar-stroke-opacity', [datum, i, scope.xScale.domain().indexOf(scope.x(datum)), this])
 				})
+			  .style("stroke-width", function (d, i) {
+				  var datum = d.data['series' + i].data;
+				  return viz.getStyle('bar-stroke-width', [datum, i, scope.xScale.domain().indexOf(scope.x(datum)), this])
+			  })
 				.style("rx", function (d, i) {
 					var datum = d.data['series' + i].data;
 					return viz.getStyle('bar-radius', [datum, i, scope.xScale.domain().indexOf(scope.x(datum)), this])
 				});
+			
+			 // Update value labels
+			 d3.select(this).selectAll(".vz-bar-label")
+			  .style('display', function (d,i) {
+				  console.log("i = " + i)
+				  var datum = d.data['series' + i].data;
+				  return viz.getStyle('show-value-labels', [datum, i, scope.xScale.domain().indexOf(scope.x(datum)), this]) ? 'block' : 'none'
+			  })
+			  .style('text-anchor', (scope.layout == vizuly2.viz.layout.STACKED) ? 'start' : 'middle')
+			  .style("font-weight", function (d,i) {
+				  var datum = d.data['series' + i].data;
+				  return viz.getStyle('label-font-weight', [datum, i, scope.xScale.domain().indexOf(scope.x(datum)), this])
+			  })
+			  .style("fill", function (d,i) {
+				  var datum = d.data['series' + i].data;
+				  return viz.getStyle('label-color', [datum, i, scope.xScale.domain().indexOf(scope.x(datum)), this])
+			  })
+			  .style("font-size", function (d,i) {
+				  var datum = d.data['series' + i].data;
+				  return viz.getStyle('label-font-size', [datum, i, scope.xScale.domain().indexOf(scope.x(datum)), this]) + "px"
+			  });
 		 });
 		
 		// Update axis fonts
@@ -415,8 +480,17 @@ vizuly2.viz.ColumnChart = function (parent) {
 			 return viz.getStyle('label-color')
 		 })
 		 .style("fill-opacity", .8)
-		 .style("font-size", function (d,i) { return viz.getStyle('axis-font-size', arguments) + "px" });
+		 .style("font-size", function (d,i) { return viz.getStyle('axis-font-size', arguments) + "px" })
+		 .attr("dy", function (d,i) { return viz.getStyle('axis-font-size', arguments)/2 });
 		
+		selection.selectAll(".vz-bottom-axis text")
+		 .style('display', function () { return viz.getStyle('show-x-axis-labels', arguments) ? 'block' : 'none' })
+		 .style('font-style', function () { return viz.getStyle('x-axis-font-style', arguments) })
+		 .style("text-anchor", "middle")
+		
+		selection.selectAll(".vz-left-axis text")
+		 .style('display', function () { return viz.getStyle('show-y-axis-labels', arguments) ? 'block' : 'none' })
+		 .style('font-style', function () { return viz.getStyle('y-axis-font-style', arguments) })
 		
 		// Update the left axis
 		selection.selectAll(".vz-bottom-axis line, .vz-left-axis line")
@@ -435,7 +509,8 @@ vizuly2.viz.ColumnChart = function (parent) {
 		 .style("fill", function () {
 			 return viz.getStyle('label-color')
 		 })
-		 .style("fill-opacity", .8);
+		 .style("fill-opacity", .8)
+		
 		
 		selection.selectAll(".vz-left-axis").attr("font-family", null)
 		selection.selectAll(".vz-bottom-axis").attr("font-family", null)
@@ -560,11 +635,9 @@ vizuly2.viz.ColumnChart = function (parent) {
 			w / 200) + ")";
 	}
 	
-
-	
 	initialize();
 	
-	// Returns our glorious viz component :)
+	// Returns our viz component :)
 	return viz;
 	
 };

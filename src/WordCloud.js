@@ -84,7 +84,7 @@ vizuly2.viz.WordCloud = function (parent) {
 		viz.validate();
 		
 		// Get our size based on height, width, and margin
-		size = vizuly2.core.util.size(scope.margin, scope.width, scope.height);
+		size = vizuly2.core.util.size(scope.margin, scope.width, scope.height, scope.parent);
 		
 		var wordHash = {};
 		
@@ -136,8 +136,8 @@ vizuly2.viz.WordCloud = function (parent) {
 		wordLayout.start();
 		
 		// Layout all of our primary SVG d3.elements.
-		svg.attr("width", scope.width).attr("height", scope.height);
-		background.attr("width", scope.width).attr("height", scope.height);
+		svg.attr("width", size.measuredWidth).attr("height", size.measuredHeight);
+		background.attr("width", size.measuredWidth).attr("height", size.measuredHeight);
 		plot.attr('transform', 'translate(' + (size.width/2 + size.left) + ',' + (size.height/2 + size.top) + ')')
 		
 	}
@@ -220,13 +220,10 @@ vizuly2.viz.WordCloud = function (parent) {
 	}
 	
 	
-	
-	
 	initialize();
 	
 	// Returns our viz component :)
 	return viz;
-	
 	
 	// Word cloud layout by Jason Davies, http://www.jasondavies.com/word-cloud/
 	// Algorithm due to Jonathan Feinberg, http://static.mrfeinberg.com/bv_ch03.pdf
@@ -628,4 +625,5 @@ vizuly2.viz.WordCloud = function (parent) {
 		
 		return cloud();
 	};
+	
 }

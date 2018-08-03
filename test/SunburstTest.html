@@ -68,8 +68,8 @@
 			data.values = prepData(csv);
 
 			viz.data(data)                                                      // Expects hierarchical array of objects.
-				.width(1000)                                                     // Width of component
-				.height(1000)                                                    // Height of component
+				.width('100%')                                                     // Width of component
+				.height('100%')                                                    // Height of component
 				.children(function (d) {
 					return d.values
 				})                     // Denotes the property that holds child object array

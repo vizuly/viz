@@ -126,7 +126,7 @@ vizuly2.viz.Sunburst = function (parent) {
 		viz.validate();
 		
 		// Get our size based on height, width, and margin
-		size = vizuly2.core.util.size(scope.margin, scope.width, scope.height);
+		size = vizuly2.core.util.size(scope.margin, scope.width, scope.height, scope.parent);
 		
 		radius = Math.min(size.width / 2, size.height / 2);
 		
@@ -169,8 +169,8 @@ vizuly2.viz.Sunburst = function (parent) {
 		measure();
 		
 		// Layout all of our primary SVG d3.elements.
-		svg.attr("width", scope.width).attr("height", scope.height);
-		background.attr("width", scope.width).attr("height", scope.height);
+		svg.attr("width", size.measuredWidth).attr("height", size.measuredHeight);
+		background.attr("width", size.measuredWidth).attr("height", size.measuredHeight);
 		plot.style("width", size.width).style("height", size.height).attr("transform", "translate(" + (size.left + radius) + "," + (size.top + radius) + ")");
 		
 		var paths = plot.selectAll(".vz-sunburst-arc").data(nodes)
