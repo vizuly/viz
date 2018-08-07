@@ -29,7 +29,7 @@ var labelColors = ['#FFF', '#D8F433', '#FFF', '#FFF']
 function changeSize(val) {
 	var s = String(val).split(",");
 	d3.select('#viz_container').style('width', s[0] + 'px').style('height', s[1] + 'px');
-	viz.width(s[0]).height(s[1]).update();
+	viz.update();
 }
 
 function changeStyles(val) {

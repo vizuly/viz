@@ -137,7 +137,7 @@ vizuly2.viz.LineAreaChart = function (parent) {
 		viz.validate();
 		
 		// Get our size based on height, width, and margin
-		size = vizuly2.core.util.size(scope.margin, scope.width, scope.height);
+		size = vizuly2.core.util.size(scope.margin, scope.width, scope.height, scope.parent);
 		
 		// If we don't have a defined x-scale then determine one
 		if (scope.xScale == "undefined") {
@@ -224,8 +224,8 @@ vizuly2.viz.LineAreaChart = function (parent) {
 		scope.xAxis.scale(scope.xScale);
 		scope.yAxis.scale(scope.yScale);
 		
-		scope.xAxis.tickFormat(scope.xTickFormat).tickSize(-vizuly2.core.util.size(scope.margin, scope.width, scope.height).height);
-		scope.yAxis.tickFormat(scope.yTickFormat).tickSize(-vizuly2.core.util.size(scope.margin, scope.width, scope.height).width).ticks(5);
+		scope.xAxis.tickFormat(scope.xTickFormat).tickSize(-vizuly2.core.util.size(scope.margin, size.measuredWidth, size.measuredHeight).height);
+		scope.yAxis.tickFormat(scope.yTickFormat).tickSize(-vizuly2.core.util.size(scope.margin, size.measuredWidth, size.measuredHeight).width).ticks(5);
 		
 		
 		// Take an educated guess about how big to make our hit area radius based on height/width of viz.
@@ -261,8 +261,8 @@ vizuly2.viz.LineAreaChart = function (parent) {
 		measure();
 		
 		// Layout all of our primary SVG d3.elements.
-		svg.attr("width", scope.width).attr("height", scope.height);
-		background.attr("width", scope.width).attr("height", scope.height);
+		svg.attr("width", size.measuredWidth).attr("height", size.measuredHeight);
+		background.attr("width", size.measuredWidth).attr("height", size.measuredHeight);
 		plotClipPath.attr("width", size.width).attr("height", size.height);
 		xClipPath.attr("width", size.width).attr("height", (size.height + size.bottom)).attr("transform", "translate(" + size.left + "," + size.top + ")");
 		plot.style("width", size.width).style("height", size.height).attr("transform", "translate(" + size.left + "," + size.top + ")");
@@ -513,8 +513,8 @@ vizuly2.viz.LineAreaChart = function (parent) {
 		if (!scope.styles || scope.styles == null) return;
 		
 		// The width and height of the viz
-		var w = scope.width;
-		var h = scope.height;
+		var w = size.measuredWidth;
+		var h = size.measuredHeight;
 		
 		// Grab the d3.selection from the viz so we can operate on it.
 		var selection = scope.selection;
@@ -580,7 +580,7 @@ vizuly2.viz.LineAreaChart = function (parent) {
 		 .style("fill-opacity", .8)
 		 .style("font-size", function (d,i) { return viz.getStyle('axis-font-size',arguments)  + "px"})
 		 .style("opacity", function () {
-			 return scope.width > 399 ? 1 : 0
+			 return size.measuredWidth > 399 ? 1 : 0
 		 })
 		
 		// Update the left axis

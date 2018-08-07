@@ -240,4 +240,25 @@ svg.vizuly path.domain {
     fill:#FFF;
 }
 
+div.vz-weighted_tree-viz {
+    overflow:scroll;
+}
+
+
+.vz-weighted_tree-viz circle {
+    fill:#777;
+    fill-opacity:.5;
+}
+
+
+.vz-weighted_tree-viz text {
+    fill:#777;
+}
+
+.vz-weighted_tree-viz path {
+    stroke:#777;
+    stroke-opacity:.5;
+    fill: none;
+}
+
 

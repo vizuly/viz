@@ -84,7 +84,7 @@ vizuly2.viz.Venn = function (parent) {
 		viz.validate();
 		
 		// Get our size based on height, width, and margin
-		size = vizuly2.core.util.size(scope.margin, scope.width, scope.height);
+		size = vizuly2.core.util.size(scope.margin, scope.width, scope.height, scope.parent);
 		
 		util.sizeFunction(scope.value)
 		
@@ -131,8 +131,8 @@ vizuly2.viz.Venn = function (parent) {
 		measure();
 		
 		// Layout all of our primary SVG d3.elements.
-		svg.attr("width", scope.width).attr("height", scope.height);
-		background.attr("width", scope.width).attr("height", scope.height);
+		svg.attr("width", size.measuredWidth).attr("height", size.measuredHeight);
+		background.attr("width", size.measuredWidth).attr("height", size.measuredHeight);
 		
 		/***  BRUTE FORCE - FORCING REMOVAL OF ALL NODES ***/
 		// Should look at the remaining logic as it does not expect this
