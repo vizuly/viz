@@ -89,6 +89,8 @@ vizuly2.viz.ColumnChart = function (parent) {
 		'show-x-axis-labels': true,
 		'y-axis-font-style': 'normal',
 		'x-axis-font-style': 'normal',
+		'y-axis-label-color': function (d,i) { return this.getStyle('label-color', arguments) },
+		'x-axis-label-color': function (d,i) { return this.getStyle('label-color', arguments) },
 		'axis-stroke': '#FFF',
 		'axis-opacity': .5
 	}
@@ -476,10 +478,6 @@ vizuly2.viz.ColumnChart = function (parent) {
 		 .style("font-weight", function () {
 			 return viz.getStyle('axis-font-weight', arguments)
 		 })
-		 .style("fill", function () {
-			 return viz.getStyle('label-color')
-		 })
-		 .style("fill-opacity", .8)
 		 .style("font-size", function (d,i) { return viz.getStyle('axis-font-size', arguments) + "px" })
 		 .attr("dy", function (d,i) { return viz.getStyle('axis-font-size', arguments)/2 });
 		
@@ -487,10 +485,12 @@ vizuly2.viz.ColumnChart = function (parent) {
 		 .style('display', function () { return viz.getStyle('show-x-axis-labels', arguments) ? 'block' : 'none' })
 		 .style('font-style', function () { return viz.getStyle('x-axis-font-style', arguments) })
 		 .style("text-anchor", "middle")
+		 .style('fill', function () { return viz.getStyle('x-axis-label-color', arguments) })
 		
 		selection.selectAll(".vz-left-axis text")
 		 .style('display', function () { return viz.getStyle('show-y-axis-labels', arguments) ? 'block' : 'none' })
 		 .style('font-style', function () { return viz.getStyle('y-axis-font-style', arguments) })
+		 .style('fill', function () { return viz.getStyle('y-axis-label-color', arguments) })
 		
 		// Update the left axis
 		selection.selectAll(".vz-bottom-axis line, .vz-left-axis line")
@@ -524,83 +524,61 @@ vizuly2.viz.ColumnChart = function (parent) {
 	
 	function styles_onMouseOver(bar, d, i) {
 		
-		var groupIndex = scope.yScale.domain().indexOf(scope.y(d))
+		var groupIndex = scope.xScale.domain().indexOf(scope.x(d))
 		
 		//Making style and color changes to our bar for the <code>mouseover</code>.
 		d3.select(bar)
-		 .style("fill", function (d, i) {
-			 return viz.getStyle('bar-over-fill', arguments)
-		 })
-		 .style("fill-opacity", function (d, i) {
-			 return viz.getStyle('bar-over-fill-opacity', arguments)
-		 })
-		 .style("stroke", function (d, i) {
-			 return viz.getStyle('bar-over-stroke', arguments)
-		 })
-		 .attr("filter", function (d, i) {
-			 return viz.getStyle('bar-over-filter', arguments)
-		 })
+		 .style("fill", function (d,i) { return viz.getStyle('bar-over-fill',arguments) })
+		 .style("fill-opacity", function (d,i) { return viz.getStyle('bar-over-fill-opacity',arguments) })
+		 .style("stroke", function (d,i) { return viz.getStyle('bar-over-stroke',arguments) })
 		
 		//Finding the correct axis label and highlighting it.
-		d3.select(leftAxis
+		d3.select(bottomAxis
 		 .selectAll('.tick text').nodes()[groupIndex])
 		 .transition()
-		 .style("font-size", function () {
-			 return viz.getStyle('axis-font-size') * 1.2 + "px"
-		 })
+		 .style("font-size",function () { return viz.getStyle('axis-font-size') * 1.2 + "px" })
 		 .style("font-weight", 700)
-		 .style("fill", function (d, i) {
-			 return viz.getStyle('label-over-color', arguments)
-		 })
+		 .style("fill", function (d,i) { return viz.getStyle('label-over-color',arguments)})
 		 .style("text-decoration", "underline")
 		 .style("fill-opacity", 1)
-		 .style("opacity", 1);
+		 .style("opacity",1);
 		
-		 viz.showDataTip(bar, d, i);
+		viz.showDataTip(bar, d, i);
+		
 	}
 	
 	//On <coce>mouseout</code> we want to undo any changes we made on the <code>mouseover</code>.
 	function styles_onMouseOut(bar, d, i) {
 		
-		viz.removeDataTip();
-		
-		var groupIndex = scope.yScale.domain().indexOf(scope.y(d))
+		var groupIndex = scope.xScale.domain().indexOf(scope.x(d))
 		
 		d3.select(bar)
 		 .style("fill", function (d) {
 			 var datum = d.data['series' + i].data;
-			 return viz.getStyle('bar-fill', [datum, i, scope.xScale.domain().indexOf(scope.x(datum)), this])
+			 return viz.getStyle('bar-fill',[datum, i, scope.yScale.domain().indexOf(scope.y(datum)), this])
 		 })
 		 .style("fill-opacity", function (d) {
 			 var datum = d.data['series' + i].data;
-			 return viz.getStyle('bar-fill-opacity', [datum, i, scope.xScale.domain().indexOf(scope.x(datum)), this])
+			 return viz.getStyle('bar-fill-opacity',[datum, i, scope.yScale.domain().indexOf(scope.y(datum)), this])
 		 })
 		 .style("stroke", function (d, i) {
 			 var datum = d.data['series' + i].data;
-			 return viz.getStyle('bar-stroke', [datum, i, scope.xScale.domain().indexOf(scope.x(datum)), this])
+			 return viz.getStyle('bar-stroke',[datum, i, scope.yScale.domain().indexOf(scope.y(datum)), this])
 		 })
 		 .style("stroke-opacity", function (d, i) {
 			 var datum = d.data['series' + i].data;
-			 return viz.getStyle('bar-stroke-opacity', [datum, i, scope.xScale.domain().indexOf(scope.x(datum)), this])
-		 });
+			 return viz.getStyle('bar-stroke-opacity',[datum, i, scope.yScale.domain().indexOf(scope.y(datum)), this])
+		 })
 		
-		d3.select(leftAxis
+		d3.select(bottomAxis
 		 .selectAll('.tick text').nodes()[groupIndex])
 		 .transition()
-		 .style("font-size", function () {
-			 return viz.getStyle('axis-font-size') + "px"
-		 })
-		 .style("fill", function (d, i) {
-			 return viz.getStyle('label-color', arguments)
-		 })
-		 .style("font-weight", function (d, i) {
-			 return viz.getStyle('axis-font-weight', arguments)
-		 })
+		 .style("font-size",function () { return viz.getStyle('axis-font-size') + "px" })
+		 .style("fill", function () { return viz.getStyle('x-axis-label-color',arguments)})
+		 .style("font-weight", function (d,i) { return viz.getStyle('axis-font-weight',arguments)})
 		 .style("text-decoration", null)
-		 .style("fill-opacity", .8)
-		 .style("opacity", function () {
-			 return viz.width() > 399 ? 1 : 0
-		 });
+		
+		viz.removeDataTip();
 		
 	}
 	

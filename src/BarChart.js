@@ -28,8 +28,8 @@ vizuly2.viz.BarChart = function (parent) {
 		"margin": {                            // Our margin object
 			"top": "10%",                       // Top margin
 			"bottom": "7%",                    // Bottom margin
-			"left": "9%",                      // Left margin
-			"right": "7%"                      // Right margin
+			"left": "12%",                      // Left margin
+			"right": "9%"                      // Right margin
 		},
 		"duration": 500,                       // This the time in ms used for any component generated transitions
 		"width": 300,                          // Overall width of component
@@ -83,6 +83,8 @@ vizuly2.viz.BarChart = function (parent) {
 		'show-x-axis-labels': true,
 		'y-axis-font-style': 'normal',
 		'x-axis-font-style': 'normal',
+		'y-axis-label-color': function (d,i) { return this.getStyle('label-color', arguments) },
+		'x-axis-label-color': function (d,i) { return this.getStyle('label-color', arguments) },
 		'axis-stroke': '#FFF',
 		'axis-opacity': .5
 	}
@@ -457,7 +459,11 @@ vizuly2.viz.BarChart = function (parent) {
 			  .style("font-size", function (d,i) {
 				  var datum = d.data['series' + i].data;
 				  return viz.getStyle('label-font-size', [datum, i, scope.xScale.domain().indexOf(scope.x(datum)), this]) + "px"
-			  });
+			  })
+			  .attr('dx', function (d,i) {
+				  var datum = d.data['series' + i].data;
+			  	return (scope.layout == vizuly2.viz.layout.STACKED) ? 0 : viz.getStyle('label-font-size', [datum, i, scope.xScale.domain().indexOf(scope.x(datum)), this])/3
+			  })
 		 });
 		
 		// Update axis fonts
@@ -465,19 +471,18 @@ vizuly2.viz.BarChart = function (parent) {
 		 .style("font-weight", function () {
 			 return viz.getStyle('axis-font-weight', arguments)
 		 })
-		 .style("fill", function () {
-			 return viz.getStyle('label-color')
-		 })
 		 .style("font-size", function (d,i) { return viz.getStyle('axis-font-size', arguments) + "px" });
 		
 		selection.selectAll(".vz-bottom-axis text")
 		 .style('display', function () { return viz.getStyle('show-x-axis-labels', arguments) ? 'block' : 'none' })
 		 .style('font-style', function () { return viz.getStyle('x-axis-font-style', arguments) })
+		 .style('fill', function () { return viz.getStyle('x-axis-label-color', arguments) })
 		 .style("text-anchor", "middle")
 		
 		selection.selectAll(".vz-left-axis text")
 		 .style('display', function () { return viz.getStyle('show-y-axis-labels', arguments) ? 'block' : 'none' })
 		 .style('font-style', function () { return viz.getStyle('y-axis-font-style', arguments) })
+		 .style('fill', function () { return viz.getStyle('y-axis-label-color', arguments) })
 		
 		// Update the bottom axis
 		selection.selectAll(".vz-bottom-axis line, .vz-left-axis line")
@@ -551,13 +556,9 @@ vizuly2.viz.BarChart = function (parent) {
 		 .selectAll('.tick text').nodes()[groupIndex])
 		 .transition()
 		 .style("font-size",function () { return viz.getStyle('axis-font-size') + "px" })
-		 .style("fill", function (d,i) { return viz.getStyle('label-color',arguments)})
+		 .style("fill", function () { return viz.getStyle('y-axis-label-color',arguments)})
 		 .style("font-weight", function (d,i) { return viz.getStyle('axis-font-weight',arguments)})
 		 .style("text-decoration", null)
-		 .style("fill-opacity", .8)
-		 .style("opacity", function () {
-			 return viz.width() > 399 ? 1 : 0
-		 });
 		
 		viz.removeDataTip();
 		
