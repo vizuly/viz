@@ -51,7 +51,7 @@
       })
 			*/
 
-    d3.csv('data/treemap_boise.csv', function (error, csv) {
+    d3.csv('data/treemap_boise.csv').then(function (error, csv) {
 
     	var valueFields = ["TotalCost"]
 

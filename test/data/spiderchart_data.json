@@ -1,0 +1,128 @@
+[
+  [
+    {
+      "axis": "Battery Life",
+      "value": 0.22,
+      "category": "Model A"
+    },
+    {
+      "axis": "Brand",
+      "value": 0.28,
+      "category": "Model A"
+    },
+    {
+      "axis": "Contract Cost",
+      "value": 0.29,
+      "category": "Model A"
+    },
+    {
+      "axis": "Design And Quality",
+      "value": 0.17,
+      "category": "Model A"
+    },
+    {
+      "axis": "Have Internet Connectivity",
+      "value": 0.22,
+      "category": "Model A"
+    },
+    {
+      "axis": "Large Screen",
+      "value": 0.02,
+      "category": "Model A"
+    },
+    {
+      "axis": "Price Of Device",
+      "value": 0.21,
+      "category": "Model A"
+    },
+    {
+      "axis": "To Be A Smartphone",
+      "value": 0.5,
+      "category": "Model A"
+    }
+  ],
+  [
+    {
+      "axis": "Battery Life",
+      "value": 0.27,
+      "category": "Model B"
+    },
+    {
+      "axis": "Brand",
+      "value": 0.16,
+      "category": "Model B"
+    },
+    {
+      "axis": "Contract Cost",
+      "value": 0.35,
+      "category": "Model B"
+    },
+    {
+      "axis": "Design And Quality",
+      "value": 0.13,
+      "category": "Model B"
+    },
+    {
+      "axis": "Have Internet Connectivity",
+      "value": 0.2,
+      "category": "Model B"
+    },
+    {
+      "axis": "Large Screen",
+      "value": 0.13,
+      "category": "Model B"
+    },
+    {
+      "axis": "Price Of Device",
+      "value": 0.35,
+      "category": "Model B"
+    },
+    {
+      "axis": "To Be A Smartphone",
+      "value": 0.38,
+      "category": "Model B"
+    }
+  ],
+  [
+    {
+      "axis": "Battery Life",
+      "value": 0.26,
+      "category": "Model C"
+    },
+    {
+      "axis": "Brand",
+      "value": 0.1,
+      "category": "Model C"
+    },
+    {
+      "axis": "Contract Cost",
+      "value": 0.3,
+      "category": "Model C"
+    },
+    {
+      "axis": "Design And Quality",
+      "value": 0.14,
+      "category": "Model C"
+    },
+    {
+      "axis": "Have Internet Connectivity",
+      "value": 0.22,
+      "category": "Model C"
+    },
+    {
+      "axis": "Large Screen",
+      "value": 0.04,
+      "category": "Model C"
+    },
+    {
+      "axis": "Price Of Device",
+      "value": 0.41,
+      "category": "Model C"
+    },
+    {
+      "axis": "To Be A Smartphone",
+      "value": 0.3,
+      "category": "Model C"
+    }
+  ]
+]

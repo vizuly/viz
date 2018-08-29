@@ -11,9 +11,14 @@
 
 // @version 2.1.45
 
-//
-// This is the base component for a vizuly2.bar chart.
-//
+/**
+ * The BarChart renders multiple series of data in a nested array
+ * @class
+ * @constructor
+ * @extends vizuly2.viz.Generic
+ * @param {DOMElement} parent - Container element that will render the component.
+ *
+ */
 vizuly2.viz.BarChart = function (parent) {
 	
 	// This is the object that provides pseudo "protected" properties that the vizuly2.viz function helps create
@@ -21,71 +26,427 @@ vizuly2.viz.BarChart = function (parent) {
 	
 	var d3 = vizuly2.d3;
 	
+	/** @lends vizuly2.viz.BarChart.properties */
 	var properties = {
-		"data": null,                          // Expects array of series data - assumes each series has same length and sames yScale values;
-		"layout":                              // Sets a CLUSTERED OR STACKED layout
-		vizuly2.viz.layout.CLUSTERED,
-		"margin": {                            // Our margin object
-			"top": "10%",                       // Top margin
-			"bottom": "7%",                    // Bottom margin
-			"left": "12%",                      // Left margin
-			"right": "9%"                      // Right margin
+		/**
+		 * Array of Arrays. Each array represents a series of data.  Assumes each series has the same length and same yScale values.
+		 * @member {Array}
+		 * @default Needs to be set at runtime
+		 *
+		 * @example
+		 * [
+		 *  // Series 1 (Gold)
+		 *  [
+		 *   {"country": "USA", "category": "Gold", "value": "1072"},
+		 *   {"country": "USSR", "category": "Gold", "value": "473"},
+		 *   ...
+		 *  ],
+		 *  // Series 2 (Silver)
+		 *  [
+		 *   {"country": "USA", "category": "Silver", "value": "859"},
+		 *   {"country": "USSR", "category": "Silver","value": "376"},
+		 *   ...
+		 *  ],
+		 *  // Series 3 (Bronze)
+		 *  [
+		 *   {"country": "USA", "category": "Bronze", "value": "749"},
+		 *   {"country": "USSR", "category": "Bronze","value": "355"},
+		 *   ...
+		 *  ],
+		 * ]
+		 */
+		'data': null,
+		/**
+		 * Determines layout of Bar Chart.  Can use either 'CLUSTERED' or 'STACKED'
+		 * @member {String}
+		 * @default 'CLUSTERED'
+		 *
+		 */
+		'layout': vizuly2.viz.layout.CLUSTERED,
+		/**
+		 * Width of component in either pixels (Number) or percentage of parent container (%)
+		 * @member {Number}
+		 * @default 600
+		 */
+		'width': 600,
+		/**
+		 * Height of component in either pixels (Number) or percentage of parent container (%)
+		 * @member {Number}
+		 * @default 600
+		 */
+		'height': 600,
+		/**
+		 * Margins between tree and border of container.  This can either be a fixed pixels (Number) or a percentage (%) of height/width.
+		 * @member {Object}
+		 * @default  {top:'5%', bottom:'5%', left:'8%', right:'10%'}
+		 */
+		'margin': {                            // Our margin object
+			'top': '10%',                       // Top margin
+			'bottom': '7%',                    // Bottom margin
+			'left': '12%',                      // Left margin
+			'right': '9%'                      // Right margin
 		},
-		"duration": 500,                       // This the time in ms used for any component generated transitions
-		"width": 300,                          // Overall width of component
-		"height": 300,                         // Height of component
-		"barWidth": -1,                          // -1 means dynamic width, positive values are fixed width and will override chart width if needed.
-		"barPadding": '20%',                    // % space between bars OR fixed space between bars.
-		"groupPadding": '30%',                  // % space between bars OR fixed space between bars.
-		"x": null,                               // Function that returns xScale data value
-		"y": null,                               // Function that returns yScale data value
-		"seriesLabel" : function (d) { return d.series },
-		"xScale": d3.scaleLinear(),           // Default xScale (can be overridden after 'validate' event via callback)
-		"yScale": "undefined",          // Default yScale (can be overridden after 'validate' event via callback)
-		"xAxis": d3.axisBottom(),                // Default xAxis (can be overridden after 'validate' event via callback)
-		"yAxis": d3.axisLeft(),                // Default yAxis (can be overridden after 'validate' event via callback)
-		"yTickFormat": function (d) { return d },
-		"xTickFormat": function (d) { return d },
-		"dataTipRenderer": dataTipRenderer,
-		"labelFormat": function (d) { return d }
+		/**
+		 * Duration (in milliseconds) of any component transitions.
+		 * @member {Number}
+		 * @default  500
+		 */
+		'duration': 500,
+		/**
+		 * The height of each bar in pixels.  The default value of "-1" will auto size bars based on padding and chart height.
+		 * @member {Number}
+		 * @default  -1
+		 */
+		'barWidth': -1,
+		/**
+		 * <img src='BarChartPadding.png'><br><br>
+		 * Determines space between bars within a series group.  Can be represented as a pixel (Number) or a percentage ('20%').
+		 * Using a percentage will try and optimize the spacing based on the number of bars and the height of the chart.  Using a fixed number
+		 * will ignore the chart "height" property and space bars a fixed distance apart, so the resulting chart height may differ.
+		 * This allows for creating consistently padded charts regardless of the number of elements within the series.
+		 * @member {String}
+		 * @default 20%
+		 *
+		 */
+		'barPadding': '20%',
+		/**
+		 * <img src='BarChartPadding.png'><br><br>
+		 * Determines space between series groups.  Can be represented as a pixel (Number) or a percentage ('20%').
+		 * Using a percentage will try and optimize the spacing based on the number of bars and the height of the chart.  Using a fixed number
+		 * will ignore the chart "height" property and space series groups a fixed distance apart, so the resulting chart height may differ.
+		 * This allows for creating consistently padded charts regardless of the number of elements within the series.
+		 * @member {String}
+		 * @default 20%
+		 *
+		 */
+		'groupPadding': '30%',
+		/**
+		 * Function that returns the datum property used to calculate the width of the bar.  This accessor is called for each bar that is being rendered.
+		 * @member {Function}
+		 * @default  Must be set at runtime
+		 * @example
+		 * viz.x(function(d,i) { return Number(d.myProperty) });
+		 */
+		'x': null,
+		/**
+		 * Function that returns the datum property used to calculate the vertical grouping/position of the bar .  This accessor is called for each bar that is being rendered.
+		 * @member {Function}
+		 * @default  Must be set at runtime
+		 * @example
+		 * viz.y(function(d,i) { return Number(d.myProperty) });
+		 */
+		'y': null,
+		/**
+		 * Function that returns the series label of the datum
+		 * @member {Function}
+		 * @default  function (d) { return d.series }
+		 * @example
+		 * viz.seriesLabel(function(d,i) { return d.myProperty });
+		 */
+		'seriesLabel': function (d) {
+			return d.series
+		},
+		/**
+		 * Scale type used to measure and position bars along the x-axis.  The scale, or scale properties can be overridden by capturing the
+		 * "measure" event and accessing/modifying the scale.
+		 * @member {d3.scale}
+		 * @default  d.scaleLinear()
+		 * @example
+		 * viz.on('measure', function () { viz.scaleX().range([0, 600]) }) //Sets max width of scale to 600
+		 */
+		'xScale': d3.scaleLinear(),
+		/**
+		 * Scale type used to measure and position bars along the y-axis.  The bar chart will try and auto-determine the scale type based on
+		 * the value type being returned by the viz.y accessor.  String values will use a d3.scaleBand, date values will use a d3.scaleTime,
+		 * and numeric values will use a d3.scaleLinear. The scale, or scale properties can be overridden by capturing the
+		 * "measure" event and accessing/modifying the scale.
+		 * @member {d3.scale}
+		 * @default  undefined - set at runtime automatically
+		 * @example
+		 * viz.on('measure', function () { viz.scaleY().range([0, 600]) }) //Sets max height of scale to 600;
+		 */
+		'yScale': 'undefined',
+		/**
+		 * D3 Axis used to render x (bottom) axis.  This axis can be overriden with custom settings by capturing the 'measure' event.
+		 * @member {d3.axis}
+		 * @default d3.axisBottom
+		 * @example
+		 * viz.on('measure', function () { viz.xAxis().tickSize(10) }) //Sets each axis tick to 10 pixels
+		 */
+		'xAxis': d3.axisBottom(),
+		/**
+		 * D3 Axis used to render y (left) axis.  This axis can be overriden with custom settings by capturing the 'measure' event.
+		 * @member {d3.axis}
+		 * @default d3.axisLeft
+		 * @example
+		 * viz.on('measure', function () { viz.yAxis().tickSize(10) }) //Sets each axis tick to 10 pixels
+		 */
+		'yAxis': d3.axisLeft(),
+		/**
+		 * Label formatter for the y axis.  Can be customized to modify labels along axis.
+		 * @member {function}
+		 * @default function (d) { return d }
+		 * @example
+		 * //Sets each axis tick label to a currency format
+		 * viz.yTickFormat(function (d, i) { return '$' + d3.format('.2f')(d) })
+		 */
+		'yTickFormat': function (d) {
+			return d
+		},
+		/**
+		 * Label formatter for the x axis.  Can be customized to modify labels along axis.
+		 * @member {function}
+		 * @default function (d) { return d }
+		 * @example
+		 * //Sets each axis tick label to a currency format
+		 * viz.xTickFormat(function (d, i) { return '$' + d3.format('.2f')(d) })
+		 */
+		'xTickFormat': function (d) {
+			return d
+		},
+		/**
+		 * Label formatter for value labels.  Can be customized to modify value labels that are displayed by each bar.
+		 * @member {function}
+		 * @default function (d) { return d }
+		 * @example
+		 * //Sets each value label to a percentage format
+		 * viz.labelFormat(function (d, i) { return (d * 100) + '%' })
+		 */
+		'labelFormat': function (d) {
+			return d
+		},
+		/**
+		 * The dataTipRenderer is used to customize the data tip that is shown on mouse-over events.
+		 *  You can append to or modify the 'tip' parameter to customize the data tip.
+		 *  You can also return modified x, y coordinates to place the data tip in a different location.
+		 * @member {function}
+		 * @default internal.dataTipRenderer
+		 * @example
+		 * // tip - html DIV element
+		 * // e - svg rect of the bar being moused over
+		 * // d - datum
+		 * // i - datum index
+		 * // x - suggested x position of data tip
+		 * // y - suggested y position of data tip
+		 * // return {Array} [x, y] - x and y coordinates placing data tip.
+		 *
+		 *function dataTipRenderer(tip, e, d, i, x, y) {
+		 *	 var html = '<div class="vz-tip-header1">HEADER1</div>' +
+		 *	 '<div class="vz-tip-header-rule"></div>' +
+		 *	 '<div class="vz-tip-header2"> HEADER2 </div>' +
+		 *	 '<div class="vz-tip-header-rule"></div>' +f
+		 *	 '<div class="vz-tip-header3" style="font-size:12px;"> HEADER3 </div>';
+		 *
+		 *	 var h1 = scope.y(d);
+		 *	 var h2 = scope.x(d);
+		 *	 var h3 = scope.seriesLabel(d);
+		 *
+		 *	 html = html.replace("HEADER1", h1);
+		 *	 html = html.replace("HEADER2", h2);
+		 *	 html = html.replace("HEADER3", h3);
+		 *ff
+		 *	 tip.style('height','80px').html(html);
+		 *
+		 *	 return [(Number(x) + Number(d3.select(e).attr('width'))),y - 50]
+		 *}
+		 */
+		'dataTipRenderer': dataTipRenderer
+		
 	};
 	
+
+	/** @lends vizuly2.viz.BarChart.styles */
 	var styles = {
-		'label-color': '#FFF',
-		'label-over-color': '#02C3FF',
-		'label-font-size': function () {
-			return Math.max(8, Math.round(size.width /85))
+		/**
+		 * Determines the color for a given value label.
+		 * @default Learn how to set [Dynamic Styles]{@tutorial 3-styles}
+		 * @member {'#FFF'}
+		 */
+		'value-label-color': '#FFF',
+		/**
+		 * Determines the font size for a given value label that are displayed.
+		 * @example
+		 * //Default Functor
+		 * function() { return Math.max(8, Math.round(size.width / 85) }
+		 * @default Learn how to set [Dynamic Styles]{@tutorial 3-styles}
+		 * @member {StyleFunctor}
+		 */
+		'value-label-font-size': function () {
+			return Math.max(8, Math.round(size.width / 85))
 		},
-		'label-font-weight': 400,
-		'show-value-labels': true,
+		/**
+		 * Determines the font weight for a given value label.
+		 * @default Learn how to set [Dynamic Styles]{@tutorial 3-styles}
+		 * @member {400}
+		 */
+		'value-label-font-weight': 400,
+		/**
+		 * Determines if any value labels should be displayed
+		 * @default Learn how to set [Dynamic Styles]{@tutorial 3-styles}
+		 * @member {true}
+		 */
+		'value-label-show': true,
+		/**
+		 * Determines the color of the top of the components background gradient
+		 * @default Learn how to set [Dynamic Styles]{@tutorial 3-styles}
+		 * @member {'#021F51'}
+		 */
 		'background-gradient-top': '#021F51',
+		/**
+		 * Determines the color of the bottom of the components background gradient
+		 * @default Learn how to set [Dynamic Styles]{@tutorial 3-styles}
+		 * @member {'#039FDB'}
+		 */
 		'background-gradient-bottom': '#039FDB',
+		/**
+		 * Determines the stroke of a given bar.
+		 * @default Learn how to set [Dynamic Styles]{@tutorial 3-styles}
+		 * @member {'#FFF'}
+		 */
 		'bar-stroke': '#FFF',
-		'bar-stroke-opacity': function (d,i) {
+		/**
+		 * Determines the stroke opacity of a given bar
+		 * @default Learn how to set [Dynamic Styles]{@tutorial 3-styles}
+		 * @example
+		 * //Default Functor
+		 * function (d, i) { return (scope.layout == vizuly2.viz.layout.STACKED) ? '1' : '0' }
+		 * @member {StyleFunctor}
+		 */
+		'bar-stroke-opacity': function (d, i) {
 			return (scope.layout == vizuly2.viz.layout.STACKED) ? '1' : '0'
 		},
-		'bar-over-stroke': '#FFF',
-		'bar-stroke-width': function (d,i) {
+		/**
+		 * Determines the stroke of a given bar on a mouse over event.
+		 * @default Learn how to set [Dynamic Styles]{@tutorial 3-styles}
+		 * @member {'#FFF'}
+		 */
+		'bar-stroke-over': '#FFF',
+		/**
+		 * Determines the stroke width of a given bar
+		 * @default Learn how to set [Dynamic Styles]{@tutorial 3-styles}
+		 * @example
+		 * //Default Functor
+		 * function (d, i) { return (this.width() / 800) + "px"; }
+		 * @member {StyleFunctor}
+		 */
+		'bar-stroke-width': function (d, i) {
 			return (this.width() / 800) + "px";
 		},
+		/**
+		 * Determines the fill color of a given bar
+		 * @default Learn how to set [Dynamic Styles]{@tutorial 3-styles}
+		 * @member {'#02C3FF'}
+		 */
 		'bar-fill': '#02C3FF',
+		/**
+		 * Determines the fill opacity of a given bar
+		 * @default Learn how to set [Dynamic Styles]{@tutorial 3-styles}
+		 * @example
+		 * //Default Functor
+		 * function (d, i) { return (1 - ((i) / (scope.data.length + 1))); }
+		 * @member {StyleFunctor}
+		 */
 		'bar-fill-opacity': function (d, i) {
-			return (1 - ((i) / (scope.data.length+1)));
+			return (1 - ((i) / (scope.data.length + 1)));
 		},
-		'bar-over-fill': '#FFF',
-		'bar-over-fill-opacity': 1,
+		/**
+		 * Determines the fill color of a given bar on a mouse over event
+		 * @default Learn how to set [Dynamic Styles]{@tutorial 3-styles}
+		 * @member {'#FFF'}
+		 */
+		'bar-fill-over': '#FFF',
+		/**
+		 * Determines the fill opacity of a given bar on mouse over event
+		 * @default Learn how to set [Dynamic Styles]{@tutorial 3-styles}
+		 * @member {1}
+		 */
+		'bar-fill-opacity-over': 1,
+		/**
+		 * Determines the corner radius of a given bar
+		 * @default Learn how to set [Dynamic Styles]{@tutorial 3-styles}
+		 * @member {0}
+		 */
 		'bar-radius': 0,
+		/**
+		 * Determines the font weight of a given axis label
+		 * @default Learn how to set [Dynamic Styles]{@tutorial 3-styles}
+		 * @member {400}
+		 */
 		'axis-font-weight': 400,
+		/**
+		 * Determines the font size of a given axis label
+		 * @default Learn how to set [Dynamic Styles]{@tutorial 3-styles}
+		 * @example
+		 * //Default Functor
+		 * function (d, i) { return Math.max(8, Math.round(size.width / 65)); }
+		 * @member {StyleFunctor}
+		 */
 		'axis-font-size': function () {
 			return Math.max(8, Math.round(size.width / 65))
 		},
-		'show-y-axis-labels': true,
-		'show-x-axis-labels': true,
+		/**
+		 * Determines whether to display a given y-axis label
+		 * @default Learn how to set [Dynamic Styles]{@tutorial 3-styles}
+		 * @member {true}
+		 */
+		'y-axis-label-show': true,
+		/**
+		 * Determines whether to display a given x-axis label
+		 * @default Learn how to set [Dynamic Styles]{@tutorial 3-styles}
+		 * @member {true}
+		 */
+		'x-axis-label-show': true,
+		/**
+		 * Determines the color of axis labels on mouse over <br>
+		 * @default Learn how to set [Dynamic Styles]{@tutorial 3-styles}
+		 * @member {'#02C3FF'}
+		 */
+		'axis-axis-label-over-color': '#02C3FF',
+		/**
+		 * Determines the style of a given y-axis label
+		 * @default Learn how to set [Dynamic Styles]{@tutorial 3-styles}
+		 * @member {'normal'}
+		 */
 		'y-axis-font-style': 'normal',
+		/**
+		 * Determines the style of a given x-axis label
+		 * @default Learn how to set [Dynamic Styles]{@tutorial 3-styles}
+		 * @member {'normal'}
+		 */
 		'x-axis-font-style': 'normal',
-		'y-axis-label-color': function (d,i) { return this.getStyle('label-color', arguments) },
-		'x-axis-label-color': function (d,i) { return this.getStyle('label-color', arguments) },
+		/**
+		 * Determines the color size of a given y-axis label
+		 * @default Learn how to set [Dynamic Styles]{@tutorial 3-styles}
+		 * @example
+		 * //Default Functor
+		 * function (d, i) { return this.getStyle('value-label-color', arguments); }
+		 * @member {StyleFunctor}
+		 */
+		'y-axis-label-color': function (d, i) {
+			return this.getStyle('value-label-color', arguments)
+		},
+		/**
+		 * Determines the color size of a given x-axis label
+		 * @default Learn how to set [Dynamic Styles]{@tutorial 3-styles}
+		 * @example
+		 * //Default Functor
+		 * function (d, i) { return this.getStyle('value-label-color', arguments); }
+		 * @member {StyleFunctor}
+		 */
+		'x-axis-label-color': function (d, i) {
+			return this.getStyle('value-label-color', arguments)
+		},
+		/**
+		 * Determines the stroke color for all axis lines
+		 * @default Learn how to set [Dynamic Styles]{@tutorial 3-styles}
+		 * @member {'FFF'}
+		 */
 		'axis-stroke': '#FFF',
+		/**
+		 * Determines the opacity for all axis lines
+		 * @default Learn how to set [Dynamic Styles]{@tutorial 3-styles}
+		 * @member {0.5}
+		 */
 		'axis-opacity': .5
 	}
 	
@@ -149,8 +510,8 @@ vizuly2.viz.BarChart = function (parent) {
 			groupWidth = groupWidth - groupPadding;
 			// The width of an individual bar for a given data point a single series
 			barWidth = (scope.layout == vizuly2.viz.layout.STACKED) ? groupWidth : (groupWidth / scope.data.length);
-			barPadding = calculatePadding((scope.layout == vizuly2.viz.layout.STACKED)  ? 0 : scope.barPadding, barWidth);
-			if (barPadding > barWidth) barPadding = barWidth-2;
+			barPadding = calculatePadding((scope.layout == vizuly2.viz.layout.STACKED) ? 0 : scope.barPadding, barWidth);
+			if (barPadding > barWidth) barPadding = barWidth - 2;
 			barWidth = barWidth - barPadding;
 		}
 		
@@ -168,11 +529,11 @@ vizuly2.viz.BarChart = function (parent) {
 		}
 		else {
 			scope.yScale.domain([
-				 d3.min(scope.data[0],
+				d3.min(scope.data[0],
 				 function (d) {
 					 return scope.y(d);
 				 }),
-				 d3.max(scope.data[0], function (d) {
+				d3.max(scope.data[0], function (d) {
 					return scope.y(d);
 				})
 			]);
@@ -225,7 +586,7 @@ vizuly2.viz.BarChart = function (parent) {
 		
 		//Makes sure our range is correct for continous scales
 		if (typeof scope.yScale.clamp != 'undefined') {
-			seriesOffset = (groupWidth + groupPadding)/2;
+			seriesOffset = (groupWidth + groupPadding) / 2;
 			yScaleOffset = groupWidth;
 		}
 		
@@ -245,8 +606,8 @@ vizuly2.viz.BarChart = function (parent) {
 	
 	function calculatePadding(padding, w) {
 		var val = 0;
-		if(typeof padding == "string" && padding.substr(padding.length-1) == "%") {
-			var r = Math.min(Number(padding.substr(0,padding.length-1)),100)/100;
+		if (typeof padding == "string" && padding.substr(padding.length - 1) == "%") {
+			var r = Math.min(Number(padding.substr(0, padding.length - 1)), 100) / 100;
 			val = Math.round(w * r);
 		}
 		else if (!isNaN(Number(padding))) {
@@ -310,11 +671,11 @@ vizuly2.viz.BarChart = function (parent) {
 			 })
 			 .merge(bars);
 			
-			bars.attr("height", barWidth).attr("width",0).attr("x",0);
+			bars.attr("height", barWidth).attr("width", 0).attr("x", 0);
 			
 			bars.transition().duration(scope.duration)
 			 .attr("y", function (d, i) {
-				 return (scope.layout == vizuly2.viz.layout.STACKED) ?  0 :  i * (barWidth + barPadding);
+				 return (scope.layout == vizuly2.viz.layout.STACKED) ? 0 : i * (barWidth + barPadding);
 			 })
 			 .attr("height", barWidth)
 			 .attr("width", function (d, i) {
@@ -335,28 +696,30 @@ vizuly2.viz.BarChart = function (parent) {
 				 return i * (barWidth + barPadding);
 			 })
 			 .attr("x", 0)
-			 .text(function (d,i) { return scope.labelFormat(scope.x(d.data['series' + i].data)) })
+			 .text(function (d, i) {
+				 return scope.labelFormat(scope.x(d.data['series' + i].data))
+			 })
 			 .merge(labels);
 			
-			labels.attr("x",0);
+			labels.attr("x", 0);
 			
 			labels.transition().duration(scope.duration)
-			.attr("y", function (d, i) {
-				var datum = d.data['series' + i].data;
-				 var fs = viz.getStyle('label-font-size',[datum, i, scope.xScale.domain().indexOf(scope.x(datum)), this]);
-				 return (scope.layout == vizuly2.viz.layout.STACKED) ?  -fs/2 :  i * (barWidth + barPadding) + (barWidth/2) + fs/3;
+			 .attr("y", function (d, i) {
+				 var datum = d.data['series' + i].data;
+				 var fs = viz.getStyle('value-label-font-size', [datum, i, scope.xScale.domain().indexOf(scope.x(datum)), this]);
+				 return (scope.layout == vizuly2.viz.layout.STACKED) ? -fs / 2 : i * (barWidth + barPadding) + (barWidth / 2) + fs / 3;
 			 })
 			 .attr("x", function (d, i) {
 				 var datum = d.data['series' + i].data;
-				 var fs = viz.getStyle('label-font-size',[datum, i, scope.xScale.domain().indexOf(scope.x(datum)), this]);
-				 return (scope.layout == vizuly2.viz.layout.STACKED) ? scope.xScale(d[1]) : scope.xScale(d[1]) + fs;
+				 var fs = viz.getStyle('value-label-font-size', [datum, i, scope.xScale.domain().indexOf(scope.x(datum)), this]);
+				 return (scope.layout == vizuly2.viz.layout.STACKED) ? scope.xScale(d[1]) : scope.xScale(d[1]);
 			 })
 			group.attr("transform", function (d, i) {
-				return "translate(0," + (scope.yScale(scope.y(datum.data['series0'].data)) + (groupPadding + barPadding)/2) +  ")"
+				return "translate(0," + (scope.yScale(scope.y(datum.data['series0'].data)) + (groupPadding + barPadding) / 2) + ")"
 			});
 			
 		});
-
+		
 		// Update our axis labels
 		bottomAxis.call(scope.xAxis);
 		leftAxis.call(scope.yAxis);
@@ -418,52 +781,52 @@ vizuly2.viz.BarChart = function (parent) {
 			 d3.select(this).selectAll("rect.vz-bar")
 				.style("fill", function (d, i) {
 					var datum = d.data['series' + i].data;
-					return viz.getStyle('bar-fill',[datum, i, scope.yScale.domain().indexOf(scope.y(datum)), this])
+					return viz.getStyle('bar-fill', [datum, i, scope.yScale.domain().indexOf(scope.y(datum)), this])
 				})
-			  .style("fill-opacity", function (d, i) {
-				  var datum = d.data['series' + i].data;
-				  return viz.getStyle('bar-fill-opacity',[datum, i, scope.yScale.domain().indexOf(scope.y(datum)), this])
-			  })
-			  .style("stroke", function (d, i) {
-				  var datum = d.data['series' + i].data;
-				  return viz.getStyle('bar-stroke',[datum, i, scope.yScale.domain().indexOf(scope.y(datum)), this])
-			  })
-			  .style("stroke-width", function (d, i) {
-				  var datum = d.data['series' + i].data;
-				  return viz.getStyle('bar-stroke-width',[datum, i, scope.yScale.domain().indexOf(scope.y(datum)), this])
-			  })
-			  .style("stroke-opacity", function (d, i) {
-				  var datum = d.data['series' + i].data;
-				  return viz.getStyle('bar-stroke-opacity',[datum, i, scope.yScale.domain().indexOf(scope.y(datum)), this])
-			  })
+				.style("fill-opacity", function (d, i) {
+					var datum = d.data['series' + i].data;
+					return viz.getStyle('bar-fill-opacity', [datum, i, scope.yScale.domain().indexOf(scope.y(datum)), this])
+				})
+				.style("stroke", function (d, i) {
+					var datum = d.data['series' + i].data;
+					return viz.getStyle('bar-stroke', [datum, i, scope.yScale.domain().indexOf(scope.y(datum)), this])
+				})
+				.style("stroke-width", function (d, i) {
+					var datum = d.data['series' + i].data;
+					return viz.getStyle('bar-stroke-width', [datum, i, scope.yScale.domain().indexOf(scope.y(datum)), this])
+				})
+				.style("stroke-opacity", function (d, i) {
+					var datum = d.data['series' + i].data;
+					return viz.getStyle('bar-stroke-opacity', [datum, i, scope.yScale.domain().indexOf(scope.y(datum)), this])
+				})
 				.style("rx", function (d, i) {
 					var datum = d.data['series' + i].data;
-					return viz.getStyle('bar-radius',[datum, i, scope.yScale.domain().indexOf(scope.y(datum)), this])
+					return viz.getStyle('bar-radius', [datum, i, scope.yScale.domain().indexOf(scope.y(datum)), this])
 				});
-			
+			 
 			 // Update value labels
 			 d3.select(this).selectAll(".vz-bar-label")
-			  .style('display', function (d,i) {
-				  var datum = d.data['series' + i].data;
-				  return viz.getStyle('show-value-labels', [datum, i, scope.xScale.domain().indexOf(scope.x(datum)), this]) ? 'block' : 'none'
-			  })
-			  .style('text-anchor', (scope.layout == vizuly2.viz.layout.STACKED) ? 'start' : 'middle')
-			  .style("font-weight", function (d,i) {
-				  var datum = d.data['series' + i].data;
-				  return viz.getStyle('label-font-weight', [datum, i, scope.xScale.domain().indexOf(scope.x(datum)), this])
-			  })
-			  .style("fill", function (d,i) {
-				  var datum = d.data['series' + i].data;
-				  return viz.getStyle('label-color', [datum, i, scope.xScale.domain().indexOf(scope.x(datum)), this])
-			  })
-			  .style("font-size", function (d,i) {
-				  var datum = d.data['series' + i].data;
-				  return viz.getStyle('label-font-size', [datum, i, scope.xScale.domain().indexOf(scope.x(datum)), this]) + "px"
-			  })
-			  .attr('dx', function (d,i) {
-				  var datum = d.data['series' + i].data;
-			  	return (scope.layout == vizuly2.viz.layout.STACKED) ? 0 : viz.getStyle('label-font-size', [datum, i, scope.xScale.domain().indexOf(scope.x(datum)), this])/3
-			  })
+				.style('display', function (d, i) {
+					var datum = d.data['series' + i].data;
+					return viz.getStyle('value-label-show', [datum, i, scope.xScale.domain().indexOf(scope.x(datum)), this]) ? 'block' : 'none'
+				})
+				.style('text-anchor', 'start')
+				.style("font-weight", function (d, i) {
+					var datum = d.data['series' + i].data;
+					return viz.getStyle('value-label-font-weight', [datum, i, scope.xScale.domain().indexOf(scope.x(datum)), this])
+				})
+				.style("fill", function (d, i) {
+					var datum = d.data['series' + i].data;
+					return viz.getStyle('value-label-color', [datum, i, scope.xScale.domain().indexOf(scope.x(datum)), this])
+				})
+				.style("font-size", function (d, i) {
+					var datum = d.data['series' + i].data;
+					return viz.getStyle('value-label-font-size', [datum, i, scope.xScale.domain().indexOf(scope.x(datum)), this]) + "px"
+				})
+				.attr('dx', function (d, i) {
+					var datum = d.data['series' + i].data;
+					return (scope.layout == vizuly2.viz.layout.STACKED) ? 0 : viz.getStyle('value-label-font-size', [datum, i, scope.xScale.domain().indexOf(scope.x(datum)), this]) / 2
+				})
 		 });
 		
 		// Update axis fonts
@@ -471,18 +834,32 @@ vizuly2.viz.BarChart = function (parent) {
 		 .style("font-weight", function () {
 			 return viz.getStyle('axis-font-weight', arguments)
 		 })
-		 .style("font-size", function (d,i) { return viz.getStyle('axis-font-size', arguments) + "px" });
+		 .style("font-size", function (d, i) {
+			 return viz.getStyle('axis-font-size', arguments) + "px"
+		 });
 		
 		selection.selectAll(".vz-bottom-axis text")
-		 .style('display', function () { return viz.getStyle('show-x-axis-labels', arguments) ? 'block' : 'none' })
-		 .style('font-style', function () { return viz.getStyle('x-axis-font-style', arguments) })
-		 .style('fill', function () { return viz.getStyle('x-axis-label-color', arguments) })
+		 .style('display', function () {
+			 return viz.getStyle('x-axis-label-show', arguments) ? 'block' : 'none'
+		 })
+		 .style('font-style', function () {
+			 return viz.getStyle('x-axis-font-style', arguments)
+		 })
+		 .style('fill', function () {
+			 return viz.getStyle('x-axis-label-color', arguments)
+		 })
 		 .style("text-anchor", "middle")
 		
 		selection.selectAll(".vz-left-axis text")
-		 .style('display', function () { return viz.getStyle('show-y-axis-labels', arguments) ? 'block' : 'none' })
-		 .style('font-style', function () { return viz.getStyle('y-axis-font-style', arguments) })
-		 .style('fill', function () { return viz.getStyle('y-axis-label-color', arguments) })
+		 .style('display', function () {
+			 return viz.getStyle('y-axis-label-show', arguments) ? 'block' : 'none'
+		 })
+		 .style('font-style', function () {
+			 return viz.getStyle('y-axis-font-style', arguments)
+		 })
+		 .style('fill', function () {
+			 return viz.getStyle('y-axis-label-color', arguments)
+		 })
 		
 		// Update the bottom axis
 		selection.selectAll(".vz-bottom-axis line, .vz-left-axis line")
@@ -493,7 +870,7 @@ vizuly2.viz.BarChart = function (parent) {
 		 .style("opacity", function () {
 			 return viz.getStyle('axis-opacity')
 		 })
-
+		
 		selection.selectAll(".vz-left-axis").attr("font-family", null)
 		selection.selectAll(".vz-bottom-axis").attr("font-family", null)
 		selection.selectAll('.vz-left-axis path.domain').style('display', 'none');
@@ -510,20 +887,30 @@ vizuly2.viz.BarChart = function (parent) {
 		
 		//Making style and color changes to our bar for the <code>mouseover</code>.
 		d3.select(bar)
-		 .style("fill", function (d,i) { return viz.getStyle('bar-over-fill',arguments) })
-		 .style("fill-opacity", function (d,i) { return viz.getStyle('bar-over-fill-opacity',arguments) })
-		 .style("stroke", function (d,i) { return viz.getStyle('bar-over-stroke',arguments) })
+		 .style("fill", function (d, i) {
+			 return viz.getStyle('bar-fill-over', arguments)
+		 })
+		 .style("fill-opacity", function (d, i) {
+			 return viz.getStyle('bar-fill-opacity-over', arguments)
+		 })
+		 .style("stroke", function (d, i) {
+			 return viz.getStyle('bar-stroke-over', arguments)
+		 })
 		
 		//Finding the correct axis label and highlighting it.
 		d3.select(leftAxis
 		 .selectAll('.tick text').nodes()[groupIndex])
 		 .transition()
-		 .style("font-size",function () { return viz.getStyle('axis-font-size') * 1.2 + "px" })
+		 .style("font-size", function () {
+			 return viz.getStyle('axis-font-size') * 1.2 + "px"
+		 })
 		 .style("font-weight", 700)
-		 .style("fill", function (d,i) { return viz.getStyle('label-over-color',arguments)})
+		 .style("fill", function (d, i) {
+			 return viz.getStyle('axis-label-over-color', arguments)
+		 })
 		 .style("text-decoration", "underline")
 		 .style("fill-opacity", 1)
-		 .style("opacity",1);
+		 .style("opacity", 1);
 		
 		viz.showDataTip(bar, d, i);
 		
@@ -537,27 +924,33 @@ vizuly2.viz.BarChart = function (parent) {
 		d3.select(bar)
 		 .style("fill", function (d) {
 			 var datum = d.data['series' + i].data;
-			 return viz.getStyle('bar-fill',[datum, i, scope.yScale.domain().indexOf(scope.y(datum)), this])
+			 return viz.getStyle('bar-fill', [datum, i, scope.yScale.domain().indexOf(scope.y(datum)), this])
 		 })
 		 .style("fill-opacity", function (d) {
 			 var datum = d.data['series' + i].data;
-			 return viz.getStyle('bar-fill-opacity',[datum, i, scope.yScale.domain().indexOf(scope.y(datum)), this])
+			 return viz.getStyle('bar-fill-opacity', [datum, i, scope.yScale.domain().indexOf(scope.y(datum)), this])
 		 })
 		 .style("stroke", function (d, i) {
 			 var datum = d.data['series' + i].data;
-			 return viz.getStyle('bar-stroke',[datum, i, scope.yScale.domain().indexOf(scope.y(datum)), this])
+			 return viz.getStyle('bar-stroke', [datum, i, scope.yScale.domain().indexOf(scope.y(datum)), this])
 		 })
 		 .style("stroke-opacity", function (d, i) {
 			 var datum = d.data['series' + i].data;
-			 return viz.getStyle('bar-stroke-opacity',[datum, i, scope.yScale.domain().indexOf(scope.y(datum)), this])
+			 return viz.getStyle('bar-stroke-opacity', [datum, i, scope.yScale.domain().indexOf(scope.y(datum)), this])
 		 })
 		
 		d3.select(leftAxis
 		 .selectAll('.tick text').nodes()[groupIndex])
 		 .transition()
-		 .style("font-size",function () { return viz.getStyle('axis-font-size') + "px" })
-		 .style("fill", function () { return viz.getStyle('y-axis-label-color',arguments)})
-		 .style("font-weight", function (d,i) { return viz.getStyle('axis-font-weight',arguments)})
+		 .style("font-size", function () {
+			 return viz.getStyle('axis-font-size') + "px"
+		 })
+		 .style("fill", function () {
+			 return viz.getStyle('y-axis-label-color', arguments)
+		 })
+		 .style("font-weight", function (d, i) {
+			 return viz.getStyle('axis-font-weight', arguments)
+		 })
 		 .style("text-decoration", null)
 		
 		viz.removeDataTip();
@@ -565,13 +958,12 @@ vizuly2.viz.BarChart = function (parent) {
 	}
 	
 	function dataTipRenderer(tip, e, d, i, x, y) {
-		
 		var html = '<div class="vz-tip-header1">HEADER1</div>' +
 		 '<div class="vz-tip-header-rule"></div>' +
 		 '<div class="vz-tip-header2"> HEADER2 </div>' +
 		 '<div class="vz-tip-header-rule"></div>' +
 		 '<div class="vz-tip-header3" style="font-size:12px;"> HEADER3 </div>';
-		 
+		
 		var h1 = scope.y(d);
 		var h2 = scope.x(d);
 		var h3 = scope.seriesLabel(d);
@@ -580,21 +972,20 @@ vizuly2.viz.BarChart = function (parent) {
 		html = html.replace("HEADER2", h2);
 		html = html.replace("HEADER3", h3);
 		
-		tip.style('height','80px').html(html);
+		tip.style('height', '80px').html(html);
 		
-		return [(Number(x) + Number(d3.select(e).attr('width'))),y - 50]
-		
+		return [(Number(x) + Number(d3.select(e).attr('width'))), y - 50]
 	}
 	
 	function styles_getDropShadow() {
 		var w = viz.width();
 		return "url(" + vizuly2.svg.filter.dropShadow(
-			viz,
-			w / 300,
-			w / 300,
-			w / 200) + ")";
+		 viz,
+		 w / 300,
+		 w / 300,
+		 w / 200) + ")";
 	}
-
+	
 	initialize();
 	
 	// Returns our viz component

@@ -42,7 +42,7 @@
 
 		console.log("NEED TO MAKE DATA INTO JSON")
 
-		d3.csv("data/lineareachart_stocks.csv", function (csv) {
+		d3.csv("data/lineareachart_stocks.csv").then(function (csv) {
 
 			// We have to do some prep on the data to create make it ready for our display
 			// The data comes in as one set of rows, but the linearea chart expects each series (line/area)

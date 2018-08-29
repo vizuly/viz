@@ -40,7 +40,7 @@
 
 	var initialize = function () {
 
-		d3.json("data/columnchart_olympics.json", function (json) {
+		d3.json("data/columnchart_olympics.json").then(function (json) {
 
 			data = json;
 

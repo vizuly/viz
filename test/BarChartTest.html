@@ -40,7 +40,7 @@
 
 	var initialize = function () {
 
-		d3.json("data/barchart_olympics.json", function (json) {
+		d3.json("data/barchart_olympics.json").then(function (json) {
 
 			data = json;
 
@@ -59,6 +59,7 @@
            //  .barPadding(30)
            //  .groupPadding(40)
           //   .groupPadding('50%')
+             .style('show-value-labels',false)
              .style('y-axis-label-color','#FF0')
              .on('mouseover', onMouseOver)
              .on('mouseout', onMouseOut)

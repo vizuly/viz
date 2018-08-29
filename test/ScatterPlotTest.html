@@ -57,7 +57,7 @@
 
 	var initialize = function () {
 
-		d3.csv('data/scatter_expenditure.csv', function (err, csv) {
+		d3.csv('data/scatter_expenditure.csv').then(function (err, csv) {
 			if (err) {
 				console.log("Could not load live data for scatter plot chart.")
 			}
