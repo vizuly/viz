@@ -5,8 +5,11 @@ var blueStyles =
  {
 	 'background-gradient-top': '#021F51',
 	 'background-gradient-bottom': '#039FDB',
-	 'label-color': '#FFF',
+	 'value-label-color': '#FFF',
+	 'x-axis-label-color': '#FFF',
+	 'y-axis-label-color': '#FFF',
 	 'bar-fill': '#02C3FF',
+	 'bar-fill-over': '#02C3FF',
 	 'axis-stroke': '#FFF',
 	 'bar-radius': 0
  }
@@ -15,7 +18,9 @@ var pinkStyles =
  {
 	 'background-gradient-top': '#540936',
 	 'background-gradient-bottom': '#C12780',
-	 'label-color': '#FFF',
+	 'value-label-color': '#FFF',
+	 'x-axis-label-color': '#FFF',
+	 'y-axis-label-color': '#FFF',
 	 'bar-fill': '#FF35BE',
 	 'axis-stroke': '#FFF',
 	 'bar-radius': 0
@@ -25,7 +30,9 @@ var neonStyles =
  {
 	 'background-gradient-top': '#000000',
 	 'background-gradient-bottom': '#474747',
-	 'label-color': '#FFF',
+	 'value-label-color': '#FFF',
+	 'x-axis-label-color': '#FFF',
+	 'y-axis-label-color': '#FFF',
 	 'bar-fill': '#D1F704',
 	 'axis-stroke': '#FFF',
 	 'bar-radius': function (d, i, groupIndex, e) { return Number(d3.select(e).attr("width"))/2; }
@@ -35,7 +42,9 @@ var axiisStyles =
  {
 	 'background-gradient-top': '#ECECEC',
 	 'background-gradient-bottom': '#D0D0D0',
-	 'label-color': '#444',
+	 'value-label-color': '#444',
+	 'x-axis-label-color': '#444',
+	 'y-axis-label-color': '#444',
 	 'bar-fill': function (d, i, groupIndex) {
 		 var axisColors = ['#bd0026', '#fecc5c', '#fd8d3c', '#f03b20', '#B02D5D', '#9B2C67', '#982B9A', '#692DA7', '#5725AA', '#4823AF', '#d7b5d8', '#dd1c77', '#5A0C7A', '#5A0C7A'];
 		 return axisColors[groupIndex % axisColors.length]
@@ -49,8 +58,11 @@ var minimalStyles =
  {
 	 'background-gradient-top': '#F0F0F0',
 	 'background-gradient-bottom': '#F0F0F0',
-	 'label-color': '#444',
+	 'value-label-color': '#444',
+	 'x-axis-label-color': '#444',
+	 'y-axis-label-color': '#444',
 	 'bar-fill': '#555',
+	 'bar-fill-over': '#000',
 	 'axis-stroke': '#777',
 	 'bar-radius': 0
  }

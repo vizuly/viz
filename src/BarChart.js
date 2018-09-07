@@ -258,6 +258,18 @@ vizuly2.viz.BarChart = function (parent) {
 	/** @lends vizuly2.viz.BarChart.styles */
 	var styles = {
 		/**
+		 * Determines the color of the top of the components background gradient
+		 * @default Learn how to set [Dynamic Styles]{@tutorial 3-styles}
+		 * @member {'#021F51'}
+		 */
+		'background-gradient-top': '#021F51',
+		/**
+		 * Determines the color of the bottom of the components background gradient
+		 * @default Learn how to set [Dynamic Styles]{@tutorial 3-styles}
+		 * @member {'#039FDB'}
+		 */
+		'background-gradient-bottom': '#039FDB',
+		/**
 		 * Determines the color for a given value label.
 		 * @default Learn how to set [Dynamic Styles]{@tutorial 3-styles}
 		 * @member {'#FFF'}
@@ -286,18 +298,6 @@ vizuly2.viz.BarChart = function (parent) {
 		 * @member {true}
 		 */
 		'value-label-show': true,
-		/**
-		 * Determines the color of the top of the components background gradient
-		 * @default Learn how to set [Dynamic Styles]{@tutorial 3-styles}
-		 * @member {'#021F51'}
-		 */
-		'background-gradient-top': '#021F51',
-		/**
-		 * Determines the color of the bottom of the components background gradient
-		 * @default Learn how to set [Dynamic Styles]{@tutorial 3-styles}
-		 * @member {'#039FDB'}
-		 */
-		'background-gradient-bottom': '#039FDB',
 		/**
 		 * Determines the stroke of a given bar.
 		 * @default Learn how to set [Dynamic Styles]{@tutorial 3-styles}
@@ -396,12 +396,6 @@ vizuly2.viz.BarChart = function (parent) {
 		 * @member {true}
 		 */
 		'x-axis-label-show': true,
-		/**
-		 * Determines the color of axis labels on mouse over <br>
-		 * @default Learn how to set [Dynamic Styles]{@tutorial 3-styles}
-		 * @member {'#02C3FF'}
-		 */
-		'axis-axis-label-over-color': '#02C3FF',
 		/**
 		 * Determines the style of a given y-axis label
 		 * @default Learn how to set [Dynamic Styles]{@tutorial 3-styles}
@@ -905,9 +899,6 @@ vizuly2.viz.BarChart = function (parent) {
 			 return viz.getStyle('axis-font-size') * 1.2 + "px"
 		 })
 		 .style("font-weight", 700)
-		 .style("fill", function (d, i) {
-			 return viz.getStyle('axis-label-over-color', arguments)
-		 })
 		 .style("text-decoration", "underline")
 		 .style("fill-opacity", 1)
 		 .style("opacity", 1);
