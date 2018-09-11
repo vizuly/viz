@@ -47,7 +47,7 @@ vizuly2.viz.WordCloud = function (parent) {
 	}
 	
 	// Create our viz and type it
-	var viz = vizuly2.core.component(parent, scope, properties);
+	var viz = vizuly2.core.component(parent, scope, properties, styles);
 	
 	var size;           // Holds the 'size' variable as defined in viz.util.size()
 	
@@ -63,8 +63,6 @@ vizuly2.viz.WordCloud = function (parent) {
 	// These are all place holder groups for the invidual data driven display elements.   We use these to do general
 	// sizing and margin layout.  The all are referenced as d3.selections.
 	function initialize() {
-		
-		viz.defaultStyles(styles);
 		
 		svg = scope.selection.append("svg").attr("id", scope.id).style("overflow", "visible").attr("class", "vizuly");
 		background = svg.append("rect").attr("class", "vz-background");

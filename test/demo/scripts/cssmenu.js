@@ -1,5 +1,7 @@
 (function($) {
 	
+	var styles;
+	
 	$.fn.menumaker = function(options) {
 
 		var cssmenu = $(this), settings = $.extend({
@@ -33,6 +35,7 @@
 			cssmenu.find('li ul').parent().addClass('has-sub');
 
 			cssmenu.find('li ul li').on('click',function () {
+				if ( $(this).parent().attr('id').indexOf('menu-StyleExplorer') == 0) return;
 				var f=$(this).parent().attr("callback");
 				var v = $(this).attr("item_value");
 				if (f) window[f].apply(window,[v]);
@@ -40,7 +43,7 @@
 				$(this).addClass("selected");
 				$(this).parent().parent().find(".setting").text($(this).text());
 
-				if (cssmenu.find('#menu-button').hasClass('menu-opened') && $( window ).width() <= 900) {
+				if (cssmenu.find('#menu-button').hasClass('menu-opened') && $( window ).width() <= 800) {
 					toggleMenu();
 				}
 			});
@@ -85,7 +88,7 @@
 
 			resizeFix = function() {
 
-				if ($( window ).width() > 900 ) {
+				if ($( window ).width() > 800 ) {
 					cssmenu.find('.main-menu').show().addClass("open");
 				}
 				else {
@@ -102,7 +105,22 @@
 })(jQuery);
 
 
-function createDemoMenu(options, w, h, title) {
+function createDemoMenu(options, w, h, title, styles) {
+	
+	if (styles) {
+		this.styles = styles
+		var styleOption = {};
+		styleOption.name = 'Style Explorer'
+		styleOption.callback = function () {};
+		var values = [];
+		values.push({'label': 'Hover on a style', 'value': 'test', 'selected':true})
+		Object.keys(styles).forEach(function (key) {
+			var value = {'label': key, 'value': styles[key]}
+			values.push(value);
+		})
+		styleOption.values = values;
+		demoOptions.splice(0, 0, styleOption)
+	}
 
 	// Set the size of our container element.
 	var menu = d3.select('body').insert('div').attr('id','cssmenu').append('ul').attr('class','main-menu');
@@ -116,7 +134,7 @@ function createDemoMenu(options, w, h, title) {
 		a.append('br');
 		a.append('span').attr('class','setting');
 
-		var list = menuItem.append('ul').attr('id','menu-' + option.name).attr('class','options').attr('callback',option.callback.name);
+		var list = menuItem.append('ul').attr('id','menu-' + String(option.name).replace(/ /g,'')).attr('class','options').attr('callback',option.callback.name);
 
 		option.values.forEach(function (value) {
 			list.append('li').attr("class",function() { return (value.selected) ? 'selected' : null }).attr('item_value',value.value).append('a').text(value.label);
@@ -133,5 +151,70 @@ function createDemoMenu(options, w, h, title) {
 		title: String(title).toUpperCase(),
 		format: 'multitoggle'
 	});
+	
+	//Alter Style Explorer
+	var styleMenu = d3.selectAll('#menu-StyleExplorer');
+	
+	if (styles) {
+		
+		d3.select(styleMenu.node().parentNode).style('width', '200px').attr('id','styleMenu')
+		styleMenu.selectAll('li a')
+		 .style('width','200px')
+		 .on('mouseover', function (d,i) { setStyle(options[0].values[i].label) })
+		 .on('mouseout', function (d,i) { removeStyle(options[0].values[i].label) })
+		
+		styleMenu.selectAll('li')
+		 .style('height','25px')
+		
+		if (window.location.href.indexOf('themeLight') > -1) {
+			console.log("themed");
+			d3.select(document.head)
+			 .append('link')
+			 .attr('rel','stylesheet')
+			 .attr('type','text/css')
+			 .attr('href','demo/scripts/cssmenu_light.css')
+		}
+	}
+	
+	function setStyle(d) {
+		var value;
+		
+		if (Array.isArray(styles[d])) {
+			styles[d].forEach(function (d) {
+				viz.style(d.name, d.value)
+			})
+			value = encodeStyleValue(styles[d][0].value)
+		}
+		else {
+			viz.style(d, styles[d])
+			value = encodeStyleValue(styles[d]);
+		}
+		viz.duration(0).update().duration(500);
+		d3.select('#styleCode').text("viz.style('" + d + "', " + value + ")")
+	}
+	
+	function removeStyle(d) {
+		if (Array.isArray(styles[d])) {
+			styles[d].forEach(function (d) {
+				viz.style(d.name, null)
+			})
+		}
+		else {
+			viz.style(d, null)
+		}
+		viz.applyStyles(currentStyle).duration(0).update().duration(500);
+		d3.select('#styleCode').text('');
+	}
+	
+	function encodeStyleValue(value) {
+		if (typeof value == 'string') {
+			return "'" + value + "'";
+		}
+		else {
+			return value;
+		}
+	}
 
 }
+
+

@@ -443,7 +443,7 @@ vizuly2.viz.ColumnChart = function (parent) {
 	}
 	
 	//Create our viz and type it
-	var viz = vizuly2.core.component(parent, scope, properties);
+	var viz = vizuly2.core.component(parent, scope, properties, styles);
 	
 	// Measurements
 	
@@ -465,8 +465,6 @@ vizuly2.viz.ColumnChart = function (parent) {
 	// These are all place holder groups for the individual data driven display elements.   We use these to do general
 	// sizing and margin layout.  The all are referenced as D3 selections.
 	function initialize() {
-		
-		viz.defaultStyles(styles);
 		
 		svg = scope.selection.append("svg").attr("id", scope.id).style("overflow", "visible").attr("class", "vizuly");
 		defs = vizuly2.core.util.getDefs(viz);

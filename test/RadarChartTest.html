@@ -13,7 +13,7 @@
     <script src="../lib/d3.min.js"></script>
 
     <script src="../lib/vizuly2_core.min.js"></script>
-    <script src="../src/SpiderChart.js"></script>
+    <script src="../src/RadarChart.js"></script>
 </head>
 
 <body>
@@ -28,13 +28,13 @@
 <link rel="stylesheet" href="demo/scripts/cssmenu.css">
 <script type="text/javascript" src="demo/scripts/jquery-2.1.1.min.js"></script>
 <script src="demo/scripts/cssmenu.js"></script>
-<script src="demo/SpiderChartDemo.js"></script>
+<script src="demo/RadarChartDemo.js"></script>
 <!-- DEMO CODE: END -->
 
 <script id="testscript">
 
 	// our radial components and an array to hold them
-	var viz = vizuly2.viz.SpiderChart(document.getElementById("viz_container"));
+	var viz = vizuly2.viz.RadarChart(document.getElementById("viz_container"));
 
 	var data;
 
@@ -42,7 +42,7 @@
 
     var initialize = function () {
 
-		d3.json('data/spiderchart_data.json').then(function (json) {
+		d3.json('data/radarchart_data.json').then(function (json) {
 
 			data = json;
 

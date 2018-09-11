@@ -1,4 +1,15 @@
 @import url(http://fonts.googleapis.com/css?family=Raleway:400,700);
+@import url(http://fonts.googleapis.com/css?family=Material+Icons);
+
+.style {
+  font-family: 'bt_mono', monospace;
+  color: #5f5c63;
+  font-size: 14px;
+}
+
+.style:hover {
+  color: #0095dd;
+}
 
 #cssmenu a.menu-logo {
   color:#FFF;
@@ -217,13 +228,17 @@
   top: 17px;
   height: 0;
 }
-@media all and (max-width: 900px),
-only screen and (-webkit-min-device-pixel-ratio: 2) and (max-width: 900px),
-only screen and (min--moz-device-pixel-ratio: 2) and (max-width: 900px),
-only screen and (-o-min-device-pixel-ratio: 2/1) and (max-width: 900px),
-only screen and (min-device-pixel-ratio: 2) and (max-width: 900px),
-only screen and (min-resolution: 192dpi) and (max-width: 900px),
-only screen and (min-resolution: 2dppx) and (max-width: 900px) {
+@media all and (max-width: 800px),
+only screen and (-webkit-min-device-pixel-ratio: 2) and (max-width: 800px),
+only screen and (min--moz-device-pixel-ratio: 2) and (max-width: 800px),
+only screen and (-o-min-device-pixel-ratio: 2/1) and (max-width: 800px),
+only screen and (min-device-pixel-ratio: 2) and (max-width: 800px),
+only screen and (min-resolution: 192dpi) and (max-width: 800px),
+only screen and (min-resolution: 2dppx) and (max-width: 800px) {
+
+  #cssmenu #styleMenu {
+    display:none;
+  }
 
   #cssmenu span.setting {
     padding-left:0px;

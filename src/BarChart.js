@@ -12,12 +12,7 @@
 // @version 2.1.45
 
 /**
- * The BarChart renders multiple series of data in a nested array
  * @class
- * @constructor
- * @extends vizuly2.viz.Generic
- * @param {DOMElement} parent - Container element that will render the component.
- *
  */
 vizuly2.viz.BarChart = function (parent) {
 	
@@ -254,198 +249,52 @@ vizuly2.viz.BarChart = function (parent) {
 		
 	};
 	
-
-	/** @lends vizuly2.viz.BarChart.styles */
 	var styles = {
-		/**
-		 * Determines the color of the top of the components background gradient
-		 * @default Learn how to set [Dynamic Styles]{@tutorial 3-styles}
-		 * @member {'#021F51'}
-		 */
 		'background-gradient-top': '#021F51',
-		/**
-		 * Determines the color of the bottom of the components background gradient
-		 * @default Learn how to set [Dynamic Styles]{@tutorial 3-styles}
-		 * @member {'#039FDB'}
-		 */
 		'background-gradient-bottom': '#039FDB',
-		/**
-		 * Determines the color for a given value label.
-		 * @default Learn how to set [Dynamic Styles]{@tutorial 3-styles}
-		 * @member {'#FFF'}
-		 */
 		'value-label-color': '#FFF',
-		/**
-		 * Determines the font size for a given value label that are displayed.
-		 * @example
-		 * //Default Functor
-		 * function() { return Math.max(8, Math.round(size.width / 85) }
-		 * @default Learn how to set [Dynamic Styles]{@tutorial 3-styles}
-		 * @member {StyleFunctor}
-		 */
 		'value-label-font-size': function () {
 			return Math.max(8, Math.round(size.width / 85))
 		},
-		/**
-		 * Determines the font weight for a given value label.
-		 * @default Learn how to set [Dynamic Styles]{@tutorial 3-styles}
-		 * @member {400}
-		 */
 		'value-label-font-weight': 400,
-		/**
-		 * Determines if any value labels should be displayed
-		 * @default Learn how to set [Dynamic Styles]{@tutorial 3-styles}
-		 * @member {true}
-		 */
 		'value-label-show': true,
-		/**
-		 * Determines the stroke of a given bar.
-		 * @default Learn how to set [Dynamic Styles]{@tutorial 3-styles}
-		 * @member {'#FFF'}
-		 */
 		'bar-stroke': '#FFF',
-		/**
-		 * Determines the stroke opacity of a given bar
-		 * @default Learn how to set [Dynamic Styles]{@tutorial 3-styles}
-		 * @example
-		 * //Default Functor
-		 * function (d, i) { return (scope.layout == vizuly2.viz.layout.STACKED) ? '1' : '0' }
-		 * @member {StyleFunctor}
-		 */
 		'bar-stroke-opacity': function (d, i) {
 			return (scope.layout == vizuly2.viz.layout.STACKED) ? '1' : '0'
 		},
-		/**
-		 * Determines the stroke of a given bar on a mouse over event.
-		 * @default Learn how to set [Dynamic Styles]{@tutorial 3-styles}
-		 * @member {'#FFF'}
-		 */
 		'bar-stroke-over': '#FFF',
-		/**
-		 * Determines the stroke width of a given bar
-		 * @default Learn how to set [Dynamic Styles]{@tutorial 3-styles}
-		 * @example
-		 * //Default Functor
-		 * function (d, i) { return (this.width() / 800) + "px"; }
-		 * @member {StyleFunctor}
-		 */
 		'bar-stroke-width': function (d, i) {
 			return (this.width() / 800) + "px";
 		},
-		/**
-		 * Determines the fill color of a given bar
-		 * @default Learn how to set [Dynamic Styles]{@tutorial 3-styles}
-		 * @member {'#02C3FF'}
-		 */
 		'bar-fill': '#02C3FF',
-		/**
-		 * Determines the fill opacity of a given bar
-		 * @default Learn how to set [Dynamic Styles]{@tutorial 3-styles}
-		 * @example
-		 * //Default Functor
-		 * function (d, i) { return (1 - ((i) / (scope.data.length + 1))); }
-		 * @member {StyleFunctor}
-		 */
 		'bar-fill-opacity': function (d, i) {
 			return (1 - ((i) / (scope.data.length + 1)));
 		},
-		/**
-		 * Determines the fill color of a given bar on a mouse over event
-		 * @default Learn how to set [Dynamic Styles]{@tutorial 3-styles}
-		 * @member {'#FFF'}
-		 */
 		'bar-fill-over': '#FFF',
-		/**
-		 * Determines the fill opacity of a given bar on mouse over event
-		 * @default Learn how to set [Dynamic Styles]{@tutorial 3-styles}
-		 * @member {1}
-		 */
 		'bar-fill-opacity-over': 1,
-		/**
-		 * Determines the corner radius of a given bar
-		 * @default Learn how to set [Dynamic Styles]{@tutorial 3-styles}
-		 * @member {0}
-		 */
 		'bar-radius': 0,
-		/**
-		 * Determines the font weight of a given axis label
-		 * @default Learn how to set [Dynamic Styles]{@tutorial 3-styles}
-		 * @member {400}
-		 */
 		'axis-font-weight': 400,
-		/**
-		 * Determines the font size of a given axis label
-		 * @default Learn how to set [Dynamic Styles]{@tutorial 3-styles}
-		 * @example
-		 * //Default Functor
-		 * function (d, i) { return Math.max(8, Math.round(size.width / 65)); }
-		 * @member {StyleFunctor}
-		 */
 		'axis-font-size': function () {
 			return Math.max(8, Math.round(size.width / 65))
 		},
-		/**
-		 * Determines whether to display a given y-axis label
-		 * @default Learn how to set [Dynamic Styles]{@tutorial 3-styles}
-		 * @member {true}
-		 */
 		'y-axis-label-show': true,
-		/**
-		 * Determines whether to display a given x-axis label
-		 * @default Learn how to set [Dynamic Styles]{@tutorial 3-styles}
-		 * @member {true}
-		 */
 		'x-axis-label-show': true,
-		/**
-		 * Determines the style of a given y-axis label
-		 * @default Learn how to set [Dynamic Styles]{@tutorial 3-styles}
-		 * @member {'normal'}
-		 */
 		'y-axis-font-style': 'normal',
-		/**
-		 * Determines the style of a given x-axis label
-		 * @default Learn how to set [Dynamic Styles]{@tutorial 3-styles}
-		 * @member {'normal'}
-		 */
 		'x-axis-font-style': 'normal',
-		/**
-		 * Determines the color size of a given y-axis label
-		 * @default Learn how to set [Dynamic Styles]{@tutorial 3-styles}
-		 * @example
-		 * //Default Functor
-		 * function (d, i) { return this.getStyle('value-label-color', arguments); }
-		 * @member {StyleFunctor}
-		 */
 		'y-axis-label-color': function (d, i) {
 			return this.getStyle('value-label-color', arguments)
 		},
-		/**
-		 * Determines the color size of a given x-axis label
-		 * @default Learn how to set [Dynamic Styles]{@tutorial 3-styles}
-		 * @example
-		 * //Default Functor
-		 * function (d, i) { return this.getStyle('value-label-color', arguments); }
-		 * @member {StyleFunctor}
-		 */
 		'x-axis-label-color': function (d, i) {
 			return this.getStyle('value-label-color', arguments)
 		},
-		/**
-		 * Determines the stroke color for all axis lines
-		 * @default Learn how to set [Dynamic Styles]{@tutorial 3-styles}
-		 * @member {'FFF'}
-		 */
 		'axis-stroke': '#FFF',
-		/**
-		 * Determines the opacity for all axis lines
-		 * @default Learn how to set [Dynamic Styles]{@tutorial 3-styles}
-		 * @member {0.5}
-		 */
 		'axis-opacity': .5
 	}
 	
+	var events = [];
+	
 	// Create our viz and type it
-	var viz = vizuly2.core.component(parent, scope, properties);
+	var viz = vizuly2.core.component(parent, scope, properties, styles);
 	
 	var size;           // Holds the 'size' variable as defined in viz.util.size()
 	var barWidth;       // measured bar width
@@ -466,7 +315,6 @@ vizuly2.viz.BarChart = function (parent) {
 	// sizing and margin layout.  The all are referenced as d3.selections.
 	function initialize() {
 		
-		viz.defaultStyles(styles);
 		svg = scope.selection.append("svg").attr("id", scope.id).style("overflow", "visible").attr("class", "vizuly");
 		defs = vizuly2.core.util.getDefs(viz);
 		background = svg.append("rect").attr("class", "vz-background")
