@@ -27,21 +27,9 @@ function runDemo() {
 		}
 	]
 
-		var screenWidth;
-		var screenHeight = 600;
+	
+		createDemoMenu(demoOptions, 600, 600, 'vizuly - WordCloud');
 
-		var rect;
-		if (self==top) {
-			rect = document.body.getBoundingClientRect();
-		}
-		else {
-			rect =  parent.document.body.getBoundingClientRect();
-		}
-
-		//Set display size based on window size.
-		screenWidth = (rect.width < 960) ? Math.round(rect.width*.95) : Math.round((rect.width - 210) *.95)
-		createDemoMenu(demoOptions, screenWidth, screenHeight, 'vizuly - WordCloud');
-
-		changeSize(screenWidth + ',' + screenHeight);
+		changeSize('600,600');
 }
 

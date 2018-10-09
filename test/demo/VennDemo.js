@@ -25,22 +25,10 @@ function runDemo() {
 			'callback': changeSize
 		}
 	]
-
-		var screenWidth;
-		var screenHeight = 600;
-
-		var rect;
-		if (self==top) {
-			rect = document.body.getBoundingClientRect();
-		}
-		else {
-			rect =  parent.document.body.getBoundingClientRect();
-		}
-
+	
 		//Set display size based on window size.
-		screenWidth = (rect.width < 960) ? Math.round(rect.width*.95) : Math.round((rect.width - 210) *.95)
-		createDemoMenu(demoOptions, screenWidth, screenHeight, 'vizuly - Venn');
+		createDemoMenu(demoOptions, 600, 600, 'vizuly - Venn');
 
-		changeSize(screenWidth + ',' + screenHeight);
+		changeSize('600, 600');
 }
 

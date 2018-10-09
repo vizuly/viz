@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Vizuly 2.0 - SpiderChart</title>
+    <title>Vizuly 2.0 - Radar Chart</title>
 
     <!-- We use google fonts for many of the examples, but they are not necessary -->
     <link href='https://fonts.googleapis.com/css?family=Raleway:600,400,200' rel='stylesheet' type='text/css'>
@@ -48,7 +48,7 @@
 
 			viz.data(data)
 			 .width(1000).height(600)
-             .x(function (d,i) { return d.axis })
+             .x(function (d,i) { return String(d.axis).toUpperCase() })
              .y(function (d,i) { return d.value })
              .seriesLabel(function (d) { return d.category })
              .yAxisTickFormat(function (d) { return d3.format('.0f')(d*100) + '%'})

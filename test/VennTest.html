@@ -23,7 +23,7 @@
 
 <!-- Our main content container-->
 <div class="container" style="width:100%;">
-    <div id="viz_container" class="z-depth-3" style="width:1000px; height:600px; border-radius:10px; overflow:hidden">
+    <div id="viz_container" class="z-depth-3" style="width:600px; height:600px; border-radius:10px; overflow:hidden">
     </div>
 </div>
 
@@ -44,12 +44,22 @@
 
 	var initialize = function () {
 
-		d3.json('data/venn_test.json').then(function (json) {
+		d3.json('data/venn.json').then(function (json) {
+
+			var totalSize = d3.sum(json, function (d) { return d.size; })
 
             viz
-             .data(json.data)
-             .width(1000)
-             .height(600);
+             .data(json)
+             .width(600)
+             .height(600)
+             .value(function (d) {
+	             return d.size
+             })
+             .label(function (d) {
+	             if (!d.label) return '';
+	             return d.label + ' ' + (Math.round((d.size / totalSize) * 100)) + '%';
+             })
+             .on('initialized',function () { console.log("initialized")})
 
             viz.update();
 

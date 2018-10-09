@@ -27,13 +27,22 @@
 <body>
 
 <!-- Our main content container-->
-<div class="container" style="width:100%;">
-    <div id="styleCode" class="style" style="width:100%; margin-bottom:20px; text-align:center"></div>
-    <div id="viz_container" class="z-depth-3" style="width:1000px; height:600px; border-radius:10px; overflow:hidden">
+<div class="container" style="width:100%">
+    <div id="viz_container" class="z-depth-3" style="width:600px; height:600px; border-radius:10px; overflow:hidden">
     </div>
 </div>
 
 
+<!--
+EXAMPLES
+
+Labels on/off
+Fixed bar width
+Highlight largest label
+Rotate labels (Coluimn chart)
+
+
+-->
 
 <script id="testscript">
 
@@ -50,7 +59,8 @@
 
             var countries = ['USA', 'USSR', 'GB', 'GER', 'FR', 'ITL', 'SWE', 'CHINA', 'RU', 'E. GER' ]
 
-            viz.data(data)
+            viz
+             .data(data)
              .width('100%').height('100%')     //initial component display size
              .x(function (d, i)
              { return Number(d.value); })    //property for x axis plot
@@ -59,13 +69,10 @@
              { return d.country; })//property for y axis plot
              .seriesLabel( function (d,i)
              { return d.category })
-           //  .barWidth(20)
-           //  .barPadding(30)
-           //  .groupPadding(40)
-          //   .groupPadding('50%')
              .style('show-value-labels',false)
              .on('mouseover', onMouseOver)
              .on('mouseout', onMouseOut)
+            // .dataTipRenderer(function () { return false })
 
             viz.update();
 

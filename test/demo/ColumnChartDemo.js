@@ -1,63 +1,78 @@
 // html element that holds the chart
 var viz_container;
 
+var styles = {
+	'background-color-top': '#0000FF',
+	'background-color-bottom': '#0000FF',
+	'value-label-color': {'value-label-color': '#0000FF', 'value-label-show' : true},
+	'value-label-font-size': {'value-label-font-size': 16, 'value-label-show' : true},
+	'value-label-font-weight': {'value-label-font-weight': 'bold', 'value-label-show' : true},
+	'value-label-show': true,
+	'bar-stroke': {'bar-stroke': '#0000FF', 'bar-stroke-opacity' : 1, 'bar-stroke-width' : 2},
+	'bar-stroke-opacity': .5,
+	'bar-stroke-over': {'bar-stroke-over': '#FFFF00', 'bar-stroke': '#FFFF00', 'bar-stroke-opacity' : 2},
+	'bar-stroke-width': {'bar-stroke-width' : 3, 'bar-stroke': '#0000FF', 'bar-stroke-opacity' : 1},
+	'bar-fill': '#0000FF',
+	'bar-fill-opacity': .25,
+	'bar-fill-over':  {'bar-fill-over': '#FFFF00', 'bar-fill': '#FFFF00'},
+	'bar-fill-opacity-over': {'bar-fill-opacity-over': 1, 'bar-fill-opacity' : 1},
+	'bar-radius': 5,
+	'axis-font-weight': {'axis-font-weight': 700, 'y-axis-label-color': '#0000FF', 'x-axis-label-color': '#0000FF'},
+	'axis-font-size': 16,
+	'y-axis-label-show': false,
+	'x-axis-label-show': false,
+	'y-axis-font-style': 'italic',
+	'x-axis-font-style': 'italic',
+	'y-axis-label-color': '#0000FF',
+	'x-axis-label-color': '#0000FF',
+	'axis-stroke': '#0000FF',
+	'axis-opacity': 0
+}
+
+var defaultStyles = {};
+
 var blueStyles =
  {
-	 'background-gradient-top': '#021F51',
-	 'background-gradient-bottom': '#039FDB',
+	 'background-color-top': '#039FDB',
+	 'background-color-bottom': '#021F51',
 	 'value-label-color': '#FFF',
 	 'x-axis-label-color': '#FFF',
 	 'y-axis-label-color': '#FFF',
 	 'bar-fill': '#02C3FF',
-	 'bar-fill-over': '#02C3FF',
 	 'axis-stroke': '#FFF',
 	 'bar-radius': 0
  }
 
 var pinkStyles =
  {
-	 'background-gradient-top': '#540936',
-	 'background-gradient-bottom': '#C12780',
+	 'background-color-top': '#C12780',
+	 'background-color-bottom': '#540936',
 	 'value-label-color': '#FFF',
 	 'x-axis-label-color': '#FFF',
 	 'y-axis-label-color': '#FFF',
-	 'bar-fill': '#FF35BE',
+	 'bar-fill': '#ff83de',
 	 'axis-stroke': '#FFF',
 	 'bar-radius': 0
  }
 
 var neonStyles =
  {
-	 'background-gradient-top': '#000000',
-	 'background-gradient-bottom': '#474747',
+	 'background-color-top': '#474747',
+	 'background-color-bottom': '#000000',
 	 'value-label-color': '#FFF',
 	 'x-axis-label-color': '#FFF',
 	 'y-axis-label-color': '#FFF',
 	 'bar-fill': '#D1F704',
 	 'axis-stroke': '#FFF',
-	 'bar-radius': function (d, i, groupIndex, e) { return Number(d3.select(e).attr("width"))/2; }
+	 'bar-radius': function (d, i, groupIndex, e) {
+		 return Number(d3.select(e).attr("width")) / 2;
+	 }
  }
-
-var axiisStyles =
- {
-	 'background-gradient-top': '#ECECEC',
-	 'background-gradient-bottom': '#D0D0D0',
-	 'value-label-color': '#444',
-	 'x-axis-label-color': '#444',
-	 'y-axis-label-color': '#444',
-	 'bar-fill': function (d, i, groupIndex) {
-		 var axisColors = ['#bd0026', '#fecc5c', '#fd8d3c', '#f03b20', '#B02D5D', '#9B2C67', '#982B9A', '#692DA7', '#5725AA', '#4823AF', '#d7b5d8', '#dd1c77', '#5A0C7A', '#5A0C7A'];
-		 return axisColors[groupIndex % axisColors.length]
-	 },
-	 'axis-stroke': '#777',
-	 'bar-radius': 0
- }
-
-
+ 
 var minimalStyles =
  {
-	 'background-gradient-top': '#F0F0F0',
-	 'background-gradient-bottom': '#F0F0F0',
+	 'background-color-top': '#F0F0F0',
+	 'background-color-bottom': '#F0F0F0',
 	 'value-label-color': '#444',
 	 'x-axis-label-color': '#444',
 	 'y-axis-label-color': '#444',
@@ -67,6 +82,8 @@ var minimalStyles =
 	 'bar-radius': 0
  }
 
+ 
+ var currentStyle = blueStyles;
 
 //This changes the size of the component by adjusting the radius and width/height;
 function changeSize(val) {
@@ -77,6 +94,7 @@ function changeSize(val) {
 
 function changeStyles(val) {
 	var styles = this[val];
+	viz.clearStyles();
 	viz.applyStyles(styles);
 	viz.update();
 }
@@ -95,12 +113,11 @@ function changeLayout(val) {
 
 
 function runDemo() {
-
+	
 	demoOptions = [
 		{
 			'name': 'Display',
 			'values': [
-				{'label': '1000px - 1000px', 'value': '1000,1000'},
 				{'label': '800px - 800px', 'value': '800,800'},
 				{'label': '375px - 667px', 'value': '375,667'},
 				{'label': '320px - 568px', 'value': '320,568'}
@@ -110,10 +127,10 @@ function runDemo() {
 		{
 			'name': 'Theme',
 			'values': [
-				{'label': 'Blue', 'value': 'blueStyles', 'selected': true},
+				{'label': 'Default', 'value': 'defaultStyles', 'selected': true},
+				{'label': 'Blue', 'value': 'blueStyles'},
 				{'label': 'Pink', 'value': 'pinkStyles'},
 				{'label': 'Neon', 'value': 'neonStyles'},
-				{'label': 'Axiis', 'value': 'axiisStyles'},
 				{'label': 'Minimal', 'value': 'minimalStyles'}
 			],
 			'callback': changeStyles
@@ -121,7 +138,7 @@ function runDemo() {
 		{
 			'name': 'Series',
 			'values': [
-				{'label': '3 Medals', 'value': '3', 'selected' : true},
+				{'label': '3 Medals', 'value': '3', 'selected': true},
 				{'label': '2 Medals', 'value': '2'},
 				{'label': '1 Medal', 'value': '1'},
 			],
@@ -130,28 +147,15 @@ function runDemo() {
 		{
 			'name': 'Layout',
 			'values': [
-				{'label': 'Clustered', 'value': 'CLUSTERED', 'selected' : true},
+				{'label': 'Clustered', 'value': 'CLUSTERED', 'selected': true},
 				{'label': 'Stacked', 'value': 'STACKED'}
 			],
 			'callback': changeLayout
 		}
 	]
-
-		var screenWidth;
-		var screenHeight = 600;
-
-		var rect;
-		if (self==top) {
-			rect = document.body.getBoundingClientRect();
-		}
-		else {
-			rect =  parent.document.body.getBoundingClientRect();
-		}
-
 		//Set display size based on window size.
-		screenWidth = (rect.width < 960) ? Math.round(rect.width*.95) : Math.round((rect.width - 210) *.95)
-		createDemoMenu(demoOptions, screenWidth, screenHeight, 'vizuly - column chart');
+		createDemoMenu(demoOptions, 600, 600, 'vizuly - column chart', styles);
 
-		changeSize(screenWidth + ',' + screenHeight);
+		changeSize(600 + ',' + 600);
 }
 

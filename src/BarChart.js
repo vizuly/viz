@@ -16,15 +16,12 @@
  */
 vizuly2.viz.BarChart = function (parent) {
 	
-	// This is the object that provides pseudo "protected" properties that the vizuly2.viz function helps create
-	var scope = {};
-	
 	var d3 = vizuly2.d3;
 	
 	/** @lends vizuly2.viz.BarChart.properties */
 	var properties = {
 		/**
-		 * Array of Arrays. Each array represents a series of data.  Assumes each series has the same length and same yScale values.
+		 * Array of Arrays. Each array represents a series of data.  Assumes each series has the same length and same collection of yScale ordinal values.
 		 * @member {Array}
 		 * @default Needs to be set at runtime
 		 *
@@ -48,6 +45,7 @@ vizuly2.viz.BarChart = function (parent) {
 		 *   {"country": "USSR", "category": "Bronze","value": "355"},
 		 *   ...
 		 *  ],
+		 *  ...
 		 * ]
 		 */
 		'data': null,
@@ -239,7 +237,7 @@ vizuly2.viz.BarChart = function (parent) {
 		 *	 html = html.replace("HEADER1", h1);
 		 *	 html = html.replace("HEADER2", h2);
 		 *	 html = html.replace("HEADER3", h3);
-		 *ff
+		 *
 		 *	 tip.style('height','80px').html(html);
 		 *
 		 *	 return [(Number(x) + Number(d3.select(e).attr('width'))),y - 50]
@@ -248,25 +246,32 @@ vizuly2.viz.BarChart = function (parent) {
 		'dataTipRenderer': dataTipRenderer
 		
 	};
+
 	
 	var styles = {
-		'background-gradient-top': '#021F51',
-		'background-gradient-bottom': '#039FDB',
-		'value-label-color': '#FFF',
+		'background-color-top': '#FFF',
+		'background-color-bottom': '#DDD',
+		'value-label-color': '#444',
 		'value-label-font-size': function () {
 			return Math.max(8, Math.round(size.width / 85))
 		},
 		'value-label-font-weight': 400,
-		'value-label-show': true,
-		'bar-stroke': '#FFF',
+		'value-label-show': false,
+		'bar-stroke': function (d, i, groupIndex) {
+			var axisColors = ['#bd0026', '#fecc5c', '#fd8d3c', '#f03b20', '#B02D5D', '#9B2C67', '#982B9A', '#692DA7', '#5725AA', '#4823AF', '#d7b5d8', '#dd1c77', '#5A0C7A', '#5A0C7A'];
+			return axisColors[groupIndex % axisColors.length]
+		},
 		'bar-stroke-opacity': function (d, i) {
 			return (scope.layout == vizuly2.viz.layout.STACKED) ? '1' : '0'
 		},
 		'bar-stroke-over': '#FFF',
 		'bar-stroke-width': function (d, i) {
-			return (this.width() / 800) + "px";
+			return (this.width() / 800) + 'px';
 		},
-		'bar-fill': '#02C3FF',
+		'bar-fill': function (d, i, groupIndex) {
+			var axisColors = ['#bd0026', '#fecc5c', '#fd8d3c', '#f03b20', '#B02D5D', '#9B2C67', '#982B9A', '#692DA7', '#5725AA', '#4823AF', '#d7b5d8', '#dd1c77', '#5A0C7A', '#5A0C7A'];
+			return axisColors[groupIndex % axisColors.length]
+		},
 		'bar-fill-opacity': function (d, i) {
 			return (1 - ((i) / (scope.data.length + 1)));
 		},
@@ -275,26 +280,80 @@ vizuly2.viz.BarChart = function (parent) {
 		'bar-radius': 0,
 		'axis-font-weight': 400,
 		'axis-font-size': function () {
-			return Math.max(8, Math.round(size.width / 65))
+			return Math.max(10, Math.round(size.width / 65))
 		},
 		'y-axis-label-show': true,
 		'x-axis-label-show': true,
 		'y-axis-font-style': 'normal',
 		'x-axis-font-style': 'normal',
-		'y-axis-label-color': function (d, i) {
-			return this.getStyle('value-label-color', arguments)
-		},
-		'x-axis-label-color': function (d, i) {
-			return this.getStyle('value-label-color', arguments)
-		},
-		'axis-stroke': '#FFF',
+		'y-axis-label-color': '#444',
+		'x-axis-label-color': '#444',
+		'axis-stroke': '#777',
 		'axis-opacity': .5
 	}
 	
-	var events = [];
 	
-	// Create our viz and type it
-	var viz = vizuly2.core.component(parent, scope, properties, styles);
+	/** @lends vizuly2.viz.BarChart.events */
+	var events = [
+		/**
+		 * Fires when user moves the mouse over a bar.
+		 * @event vizuly2.viz.BarChart.mouseover
+		 * @type {VizulyEvent}
+		 * @param e - DOM element that fired event
+		 * @param d - Datum associated with DOM element
+		 * @param i - Index of datum in display series
+		 * @param j -  The series index of the datum
+		 * @param this -  Vizuly Component that emitted event
+		 * @example  viz.on('mouseover', function (e, d, i) { ... });
+		 */
+		'mouseover',
+		/**
+		 * Fires when user moves the mouse off a bar.
+		 * @event vizuly2.viz.BarChart.mouseout
+		 * @type {VizulyEvent}
+		 * @param e - DOM element that fired event
+		 * @param d - Datum associated with DOM element
+		 * @param i - Index of datum in display series
+		 * @param j -  The series index of the datum
+		 * @param this -  Vizuly Component that emitted event
+		 * @example  viz.on('mouseout', function (e, d, i) { ... });
+		 */
+		'mouseout',
+		/**
+		 * Fires when user clicks a bar.
+		 * @event vizuly2.viz.BarChart.click
+		 * @type {VizulyEvent}
+		 * @param e - DOM element that fired event
+		 * @param d - Datum associated with DOM element
+		 * @param i - Index of datum in display series
+		 * @param j -  The series index of the datum
+		 * @param this -  Vizuly Component that emitted event
+		 * @example  viz.on('click', function (e, d, i) { ... });
+		 */
+		'click',
+		/**
+		 * Fires when user touches a bar on a gesture enabled device.
+		 * @event vizuly2.viz.BarChart.touch
+		 * @type {VizulyEvent}
+		 * @param e - DOM element that fired event
+		 * @param d - Datum associated with DOM element
+		 * @param i - Index of datum in display series
+		 * @param j -  The series index of the datum
+		 * @param this -  Vizuly Component that emitted event
+		 * @example  viz.on('touch', function (e, d, i) { ... });
+		 */
+		'touch'
+	]
+	
+	// This is the object that provides pseudo "protected" properties that the vizuly.viz function helps create
+	var scope = {};
+	scope.initialize = initialize;
+	scope.properties = properties;
+	scope.styles = styles;
+	scope.events = events;
+	
+	// Create our Vizuly component
+	var viz = vizuly2.core.component(parent, scope);
 	
 	var size;           // Holds the 'size' variable as defined in viz.util.size()
 	var barWidth;       // measured bar width
@@ -315,16 +374,16 @@ vizuly2.viz.BarChart = function (parent) {
 	// sizing and margin layout.  The all are referenced as d3.selections.
 	function initialize() {
 		
-		svg = scope.selection.append("svg").attr("id", scope.id).style("overflow", "visible").attr("class", "vizuly");
+		svg = scope.selection.append('svg').attr('id', scope.id).style('overflow', 'visible').attr('class', 'vizuly');
 		defs = vizuly2.core.util.getDefs(viz);
-		background = svg.append("rect").attr("class", "vz-background")
-		g = svg.append("g").attr("class", "vz-bar-viz");
-		bottomAxis = g.append("g").attr("class", "vz-bottom-axis");
-		leftAxis = g.append("g").attr("class", "vz-left-axis")
-		plot = g.append("g").attr("class", "vz-plot");
-		plotBackground = plot.append("rect").attr("class", "vz-plot-background").style("fill", "#FFF").style("fill-opacity", .01);
+		background = svg.append('rect').attr('class', 'vz-background')
+		g = svg.append('g').attr('class', 'vz-bar-viz');
+		bottomAxis = g.append('g').attr('class', 'vz-bottom-axis');
+		leftAxis = g.append('g').attr('class', 'vz-left-axis')
+		plot = g.append('g').attr('class', 'vz-plot');
+		plotBackground = plot.append('rect').attr('class', 'vz-plot-background').style('fill', '#FFF').style('fill-opacity', .01);
 		
-		scope.dispatch.apply('initialize', viz);
+		scope.dispatch.apply('initialized', viz);
 	}
 	
 	
@@ -358,13 +417,13 @@ vizuly2.viz.BarChart = function (parent) {
 		}
 		
 		// If we don't have a defined x-scale then determine one
-		if (scope.yScale == "undefined") {
+		if (scope.yScale == 'undefined') {
 			scope.yScale = vizuly2.core.util.getTypedScale(viz.y()(scope.data[0][0]));
 		}
 		
 		// Set our domains for the yScale (categories)
 		// Assumes ordinal scale if we have a string, otherwise min and max will do;
-		if (typeof scope.y(scope.data[0][0]) == "string") {
+		if (typeof scope.y(scope.data[0][0]) == 'string') {
 			scope.yScale.domain(scope.data[0].map(function (d) {
 				return scope.y(d);
 			}));
@@ -387,7 +446,7 @@ vizuly2.viz.BarChart = function (parent) {
 		var stackKeys = [];
 		
 		scope.data.forEach(function (series, i) {
-			stackKeys.push("series" + i);
+			stackKeys.push('series' + i);
 		})
 		
 		for (var columnIndex = 0; columnIndex < scope.data[0].length; columnIndex++) {
@@ -442,13 +501,13 @@ vizuly2.viz.BarChart = function (parent) {
 		scope.xAxis.tickFormat(scope.xTickFormat).tickSize(-size.height).ticks(5);
 		
 		// Tell everyone we are done making our measurements
-		scope.dispatch.apply('measure', viz);
+		scope.dispatch.apply('measured', viz);
 		
 	}
 	
 	function calculatePadding(padding, w) {
 		var val = 0;
-		if (typeof padding == "string" && padding.substr(padding.length - 1) == "%") {
+		if (typeof padding == 'string' && padding.substr(padding.length - 1) == '%') {
 			var r = Math.min(Number(padding.substr(0, padding.length - 1)), 100) / 100;
 			val = Math.round(w * r);
 		}
@@ -471,16 +530,16 @@ vizuly2.viz.BarChart = function (parent) {
 		measure();
 		
 		// Layout all of our primary SVG d3.elements.
-		svg.attr("width", size.measuredWidth).attr("height", size.measuredHeight);
-		background.attr("width", size.measuredWidth).attr("height", size.measuredHeight);
-		plot.style("width", size.width).style("height", size.height).attr("transform", "translate(" + (size.left) + "," + (size.top) + ")");
-		bottomAxis.attr("transform", "translate(" + (size.left) + "," + (size.height + size.top) + ")");
-		leftAxis.attr("transform", "translate(" + (size.left * .9) + "," + (size.top + seriesOffset) + ")");
-		plotBackground.attr("width", size.width).attr("height", size.height);
+		svg.attr('width', size.measuredWidth).attr('height', size.measuredHeight);
+		background.attr('width', size.measuredWidth).attr('height', size.measuredHeight);
+		plot.style('width', size.width).style('height', size.height).attr('transform', 'translate(' + (size.left) + ',' + (size.top) + ')');
+		bottomAxis.attr('transform', 'translate(' + (size.left) + ',' + (size.height + size.top) + ')');
+		leftAxis.attr('transform', 'translate(' + (size.left * .9) + ',' + (size.top + seriesOffset) + ')');
+		plotBackground.attr('width', size.width).attr('height', size.height);
 		
 		// Select, create, and destroy our bar groups as needed
-		barGroup = plot.selectAll(".vz-bar-group").data(stackSeries[0]);
-		barGroup = barGroup.enter().append("g").attr("class", "vz-bar-group").merge(barGroup);
+		barGroup = plot.selectAll('.vz-bar-group').data(stackSeries[0]);
+		barGroup = barGroup.enter().append('g').attr('class', 'vz-bar-group').merge(barGroup);
 		barGroup.exit().remove();
 		
 		// Create bars in each group - even if there is only one
@@ -488,76 +547,76 @@ vizuly2.viz.BarChart = function (parent) {
 			
 			var group = d3.select(this);
 			
-			var bars = d3.select(this).selectAll(".vz-bar").data(stackSeries.map(function (series, i) {
+			var bars = d3.select(this).selectAll('.vz-bar').data(stackSeries.map(function (series, i) {
 				return series[index];
 			}));
 			
 			bars.exit().remove();
 			
-			bars = bars.enter().append("rect").attr("class", "vz-bar")
-			 .attr("y", function (d, i) {
+			bars = bars.enter().append('rect').attr('class', 'vz-bar')
+			 .attr('y', function (d, i) {
 				 return i * (barWidth + barPadding);
 			 })
-			 .attr("width", 0).attr("x", 0)
-			 .on("mouseover", function (d, i) {
+			 .attr('width', 0).attr('x', 0)
+			 .on('mouseover', function (d, i) {
 				 scope.dispatch.apply('mouseover', viz, [this, d.data['series' + i].data, i, index])
 			 })
-			 .on("mouseout", function (d, i) {
+			 .on('mouseout', function (d, i) {
 				 scope.dispatch.apply('mouseout', viz, [this, d.data['series' + i].data, i, index]);
 			 })
-			 .on("click", function (d, i) {
+			 .on('click', function (d, i) {
 				 scope.dispatch.apply('click', viz, [this, d.data['series' + i].data, i, index])
 			 })
-			 .on("touch", function (d, i) {
+			 .on('touch', function (d, i) {
 				 scope.dispatch.apply('touch', viz, [this, d.data['series' + i].data, i, index])
 			 })
 			 .merge(bars);
 			
-			bars.attr("height", barWidth).attr("width", 0).attr("x", 0);
+			bars.attr('height', barWidth).attr('width', 0).attr('x', 0);
 			
 			bars.transition().duration(scope.duration)
-			 .attr("y", function (d, i) {
+			 .attr('y', function (d, i) {
 				 return (scope.layout == vizuly2.viz.layout.STACKED) ? 0 : i * (barWidth + barPadding);
 			 })
-			 .attr("height", barWidth)
-			 .attr("width", function (d, i) {
+			 .attr('height', barWidth)
+			 .attr('width', function (d, i) {
 				 return (scope.layout == vizuly2.viz.layout.STACKED) ? scope.xScale(d[1]) - scope.xScale(d[0]) : scope.xScale(d[1])
 			 })
-			 .attr("x", function (d, i) {
+			 .attr('x', function (d, i) {
 				 return (scope.layout == vizuly2.viz.layout.STACKED) ? scope.xScale(d[0]) : 0;
 			 });
 			
-			var labels = d3.select(this).selectAll(".vz-bar-label").data(stackSeries.map(function (series, i) {
+			var labels = d3.select(this).selectAll('.vz-bar-label').data(stackSeries.map(function (series, i) {
 				return series[index];
 			}));
 			
 			labels.exit().remove();
 			
-			labels = labels.enter().append("text").attr("class", "vz-bar-label")
-			 .attr("y", function (d, i) {
+			labels = labels.enter().append('text').attr('class', 'vz-bar-label')
+			 .attr('y', function (d, i) {
 				 return i * (barWidth + barPadding);
 			 })
-			 .attr("x", 0)
+			 .attr('x', 0)
 			 .text(function (d, i) {
 				 return scope.labelFormat(scope.x(d.data['series' + i].data))
 			 })
 			 .merge(labels);
 			
-			labels.attr("x", 0);
+			labels.attr('x', 0);
 			
 			labels.transition().duration(scope.duration)
-			 .attr("y", function (d, i) {
+			 .attr('y', function (d, i) {
 				 var datum = d.data['series' + i].data;
 				 var fs = viz.getStyle('value-label-font-size', [datum, i, scope.xScale.domain().indexOf(scope.x(datum)), this]);
 				 return (scope.layout == vizuly2.viz.layout.STACKED) ? -fs / 2 : i * (barWidth + barPadding) + (barWidth / 2) + fs / 3;
 			 })
-			 .attr("x", function (d, i) {
+			 .attr('x', function (d, i) {
 				 var datum = d.data['series' + i].data;
 				 var fs = viz.getStyle('value-label-font-size', [datum, i, scope.xScale.domain().indexOf(scope.x(datum)), this]);
 				 return (scope.layout == vizuly2.viz.layout.STACKED) ? scope.xScale(d[1]) : scope.xScale(d[1]);
 			 })
-			group.attr("transform", function (d, i) {
-				return "translate(0," + (scope.yScale(scope.y(datum.data['series0'].data)) + (groupPadding + barPadding) / 2) + ")"
+			group.attr('transform', function (d, i) {
+				return 'translate(0,' + (scope.yScale(scope.y(datum.data['series0'].data)) + (groupPadding + barPadding) / 2) + ')'
 			});
 			
 		});
@@ -568,7 +627,7 @@ vizuly2.viz.BarChart = function (parent) {
 		
 		// Let everyone know we are doing doing our update
 		// Typically themes will attach a callback to this event so they can apply styles to the elements
-		scope.dispatch.apply('update', viz);
+		scope.dispatch.apply('updated', viz);
 		
 	}
 	
@@ -583,9 +642,8 @@ vizuly2.viz.BarChart = function (parent) {
 	var styles_businessColors = d3.scaleOrdinal(d3.schemeCategory20);
 	var styles_backgroundGradient;
 	
-	// styless and styles
 	var stylesCallbacks = [
-		{on: 'update.styles', callback: applyStyles},
+		{on: 'updated.styles', callback: applyStyles},
 		{on: 'mouseover.styles', callback: styles_onMouseOver},
 		{on: 'mouseout.styles', callback: styles_onMouseOut}
 	];
@@ -606,64 +664,64 @@ vizuly2.viz.BarChart = function (parent) {
 		var selection = scope.selection;
 		
 		// Hide the plot background
-		selection.selectAll(".vz-plot-background").style("opacity", 0);
+		selection.selectAll('.vz-plot-background').style('opacity', 0);
 		
-		styles_backgroundGradient = vizuly2.svg.gradient.blend(viz, viz.getStyle('background-gradient-bottom'), viz.getStyle('background-gradient-top'));
+		styles_backgroundGradient = vizuly2.svg.gradient.blend(viz, viz.getStyle('background-color-bottom'), viz.getStyle('background-color-top'));
 		
 		// Update the background
-		selection.selectAll(".vz-background").style("fill", function () {
-			return "url(#" + styles_backgroundGradient.attr("id") + ")";
+		selection.selectAll('.vz-background').style('fill', function () {
+			return 'url(#' + styles_backgroundGradient.attr('id') + ')';
 		});
 		
 		
 		//Here we select all the bars and apply filters and fills.  In the case of these styless
 		//we are using **svg drop-shadow filters** and **linear gradients** for the fills.
-		selection.selectAll(".vz-bar-group").each(
+		selection.selectAll('.vz-bar-group').each(
 		 function (datum, index) {
-			 d3.select(this).selectAll("rect.vz-bar")
-				.style("fill", function (d, i) {
+			 d3.select(this).selectAll('rect.vz-bar')
+				.style('fill', function (d, i) {
 					var datum = d.data['series' + i].data;
 					return viz.getStyle('bar-fill', [datum, i, scope.yScale.domain().indexOf(scope.y(datum)), this])
 				})
-				.style("fill-opacity", function (d, i) {
+				.style('fill-opacity', function (d, i) {
 					var datum = d.data['series' + i].data;
 					return viz.getStyle('bar-fill-opacity', [datum, i, scope.yScale.domain().indexOf(scope.y(datum)), this])
 				})
-				.style("stroke", function (d, i) {
+				.style('stroke', function (d, i) {
 					var datum = d.data['series' + i].data;
 					return viz.getStyle('bar-stroke', [datum, i, scope.yScale.domain().indexOf(scope.y(datum)), this])
 				})
-				.style("stroke-width", function (d, i) {
+				.style('stroke-width', function (d, i) {
 					var datum = d.data['series' + i].data;
 					return viz.getStyle('bar-stroke-width', [datum, i, scope.yScale.domain().indexOf(scope.y(datum)), this])
 				})
-				.style("stroke-opacity", function (d, i) {
+				.style('stroke-opacity', function (d, i) {
 					var datum = d.data['series' + i].data;
 					return viz.getStyle('bar-stroke-opacity', [datum, i, scope.yScale.domain().indexOf(scope.y(datum)), this])
 				})
-				.style("rx", function (d, i) {
+				.style('rx', function (d, i) {
 					var datum = d.data['series' + i].data;
 					return viz.getStyle('bar-radius', [datum, i, scope.yScale.domain().indexOf(scope.y(datum)), this])
 				});
 			 
 			 // Update value labels
-			 d3.select(this).selectAll(".vz-bar-label")
+			 d3.select(this).selectAll('.vz-bar-label')
 				.style('display', function (d, i) {
 					var datum = d.data['series' + i].data;
 					return viz.getStyle('value-label-show', [datum, i, scope.xScale.domain().indexOf(scope.x(datum)), this]) ? 'block' : 'none'
 				})
 				.style('text-anchor', 'start')
-				.style("font-weight", function (d, i) {
+				.style('font-weight', function (d, i) {
 					var datum = d.data['series' + i].data;
 					return viz.getStyle('value-label-font-weight', [datum, i, scope.xScale.domain().indexOf(scope.x(datum)), this])
 				})
-				.style("fill", function (d, i) {
+				.style('fill', function (d, i) {
 					var datum = d.data['series' + i].data;
 					return viz.getStyle('value-label-color', [datum, i, scope.xScale.domain().indexOf(scope.x(datum)), this])
 				})
-				.style("font-size", function (d, i) {
+				.style('font-size', function (d, i) {
 					var datum = d.data['series' + i].data;
-					return viz.getStyle('value-label-font-size', [datum, i, scope.xScale.domain().indexOf(scope.x(datum)), this]) + "px"
+					return viz.getStyle('value-label-font-size', [datum, i, scope.xScale.domain().indexOf(scope.x(datum)), this]) + 'px'
 				})
 				.attr('dx', function (d, i) {
 					var datum = d.data['series' + i].data;
@@ -672,15 +730,15 @@ vizuly2.viz.BarChart = function (parent) {
 		 });
 		
 		// Update axis fonts
-		selection.selectAll(".vz-bottom-axis text, .vz-left-axis text")
-		 .style("font-weight", function () {
+		selection.selectAll('.vz-bottom-axis text, .vz-left-axis text')
+		 .style('font-weight', function () {
 			 return viz.getStyle('axis-font-weight', arguments)
 		 })
-		 .style("font-size", function (d, i) {
-			 return viz.getStyle('axis-font-size', arguments) + "px"
+		 .style('font-size', function (d, i) {
+			 return viz.getStyle('axis-font-size', arguments) + 'px'
 		 });
 		
-		selection.selectAll(".vz-bottom-axis text")
+		selection.selectAll('.vz-bottom-axis text')
 		 .style('display', function () {
 			 return viz.getStyle('x-axis-label-show', arguments) ? 'block' : 'none'
 		 })
@@ -690,9 +748,9 @@ vizuly2.viz.BarChart = function (parent) {
 		 .style('fill', function () {
 			 return viz.getStyle('x-axis-label-color', arguments)
 		 })
-		 .style("text-anchor", "middle")
+		 .style('text-anchor', 'middle')
 		
-		selection.selectAll(".vz-left-axis text")
+		selection.selectAll('.vz-left-axis text')
 		 .style('display', function () {
 			 return viz.getStyle('y-axis-label-show', arguments) ? 'block' : 'none'
 		 })
@@ -704,17 +762,17 @@ vizuly2.viz.BarChart = function (parent) {
 		 })
 		
 		// Update the bottom axis
-		selection.selectAll(".vz-bottom-axis line, .vz-left-axis line")
-		 .style("stroke", function () {
+		selection.selectAll('.vz-bottom-axis line, .vz-left-axis line')
+		 .style('stroke', function () {
 			 return viz.getStyle('axis-stroke')
 		 })
-		 .style("stroke-width", 1)
-		 .style("opacity", function () {
+		 .style('stroke-width', 1)
+		 .style('opacity', function () {
 			 return viz.getStyle('axis-opacity')
 		 })
 		
-		selection.selectAll(".vz-left-axis").attr("font-family", null)
-		selection.selectAll(".vz-bottom-axis").attr("font-family", null)
+		selection.selectAll('.vz-left-axis').attr('font-family', null)
+		selection.selectAll('.vz-bottom-axis').attr('font-family', null)
 		selection.selectAll('.vz-left-axis path.domain').style('display', 'none');
 		selection.selectAll('.vz-bottom-axis path.domain').style('display', 'none');
 		selection.selectAll('.vz-left-axis line').style('display', 'none');
@@ -729,13 +787,13 @@ vizuly2.viz.BarChart = function (parent) {
 		
 		//Making style and color changes to our bar for the <code>mouseover</code>.
 		d3.select(bar)
-		 .style("fill", function (d, i) {
+		 .style('fill', function (d, i) {
 			 return viz.getStyle('bar-fill-over', arguments)
 		 })
-		 .style("fill-opacity", function (d, i) {
+		 .style('fill-opacity', function (d, i) {
 			 return viz.getStyle('bar-fill-opacity-over', arguments)
 		 })
-		 .style("stroke", function (d, i) {
+		 .style('stroke', function (d, i) {
 			 return viz.getStyle('bar-stroke-over', arguments)
 		 })
 		
@@ -743,13 +801,12 @@ vizuly2.viz.BarChart = function (parent) {
 		d3.select(leftAxis
 		 .selectAll('.tick text').nodes()[groupIndex])
 		 .transition()
-		 .style("font-size", function () {
-			 return viz.getStyle('axis-font-size') * 1.2 + "px"
+		 .style('font-size', function () {
+			 return viz.getStyle('axis-font-size') * 1.2 + 'px'
 		 })
-		 .style("font-weight", 700)
-		 .style("text-decoration", "underline")
-		 .style("fill-opacity", 1)
-		 .style("opacity", 1);
+		 .style('font-weight', 700)
+		 .style('fill-opacity', 1)
+		 .style('opacity', 1);
 		
 		viz.showDataTip(bar, d, i);
 		
@@ -761,19 +818,19 @@ vizuly2.viz.BarChart = function (parent) {
 		var groupIndex = scope.yScale.domain().indexOf(scope.y(d))
 		
 		d3.select(bar)
-		 .style("fill", function (d) {
+		 .style('fill', function (d) {
 			 var datum = d.data['series' + i].data;
 			 return viz.getStyle('bar-fill', [datum, i, scope.yScale.domain().indexOf(scope.y(datum)), this])
 		 })
-		 .style("fill-opacity", function (d) {
+		 .style('fill-opacity', function (d) {
 			 var datum = d.data['series' + i].data;
 			 return viz.getStyle('bar-fill-opacity', [datum, i, scope.yScale.domain().indexOf(scope.y(datum)), this])
 		 })
-		 .style("stroke", function (d, i) {
+		 .style('stroke', function (d, i) {
 			 var datum = d.data['series' + i].data;
 			 return viz.getStyle('bar-stroke', [datum, i, scope.yScale.domain().indexOf(scope.y(datum)), this])
 		 })
-		 .style("stroke-opacity", function (d, i) {
+		 .style('stroke-opacity', function (d, i) {
 			 var datum = d.data['series' + i].data;
 			 return viz.getStyle('bar-stroke-opacity', [datum, i, scope.yScale.domain().indexOf(scope.y(datum)), this])
 		 })
@@ -781,16 +838,16 @@ vizuly2.viz.BarChart = function (parent) {
 		d3.select(leftAxis
 		 .selectAll('.tick text').nodes()[groupIndex])
 		 .transition()
-		 .style("font-size", function () {
-			 return viz.getStyle('axis-font-size') + "px"
+		 .style('font-size', function () {
+			 return viz.getStyle('axis-font-size') + 'px'
 		 })
-		 .style("fill", function () {
+		 .style('fill', function () {
 			 return viz.getStyle('y-axis-label-color', arguments)
 		 })
-		 .style("font-weight", function (d, i) {
+		 .style('font-weight', function (d, i) {
 			 return viz.getStyle('axis-font-weight', arguments)
 		 })
-		 .style("text-decoration", null)
+		 .style('text-decoration', null)
 		
 		viz.removeDataTip();
 		
@@ -804,7 +861,7 @@ vizuly2.viz.BarChart = function (parent) {
 		 '<div class="vz-tip-header3" style="font-size:12px;"> HEADER3 </div>';
 		
 		var h1 = scope.y(d);
-		var h2 = scope.x(d);
+		var h2 = scope.labelFormat(scope.x(d));
 		var h3 = scope.seriesLabel(d);
 		
 		html = html.replace("HEADER1", h1);
@@ -815,17 +872,6 @@ vizuly2.viz.BarChart = function (parent) {
 		
 		return [(Number(x) + Number(d3.select(e).attr('width'))), y - 50]
 	}
-	
-	function styles_getDropShadow() {
-		var w = viz.width();
-		return "url(" + vizuly2.svg.filter.dropShadow(
-		 viz,
-		 w / 300,
-		 w / 300,
-		 w / 200) + ")";
-	}
-	
-	initialize();
 	
 	// Returns our viz component
 	return viz;

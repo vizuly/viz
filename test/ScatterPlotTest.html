@@ -20,7 +20,7 @@
 
 <!-- Our main content container-->
 <div class="container" style="width:100%;">
-    <div id="viz_container" class="z-depth-3" style="width:1000px; height:600px; border-radius:10px; overflow:hidden">
+    <div id="viz_container" class="z-depth-3" style="width:600px; height:600px; border-radius:10px; overflow:hidden">
     </div>
 </div>
 
@@ -36,23 +36,6 @@
 	// our radial components and an array to hold them
 	var viz = vizuly2.viz.ScatterPlot(document.getElementById("viz_container"));
 
-	// This example uses two data sources.  One is static and one is live
-	// Each data source has different payload structures.  We abstract the required properties for us to visualize into
-	// 'staticData' and 'liveData' objects which we store in the 'sources' object.  This allows us to easily toggle between them.
-
-
-	// Test data
-    /*
-	var staticData = {
-		name: "can_nam",
-		date: "exp_dat",
-		dateParser: d3.time.format("%m/%d/%Y").parse,
-		amount: "exp_amo",
-		com_nam: "spe_nam",
-		pty: "can_par_aff",
-		url: "data/scatter_expenditure.csv"
-	};
-*/
 	var data;
 
 	var initialize = function () {

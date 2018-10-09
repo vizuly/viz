@@ -11,7 +11,8 @@
 		}, options);
 
 		return this.each(function() {
-			cssmenu.prepend('<div id="menu-button"><img src="demo/scripts/vizuly_logo_16x16.png" class="logo">' + settings.title + '</div>');
+			cssmenu.prepend('<div id="menu-button"><span id="vizuly-logo"><img src="demo/scripts/vizuly_logo_16x16.png" class="logo">' + settings.title + '</span></div>');
+			//cssmenu.prepend('<div id="menu-button">' + settings.title + '</div>');
 
 			$(this).find("#menu-button").on('click', function(){
 				toggleMenu(this);
@@ -43,7 +44,7 @@
 				$(this).addClass("selected");
 				$(this).parent().parent().find(".setting").text($(this).text());
 
-				if (cssmenu.find('#menu-button').hasClass('menu-opened') && $( window ).width() <= 800) {
+				if (cssmenu.find('#menu-button').hasClass('menu-opened') && $( window ).width() <= 700) {
 					toggleMenu();
 				}
 			});
@@ -88,7 +89,7 @@
 
 			resizeFix = function() {
 
-				if ($( window ).width() > 800 ) {
+				if ($( window ).width() > 700 ) {
 					cssmenu.find('.main-menu').show().addClass("open");
 				}
 				else {
@@ -107,93 +108,160 @@
 
 function createDemoMenu(options, w, h, title, styles) {
 	
-	if (styles) {
-		this.styles = styles
-		var styleOption = {};
-		styleOption.name = 'Style Explorer'
-		styleOption.callback = function () {};
-		var values = [];
-		values.push({'label': 'Hover on a style', 'value': 'test', 'selected':true})
-		Object.keys(styles).forEach(function (key) {
-			var value = {'label': key, 'value': styles[key]}
-			values.push(value);
-		})
-		styleOption.values = values;
-		demoOptions.splice(0, 0, styleOption)
-	}
-
+	var useInDocs = (window.location.href.indexOf('useInDocs') > -1);
+	
+	var useInStore = (window.location.href.indexOf('useInStore') > -1);
+	
 	// Set the size of our container element.
 	var menu = d3.select('body').insert('div').attr('id','cssmenu').append('ul').attr('class','main-menu');
+	
+	d3.select('.container').insert('div','#viz_container')
+	 .attr('id','currentStyle')
+	 .attr('class','styleCode');
+	
+	if (useInDocs == true) {
+		d3.select(document.head)
+		 .append('link')
+		 .attr('rel','stylesheet')
+		 .attr('type','text/css')
+		 .attr('href','demo/scripts/cssmenu_light.css')
+	}
+	
+	if (styles) {
 
+		var keys = Object.keys(styles).sort();
+		
+		if (useInDocs == true) {
+			
+			d3.select('#stylesList').style('margin-left','0px')
+			d3.selectAll('.container').style('left','230px')
+		
+			var styleList = d3.select('body').insert('div', '.container')
+			 .attr('id','styleList');
+			
+			styleList.append('div')
+			 .attr('class','styleTitle')
+			 .text('STYLE EXPLORER');
+			
+			styleList.append('div')
+			 .attr('class','styleComment')
+			 .text('mouse over any style to see it in action')
+			
+			d3.select('#viz_container')
+			 .style('width',null)
+			
+			d3.selectAll('.container')
+			 .style('position', 'absolute')
+			 .style('left', '260px')
+			 .style('right', '0px')
+			 .style('width',null)
+			
+			styleList.selectAll('.style').data(keys)
+			 .enter()
+			 .append('div')
+			 .attr('class', 'styleCode')
+			 .text(function (d) { return d })
+		}
+		else {
+			var styleOption = {};
+			styleOption.name = 'Style Explorer'
+			styleOption.callback = function () {};
+			var values = [];
+			values.push({'label': 'Choose a Style', 'value': 'test', 'selected':true})
+			values.push({'label': 'Clear Styles', 'value': 'test'})
+			keys.forEach(function (key) {
+				var value = {'label': key, 'value': styles[key]}
+				values.push(value);
+			})
+			styleOption.values = values;
+			demoOptions.splice(0, 0, styleOption)
+		}
+		
+	}
+	
 	options.forEach(function (option) {
-
+		
 		var menuItem = menu.append('li').attr('class','active');
-
+		
 		var a = menuItem.append('a');
 		a.append('span').text(option.name);
 		a.append('br');
 		a.append('span').attr('class','setting');
-
+		
 		var list = menuItem.append('ul').attr('id','menu-' + String(option.name).replace(/ /g,'')).attr('class','options').attr('callback',option.callback.name);
-
 		option.values.forEach(function (value) {
 			list.append('li').attr("class",function() { return (value.selected) ? 'selected' : null }).attr('item_value',value.value).append('a').text(value.label);
 		})
 	})
 	
 	d3.select('#menu-Display')
-		.insert('li')
-		.attr('item_value', w + ',' + h)
-		.attr('class', 'selected')
-		.append('a').text(w + 'px - ' + h + 'px');
-
+	 .insert('li')
+	 .attr('item_value', w + ',' + h)
+	 .attr('class', 'selected')
+	 .append('a').text(w + 'px - ' + h + 'px');
+	
 	$('#cssmenu').menumaker({
 		title: String(title).toUpperCase(),
 		format: 'multitoggle'
 	});
 	
-	//Alter Style Explorer
-	var styleMenu = d3.selectAll('#menu-StyleExplorer');
+	if (useInStore == true) {
+		d3.selectAll('#vizuly-logo').remove();
+	}
 	
-	if (styles) {
+	if (useInDocs == false && styles) {
+		//Alter Style Explorer
+		var styleMenu = d3.selectAll('#menu-StyleExplorer');
+		d3.select(styleMenu.node().parentNode).style('width', '160px').attr('id','styleMenu');
 		
-		d3.select(styleMenu.node().parentNode).style('width', '200px').attr('id','styleMenu')
 		styleMenu.selectAll('li a')
 		 .style('width','200px')
-		 .on('mouseover', function (d,i) { setStyle(options[0].values[i].label) })
-		 .on('mouseout', function (d,i) { removeStyle(options[0].values[i].label) })
+		 .on('click', function (d, i) { setStyle(options[0].values[i].label)  })
+		// .on('mouseover', function (d,i) { setStyle(options[0].values[i].label) })
+		// .on('mouseout', function (d,i) { removeStyle(options[0].values[i].label) })
 		
 		styleMenu.selectAll('li')
 		 .style('height','25px')
-		
-		if (window.location.href.indexOf('themeLight') > -1) {
-			console.log("themed");
-			d3.select(document.head)
-			 .append('link')
-			 .attr('rel','stylesheet')
-			 .attr('type','text/css')
-			 .attr('href','demo/scripts/cssmenu_light.css')
-		}
 	}
 	
+	var currentStyle;
+	
 	function setStyle(d) {
-		var value;
+		if (d == "Choose a Style") return;
 		
-		if (Array.isArray(styles[d])) {
-			styles[d].forEach(function (d) {
-				viz.style(d.name, d.value)
+		viz.clearStyles();
+		
+		if (d == 'Clear Styles') {
+			viz.update();
+			d3.select('#currentStyle').text('')
+			return;
+		}
+		
+		if (d == currentStyle) {
+			removeStyle(d);
+			currentStyle = null;
+			return;
+		}
+		
+		var value;
+		currentStyle = d;
+		
+		if (styles[d] === Object(styles[d])) {
+			Object.keys(styles[d]).forEach(function (key) {
+				if(!value) value = styles[d][key];
+				viz.style(key, styles[d][key])
 			})
-			value = encodeStyleValue(styles[d][0].value)
 		}
 		else {
 			viz.style(d, styles[d])
 			value = encodeStyleValue(styles[d]);
 		}
 		viz.duration(0).update().duration(500);
-		d3.select('#styleCode').text("viz.style('" + d + "', " + value + ")")
+		d3.select('#currentStyle').text("viz.style('" + d + "', " + value + ")")
 	}
 	
 	function removeStyle(d) {
+		
 		if (Array.isArray(styles[d])) {
 			styles[d].forEach(function (d) {
 				viz.style(d.name, null)
@@ -202,8 +270,19 @@ function createDemoMenu(options, w, h, title, styles) {
 		else {
 			viz.style(d, null)
 		}
-		viz.applyStyles(currentStyle).duration(0).update().duration(500);
-		d3.select('#styleCode').text('');
+		
+		if (currentStyle) {
+			viz.applyStyles(currentStyle);
+			
+			if (viz.updateStyles) {
+				viz.updateStyles();
+			}
+			else {
+				viz.duration(0).update().duration(500);
+			}
+		}
+		
+		d3.select('#currentStyle').text('');
 	}
 	
 	function encodeStyleValue(value) {

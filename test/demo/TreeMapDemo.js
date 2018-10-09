@@ -1,5 +1,22 @@
-// html element that holds the chart
-var viz_container;
+var styles = {
+	'background-gradient-top': '#0000FF',
+	'background-gradient-bottom': '#0000FF',
+	'cell-corner-radius': 0,
+	'cell-padding': 15,
+	'cell-padding-top': 20,
+	'cell-padding-inner': 15,
+	'cell-font-size': 20,
+	'cell-label-color': '#0000FF',
+	'cell-label-opacity': .5,
+	'cell-fill': '#0000FF',
+	'cell-stroke': '#0000FF',
+	'cell-stroke-width': {'cell-stroke-width': 2, 'cell-stroke': '#0000FF'},
+	'cell-stroke-opacity': {'cell-stroke-opacity': 1, 'cell-stroke': '#0000FF'},
+	'cell-fill-opacity': .25,
+	'header-font-size': 12,
+	'header-label-color': '#0000FF',
+	'group-label-color': '#0000FF'
+}
 
 //This changes the size of the component by adjusting the radius and width/height;
 function changeSize(val) {
@@ -25,21 +42,8 @@ function runDemo() {
 		}
 	]
 
-		var screenWidth;
-		var screenHeight = 600;
+	 createDemoMenu(demoOptions, 600, 600, 'vizuly - TreeMap', styles);
 
-		var rect;
-		if (self==top) {
-			rect = document.body.getBoundingClientRect();
-		}
-		else {
-			rect =  parent.document.body.getBoundingClientRect();
-		}
-
-		//Set display size based on window size.
-		screenWidth = (rect.width < 960) ? Math.round(rect.width*.95) : Math.round((rect.width - 210) *.95)
-		createDemoMenu(demoOptions, screenWidth, screenHeight, 'vizuly - TreeMap');
-
-		changeSize(screenWidth + ',' + screenHeight);
+		changeSize(600 + ',' + 600);
 }
 

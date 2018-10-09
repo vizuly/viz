@@ -18,9 +18,14 @@
 
 <body>
 
+<!--div id="stylesList" style="width:260px; top:100px; margin-left:30px; position:absolute;">
+    <div style="font-weight:bold">STYLE EXPLORER</div>
+    <div style="font-style:italic; font-size:12px; margin-bottom:20px">mouse over any style to see it in action</div>
+</div-->
+
 <!-- Our main content container-->
-<div class="container" style="width:100%;">
-    <div id="viz_container" class="z-depth-3" style="width:1000px; height:600px; border-radius:10px; overflow:hidden">
+<div class="container" style="width:100%">
+    <div id="viz_container" class="z-depth-3" style="width:600px; height:600px; border-radius:10px; overflow:hidden">
     </div>
 </div>
 
@@ -61,6 +66,7 @@
            //  .groupPadding(1)
              .on('mouseover', onMouseOver)
              .on('mouseout', onMouseOut)
+             .on('initialized',function () { console.log("INTIALIXED" + this.id())});
 
             viz.update();
 

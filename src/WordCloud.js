@@ -16,9 +16,6 @@
 //
 vizuly2.viz.WordCloud = function (parent) {
 	
-	// This is the object that provides pseudo "protected" properties that the vizuly2.viz function helps create
-	var scope = {};
-	
 	var d3 = vizuly2.d3;
 	var d3v3 = vizuly2.d3v3;
 	
@@ -39,15 +36,24 @@ vizuly2.viz.WordCloud = function (parent) {
 	};
 	
 	var styles = {
-		'background-gradient-top': '#FFF',
-		'background-gradient-bottom': '#FFF',
+		'background-color-top': '#FFF',
+		'background-color-bottom': '#DDD',
 		'text-fill-colors': [ '#1f77b4', '#aec7e8', '#ff7f0e', '#ffbb78', '#2ca02c', '#98df8a', '#d62728', '#ff9896', '#9467bd', '#c5b0d5', '#8c564b', '#c49c94', '#e377c2', '#f7b6d2', '#7f7f7f', '#c7c7c7', '#bcbd22', '#dbdb8d', '#17becf', '#9edae5'],
 		'text-color': function (d,i) { var colors = this.getStyle('text-fill-colors'); return colors[i % colors.length] },
 		'font-family': 'Impact'
 	}
 	
-	// Create our viz and type it
-	var viz = vizuly2.core.component(parent, scope, properties, styles);
+	var events = ['mouseover', 'mouseout', 'click']
+	
+	// This is the object that provides pseudo "protected" properties that the vizuly.viz function helps create
+	var scope = {};
+	scope.initialize = initialize;
+	scope.properties = properties;
+	scope.styles = styles;
+	scope.events = events;
+	
+	// Create our Vizuly component
+	var viz = vizuly2.core.component(parent, scope);
 	
 	var size;           // Holds the 'size' variable as defined in viz.util.size()
 	
@@ -71,7 +77,7 @@ vizuly2.viz.WordCloud = function (parent) {
 		
 		wordLayout.on('end', updateCloud);
 		
-		scope.dispatch.apply('initialize', viz);
+		scope.dispatch.apply('initialized', viz);
 	}
 	
 	
@@ -117,7 +123,7 @@ vizuly2.viz.WordCloud = function (parent) {
 		 .fontSize(function(d) { return fontScale(+d.value); } )
 		
 		// Tell everyone we are done making our measurements
-		scope.dispatch.apply('measure', viz);
+		scope.dispatch.apply('measured', viz);
 		
 	}
 	
@@ -155,7 +161,7 @@ vizuly2.viz.WordCloud = function (parent) {
 		 .on("mouseout",function (d,i) { scope.dispatch.apply('mouseout',viz,[this, d, i])})
 		 .on("click",function (d,i) { scope.dispatch.apply('click',viz,[this, d, i])});
 		
-		scope.dispatch.apply('update', viz);
+		scope.dispatch.apply('updated', viz);
 	}
 	
 	// This is our public update call that all vizuly2.viz's implement
@@ -168,7 +174,7 @@ vizuly2.viz.WordCloud = function (parent) {
 	
 	// styles and styles
 	var stylesCallbacks = [
-		{on: 'update.styles', callback: applyStyles},
+		{on: 'updated.styles', callback: applyStyles},
 		{on: 'mouseover.styles', callback: styles_onMouseOver},
 		{on: 'mouseout.styles', callback: styles_onMouseOut}
 	];
@@ -183,7 +189,7 @@ vizuly2.viz.WordCloud = function (parent) {
 		// Grab the d3.selection from the viz so we can operate on it.
 		var selection = scope.selection;
 		
-		styles_backgroundGradient = vizuly2.svg.gradient.blend(viz, viz.getStyle('background-gradient-bottom'), viz.getStyle('background-gradient-top'));
+		styles_backgroundGradient = vizuly2.svg.gradient.blend(viz, viz.getStyle('background-color-bottom'), viz.getStyle('background-color-top'));
 		
 		// Update the background
 		selection.selectAll(".vz-background").style("fill", function () {
@@ -216,9 +222,7 @@ vizuly2.viz.WordCloud = function (parent) {
 	function restoreElements() {
 		plot.selectAll('.vz-wordcloud-word').transition('fade').style('opacity',1)
 	}
-	
-	
-	initialize();
+
 	
 	// Returns our viz component :)
 	return viz;

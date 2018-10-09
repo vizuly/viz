@@ -3,25 +3,100 @@ var viz_container;
 
 var businessColors = d3.scaleOrdinal(d3.schemeCategory20);
 
-var fillColors = [
-	['#C50A0A', '#C2185B', '#F57C00', '#FF9800', '#FFEB3B'],
-	['#89208F', '#C02690', '#D93256', '#DB3D0C', '#B2180E'],
-	['#FFF', '#FFF', '#FFF', '#FFF', '#FFF'],
-	['#D1F704', '#D1F704', '#D1F704', '#D1F704', '#D1F704']
-];
+var styles = {
+	'background-top': '#0000FF',
+	'background-bottom': '#0000FF',
+	'y-axis-label-show': false,
+	'x-axis-label-show': false,
+	'y-axis-font-style': 'italic',
+	'x-axis-font-style': 'italic',
+	'y-axis-label-color': '#0000FF',
+	'x-axis-label-color': '#0000FF',
+	'axis-stroke': '#0000FF',
+	'axis-opacity': 1,
+	'axis-font-size': 16,
+	'node-stroke': '#0000FF',
+	'node-stroke-width': [{'name': 'node-stroke-width', 'value': 4}, {'name': 'node-stroke', 'value': '#0000FF'}],
+  'node-fill': '#0000FF',
+	'node-fill-opacity': 1,
+	'node-stroke-opacity': 1,
+	'node-stroke-over':  {'node-stroke-over': '#FFFF00', 'node-stroke': '#FFFF00', 'node-stroke-opacity': 1},
+	'node-stroke-width-over': {'node-stroke-width-over': 4, 'node-stroke-width': 4, 'node-stroke': '#FFFF00', 'node-stroke-opacity': 1},
+	'node-stroke-opacity-over': {'node-stroke-opacity-over': 1, 'node-stroke': '#FFFF00', 'node-stroke-opacity': 1},
+	'node-fill-over': {'node-fill-over': '#FFFF00', 'node-stroke-opacity': 1},
+	'node-fill-opacity-over': {'node-fill-opacity-over': 1, 'node-fill-opacity': 1}
+};
 
-var strokeColors = [
-	['#FFA000', '#FF5722', '#F57C00', '#FF9800', '#FFEB3B'],
-	['#CD57A4', '#B236A3', '#FA6F7F', '#FA7C3B', '#E96B6B'],
-	['#0b4ca1', '#0b4ca1', '#0b4ca1', '#0b4ca1', '#0b4ca1'],
-	['#FFF', '#FFF', '#FFF', '#FFF', '#FFF']
-];
 
-var fillTopColors = ['#474747', '#390E1D', '#29A3E2', '#474747'];
+var defaultStyles = {
+	'background-top': '#FFF',
+	'background-bottom': '#DDD',
+	'axis-stroke': '#777',
+	'y-axis-label-color': '#444',
+	'x-axis-label-color': '#444',
+	'node-stroke': '#777',
+	'node-fill-opacity': .7,
+	'node-fill': function (d, i) {
+		var axisColors = ['#bd0026', '#fecc5c', '#fd8d3c', '#f03b20', '#B02D5D', '#9B2C67', '#982B9A', '#692DA7', '#5725AA', '#4823AF', '#d7b5d8', '#dd1c77', '#5A0C7A', '#5A0C7A'];
+		return axisColors[i % axisColors.length]
+	}
+}
 
-var fillBottomColors = ['#000000','#92203A','#0c54b6','#000000'];
+var fireStyles = {
+	'background-top': '#474747',
+	'background-bottom': '#000000',
+	'node-fill': function (d,i) {
+		var colors = ['#C50A0A', '#C2185B', '#F57C00', '#FF9800', '#FFEB3B'];
+		return colors[i % colors.length];
+	},
+	'node-stroke': '#FFFF00',
+	'axis-stroke': '#FFF',
+	'node-fill-opacity': .9,
+	'y-axis-label-color': '#FFF',
+	'x-axis-label-color': '#FFF'
+}
 
-var labelColors = ['#FFF', '#D8F433', '#FFF', '#FFF']
+var sunsetStyles = {
+	'background-top': '#390E1D',
+	'background-bottom': '#92203A',
+	'node-fill': function (d,i) {
+		var colors = ['#89208F', '#C02690', '#D93256', '#DB3D0C', '#B2180E'];
+		return colors[i % colors.length];
+	},
+	'node-stroke': '#FFF',
+	'node-fill-opacity': .9,
+	'axis-stroke': '#FFF',
+	'y-axis-label-color': '#FFF',
+	'x-axis-label-color': '#FFF'
+}
+
+var oceanStyles = {
+	'background-top': '#29A3E2',
+	'background-bottom': '#0c54b6',
+	'node-fill': '#FFF',
+	'node-stroke': '#FFF',
+	'axis-stroke': '#FFF',
+	'node-fill-opacity': .5,
+  'y-axis-label-color': '#FFF',
+  'x-axis-label-color': '#FFF'
+}
+
+var neonStyles = {
+	'background-top': '#474747',
+	'background-bottom': '#000',
+	'node-fill': function (d,i) {
+		var colors = ['#D1F704', '#D1F704', '#D1F704', '#D1F704', '#D1F704'];
+		return colors[i % colors.length];
+	},
+	'node-stroke': function (d,i) {
+		var colors = ['#D1F704', '#D1F704', '#D1F704', '#D1F704', '#D1F704'];
+		return colors[i % colors.length];
+	},
+  'y-axis-label-color': '#FFF',
+  'x-axis-label-color': '#FFF',
+	'axis-stroke': '#FFF'
+}
+
 
 //This changes the size of the component by adjusting the radius and width/height;
 function changeSize(val) {
@@ -31,29 +106,9 @@ function changeSize(val) {
 }
 
 function changeStyles(val) {
-	
-	if (val === 'business') {
-		viz.style('node-fill',function (d,i) { return businessColors(i)})
-		 .style('node-stroke',function (d,i) { return businessColors(i)})
-		 .style('node-fill-opacity',1)
-		 .style('fill-top','#EFEFEF')
-		 .style('fill-bottom','#DDD')
-		 .style('label-color',"#000")
-		 .style('axis-stroke',"#000")
-		 .update();
-	}
-	else {
-		viz
-		 .style('node-fill',function (d,i) { return fillColors[Number(val)][i % 5]; })
-		 .style('node-stroke',function (d,i) { return fillColors[Number(val)][i % 5]; })
-		 .style('fill-top',fillTopColors[Number(val)])
-		 .style('fill-bottom',fillBottomColors[Number(val)])
-		 .style('node-fill-opacity',null)
-		 .style('axis-stroke', "#FFF")
-		 .style('label-color', labelColors[Number(val)])
-		 .update();
-	}
-	
+	var styles = this[val];
+	viz.applyStyles(styles);
+	viz.update();
 }
 
 function changeRadius(val) {
@@ -83,11 +138,11 @@ function runDemo() {
 		{
 			'name': 'Theme',
 			'values': [
-				{'label': 'Fire', 'value': '0'},
-				{'label': 'Sunset', 'value': '1'},
-				{'label': 'Ocean', 'value': '2', 'selected': true},
-				{'label': 'Neon', 'value': '3'},
-				{'label': 'Business', 'value': 'business'}
+				{'label': 'Default', 'value': 'defaultStyles','selected': true},
+				{'label': 'Fire', 'value': 'fireStyles'},
+				{'label': 'Sunset', 'value': 'sunsetStyles'},
+				{'label': 'Ocean', 'value': 'oceanStyles'},
+				{'label': 'Neon', 'value': 'neonStyles'}
 			],
 			'callback': changeStyles
 		},
@@ -109,22 +164,9 @@ function runDemo() {
 		}
 	]
 
-		var screenWidth;
-		var screenHeight = 600;
+	
+		createDemoMenu(demoOptions, 600, 600, 'vizuly - scatter plot', styles);
 
-		var rect;
-		if (self==top) {
-			rect = document.body.getBoundingClientRect();
-		}
-		else {
-			rect =  parent.document.body.getBoundingClientRect();
-		}
-
-		//Set display size based on window size.
-		screenWidth = (rect.width < 960) ? Math.round(rect.width*.95) : Math.round((rect.width - 210) *.95)
-		createDemoMenu(demoOptions, screenWidth, screenHeight, 'vizuly - scatter plot');
-
-		changeSize(screenWidth + ',' + screenHeight);
-		changeStyles(1)
+		changeSize('600,600');
 }
 

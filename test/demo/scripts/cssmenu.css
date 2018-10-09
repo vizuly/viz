@@ -1,13 +1,40 @@
 @import url(http://fonts.googleapis.com/css?family=Raleway:400,700);
 @import url(http://fonts.googleapis.com/css?family=Material+Icons);
 
-.style {
+
+
+#styleList {
+  position:absolute;
+  width:260px;
+  top:100px;
+  margin-left:30px;
+}
+
+.styleTitle {
+  font-weight:bold;
+}
+
+.styleComment {
+  font-style:italic;
+  font-size:12px;
+  margin-bottom:20px;
+}
+
+#currentStyle {
+  position: relative;
+  height: 20px;
+  text-align: center;
+}
+
+.styleCode {
+  cursor:pointer;
   font-family: 'bt_mono', monospace;
   color: #5f5c63;
   font-size: 14px;
+  margin-bottom:5px;
 }
 
-.style:hover {
+.styleCode:hover {
   color: #0095dd;
 }
 
@@ -228,13 +255,13 @@
   top: 17px;
   height: 0;
 }
-@media all and (max-width: 800px),
-only screen and (-webkit-min-device-pixel-ratio: 2) and (max-width: 800px),
-only screen and (min--moz-device-pixel-ratio: 2) and (max-width: 800px),
-only screen and (-o-min-device-pixel-ratio: 2/1) and (max-width: 800px),
-only screen and (min-device-pixel-ratio: 2) and (max-width: 800px),
-only screen and (min-resolution: 192dpi) and (max-width: 800px),
-only screen and (min-resolution: 2dppx) and (max-width: 800px) {
+@media all and (max-width: 700px),
+only screen and (-webkit-min-device-pixel-ratio: 2) and (max-width: 700px),
+only screen and (min--moz-device-pixel-ratio: 2) and (max-width: 700px),
+only screen and (-o-min-device-pixel-ratio: 2/1) and (max-width: 700px),
+only screen and (min-device-pixel-ratio: 2) and (max-width: 700px),
+only screen and (min-resolution: 192dpi) and (max-width: 700px),
+only screen and (min-resolution: 2dppx) and (max-width: 700px) {
 
   #cssmenu #styleMenu {
     display:none;
@@ -246,6 +273,7 @@ only screen and (min-resolution: 2dppx) and (max-width: 800px) {
 
   #cssmenu {
     width: 100%;
+    background: #fff;
   }
   #cssmenu ul {
     width: 100%;

@@ -21,7 +21,7 @@
 vizuly2.viz.RadarChart = function (parent) {
 	
 	// This is the object that provides pseudo "protected" properties that the vizuly.viz function helps create
-	var scope = {};
+	
 	
 	/** @lends vizuly2.viz.Corona.properties */
 	var properties = {
@@ -31,14 +31,15 @@ vizuly2.viz.RadarChart = function (parent) {
 		 */
 		"data": null,                          //Expects array of data - assumes identical length and xScale values;
 		"margin": {                             // Our margin object
-			"top": "10%",                        // Top margin
-			"bottom": "10%",                     // Bottom margin
-			"left": "10%",                       // Left margin
-			"right": "10%"                       // Right margin
+			"top": "12%",                        // Top margin
+			"bottom": "12%",                     // Bottom margin
+			"left": "15%",                       // Left margin
+			"right": "15%"                       // Right margin
 		},
 		"duration": 500,                        // This the time in ms used for any component generated transitions
 		"width": 300,                           // Overall width of component
 		"height": 300,                          // Height of component
+		"dataTipRenderer": dataTipRenderer,
 		"labelRadiusFactor": 1.15,
 		"radiusScale": d3.scaleLinear(),      // Radius scale (defaults to linear)
 		"y": null,                             // Function to return 'y' value - cartesian y translates to distance from center in polar coordinates.
@@ -54,32 +55,41 @@ vizuly2.viz.RadarChart = function (parent) {
 	
 	var styles = {
 		'label-color': "#000",
-		'value-label-font-size': function (d,i) { return Math.max(8, Math.round(outerRadius / 15)) },
-		'color': "#02C3FF",
-		'background-gradient-top': "#FFF",
-		'background-gradient-bottom': "#EEE",
+		'background-color-top': "#FFF",
+		'background-color-bottom': "#EEE",
 		'line-stroke': function (d, i) {
 			return d3.interpolateViridis(i/scope.data.length);
 		},
 		'line-stroke-over': function (d, i) {
 			return d3.hsl(d3.interpolateViridis(i/scope.data.length)).darker();
 		},
-		'line-opacity': 0.8,
+		'line-stroke-opacity': 0.8,
 		'area-fill': function (d, i) {
 			return d3.interpolateViridis(i/scope.data.length);
 		},
 		'area-fill-opacity': .5,
-		'x-axis-font-weight': 200,
+		'area-fill-opacity-over': .8,
+		'x-axis-font-weight': 'normal',
 		'x-axis-line-stroke': "#777",
 		'x-axis-line-opacity': .5,
 		'y-axis-line-stroke': "#777",
 		'y-axis-line-opacity': .15,
-		'x-axis-font-size': function (d,i) { return Math.max(8, Math.round(outerRadius / 22)) }
+		'y-axis-fill': '#777',
+		'y-axis-fill-opacity': 0.05,
+		'x-axis-font-size': function (d,i) { return Math.max(11, Math.round(outerRadius / 22)) }
 	};
 	
+	var events = ['mouseover', 'mouseout','click', 'vertex_mouseover', 'vertex_mouseout']
 	
-	//Create our viz and type it
-	var viz = vizuly2.core.component(parent, scope, properties, styles);
+	// This is the object that provides pseudo "protected" properties that the vizuly.viz function helps create
+	var scope = {};
+	scope.initialize = initialize;
+	scope.properties = properties;
+	scope.styles = styles;
+	scope.events = events;
+	
+	// Create our Vizuly component
+	var viz = vizuly2.core.component(parent, scope);
 	
 	// Measurements
 	
@@ -98,8 +108,6 @@ vizuly2.viz.RadarChart = function (parent) {
 	//These are all d3.selection objects we use to insert and update svg elements into
 	var svg, g, xAxisPlot, yAxisPlot, plot, background, plotBackground, series, defs, pointHitArea;
 	
-	initialize();
-	
 	// Here we set up all of our svg layout elements using a 'vz-XX' class namespace.  This routine is only called once
 	// These are all place holder groups for the individual data driven display elements.   We use these to do general
 	// sizing and margin layout.  The all are referenced as D3 selections.
@@ -108,7 +116,7 @@ vizuly2.viz.RadarChart = function (parent) {
 		svg = scope.selection.append("svg").attr("id", scope.id).style("overflow", "visible").attr("class", "vizuly");
 		background = svg.append("rect").attr("class", "vz-background");
 		defs = vizuly2.core.util.getDefs(viz);
-		g = svg.append("g").attr("class", "vz-corona-viz");
+		g = svg.append("g").attr("class", "vz-radar-chart");
 		xAxisPlot = g.append("g").attr("class", "vz-xAxis-plot");
 		yAxisPlot = g.append("g").attr("class", "vz-yAxis-plot");
 		plot = g.append("g").attr("class", "vz-plot").attr("clip-path", "url(#" + scope.id + "_plotClipPath)");
@@ -121,7 +129,7 @@ vizuly2.viz.RadarChart = function (parent) {
 		scope.xAxis.tickFormat(scope.xAxisTickFormat);
 		
 		// Tell everyone we are done initializing.
-		scope.dispatch.apply('initialize', viz);
+		scope.dispatch.apply('initialized', viz);
 	}
 	
 	// The measure function performs any measurement or layout calcuations prior to making any updates to the SVG elements
@@ -133,10 +141,9 @@ vizuly2.viz.RadarChart = function (parent) {
 		// Get our size based on height, width, and margin
 		size = vizuly2.core.util.size(scope.margin, scope.width, scope.height, scope.parent);
 		
-		console.log("remove stacks from spider chart")
-		
 		// Prep data in format for stack
 		// This assumes all series share the same key value for the x-axis and are ordered accordingly.
+		// We won't actually use a stacked layout, but this keeps a consistent design pattern for radial charts.
 		stackSeries = [];
 		var stackKeys = [];
 		
@@ -245,7 +252,7 @@ vizuly2.viz.RadarChart = function (parent) {
 		tipRadius = Math.min(size.width / 50, size.height / 50);
 		
 		// Tell everyone we are done measuring.
-		scope.dispatch.apply('measure', viz);
+		scope.dispatch.apply('measured', viz);
 		
 	}
 	
@@ -274,29 +281,28 @@ vizuly2.viz.RadarChart = function (parent) {
 		background.attr("width", size.measuredWidth).attr("height", size.measuredHeight);
 		plot.style("width", size.width).style("height", size.height).attr("transform", "translate(" + (size.left + size.width / 2) + "," + (size.top + size.height / 2) + ")");
 		pointHitArea.style("width", size.width).style("height", size.height).attr("transform", "translate(" + size.left + "," + size.top + ")");
-		xAxisPlot.attr("transform", "translate(" + (size.left + size.width / 2) + "," + (size.height / 2 + size.top + 3) + ")");
-		yAxisPlot.attr("transform", "translate(" + (size.left + size.width / 2) + "," + (size.height / 2 + size.top + 3) + ")");
+		xAxisPlot.attr("transform", "translate(" + (size.left + size.width / 2) + "," + (size.height / 2 + size.top) + ")");
+		yAxisPlot.attr("transform", "translate(" + (size.left + size.width / 2) + "," + (size.height / 2 + size.top) + ")");
 		plotBackground.attr("width", size.width).attr("height", size.height);
 		
-		var seriesArea = series.selectAll(".vz-area").data(stackSeries);
+		var seriesArea = series.selectAll(".vz-radar-area").data(stackSeries);
 		seriesArea.exit().remove();
-		seriesArea = seriesArea.enter().append("path").attr("class", "vz-area").merge(seriesArea)
+		seriesArea = seriesArea
+		 .enter()
+		 .append("path")
+		 .attr("class", "vz-radar-area")
+		 .on("mouseover", function (d, i) {
+			 scope.dispatch.apply('mouseover', viz, [this, d, i]);
+		 })
+		 .on("mouseout", function (d, i) {
+			 scope.dispatch.apply('mouseout', viz, [this, d, i]);
+		 })
+		 .merge(seriesArea)
 		
 		seriesArea
 		 .transition()
 		 .duration(scope.duration)
 		 .attr("d", area)
-		
-		
-		var seriesLine = series.selectAll(".vz-line").data(stackSeries);
-		seriesLine.exit().remove();
-		seriesLine = seriesLine.enter().append("path").attr("class", "vz-line").merge(seriesLine)
-		
-		seriesLine
-		 .transition()
-		 .duration(scope.duration)
-		 .attr("d", line)
-		
 		
 		// Remove any point hit areas - we make new ones each time.
 		pointHitArea.selectAll(".vz-tip").remove();
@@ -308,23 +314,17 @@ vizuly2.viz.RadarChart = function (parent) {
 		// greatly speed up the rendering time and responsiveness of the chart
 		stackSeries.forEach(function (series, j) {
 			var points = pointHitArea.selectAll("vz-tip").data(series).enter()
-			 .append("g").attr("class", "vz-tip")
+			 .append("g").attr("class", "vz-tip series_" + j)
 			 .attr("transform", function (d, i) {
 				 var point = cartesianToPolar(d[1], d.data.x);
 				 return "translate(" + point.x + "," + point.y + ")"
 			 })
 			 .on("mouseover", function (d, i) {
-				 scope.dispatch.apply('mouseover', viz, [this, scope.data[j][i], i, j]);
-			 })
-			 .on("touchstart", function (d, i) {
-				 scope.dispatch.apply('mouseover', viz, [this, scope.data[j][i], i, j]);
+				 scope.dispatch.apply('vertex_mouseover', viz, [this, scope.data[j][i], i, j]);
 			 })
 			 .on("mouseout", function (d, i) {
-				 scope.dispatch.apply('mouseout', viz, [this, scope.data[j][i], i, j]);
+				 scope.dispatch.apply('vertex_mouseout', viz, [this, scope.data[j][i], i, j]);
 			 })
-			 .on("mousedown", function (d, i) {
-				 scope.dispatch.apply('mousedown', viz, [this, scope.data[j][i], i, j]);
-			 });
 			
 			points.each(function () {
 				var tip = d3.select(this);
@@ -339,39 +339,17 @@ vizuly2.viz.RadarChart = function (parent) {
 			
 		});
 		
-		
-		// We use these arc paths so labels can be created along each radial curve for the x axis
-		defs.selectAll(".vz-x-axis-arc-path").remove();
-		defs.selectAll(".vz-x-axis-arc-path")
-		 .data(xAxisTickData)
-		 .enter()
-		 .append("path")
-		 .attr("class", "vz-x-axis-arc-path")
-		 .attr("id", function (d, i) {
-			 return scope.id + "_x_text_arc_" + i;
-		 })
-		 .attr("d", function (d, i) {
-			 return vizuly2.svg.text.textArcPath(scope.outerRadius * 1.05, scope.xScale(scope.x(scope.data[0][i * xAxisTickStep])));
-		 });
-		
-		// Create xAxis Labels using the def arc paths we created above
-		xAxisPlot.selectAll(".vz-spider-x-axis-tick").remove();
-		var xTicks = xAxisPlot.selectAll(".vz-spider-x-axis-tick")
+		xAxisPlot.selectAll(".vz-radar-x-axis-tick").remove();
+		var xTicks = xAxisPlot.selectAll(".vz-radar-x-axis-tick")
 		 .data(xAxisTickData)
 		 .enter().append("g")
-		 .attr("class", "vz-spider-x-axis-tick");
+		 .attr("class", "vz-radar-x-axis-tick");
 		
-		xTicks.append("text")
-		 .append("textPath")
-		 .attr("text-anchor", "middle")
-		 .attr("startOffset", "50%")
-		 .style("overflow", "visible")
-		 .attr("xlink:href", function (d, i) {
-			 return "#" + scope.id + "_x_text_arc_" + i;
-		 })
-		 .text(function (d, i) {
-		 	 return scope.xAxisTickFormat(d,i)
-		 });
+		xTicks.append("circle")
+		 .attr('r', Math.round(tipRadius * .6))
+		 .attr('cx',function (d,i) { return outerRadius * Math.cos(scope.xScale(d) - Math.PI/2)})
+		 .attr('cy', function (d,i) { return outerRadius * Math.sin(scope.xScale(d) - Math.PI/2)})
+		 .style('stroke', '#EEE')
 		
 		xTicks.append("line")
 		 .attr('x1',0)
@@ -381,12 +359,12 @@ vizuly2.viz.RadarChart = function (parent) {
 		 .style('stroke', '#FFF')
 		
 		xTicks.append("text")
-		 .attr('class','vz-spider-x-axis-label')
-		 .attr('x',function (d,i) { return (outerRadius * scope.labelRadiusFactor) * Math.cos(scope.xScale(d) - Math.PI/2)})
-		 .attr('y', function (d,i) { return (outerRadius * scope.labelRadiusFactor) * Math.sin(scope.xScale(d) - Math.PI/2)})
-		 .text(function (d,i) { return scope.xAxisTickFormat(d); })
+		 .attr('class','vz-radar-x-axis-label')
+		 .attr('x',function (d,i) { return ((outerRadius + tipRadius) * scope.labelRadiusFactor) * Math.cos(scope.xScale(d) - Math.PI/2)})
+		 .attr('y', function (d,i) { return ((outerRadius + tipRadius) * scope.labelRadiusFactor) * Math.sin(scope.xScale(d) - Math.PI/2)})
 		 .attr('dy',function (d,i) { return (viz.getStyle('x-axis-font-size', arguments) * 1.2) + 'px'})
 		 .style('font-size',function (d,i) { return viz.getStyle('x-axis-font-size', arguments) + 'px'})
+		 .text(function (d,i) { return scope.xAxisTickFormat(d); })
 		 .style('text-anchor','middle')
 		 .call(wrap, outerRadius/4)
 		
@@ -444,7 +422,7 @@ vizuly2.viz.RadarChart = function (parent) {
 		});
 		
 		// Let everyone know we are done updating.
-		scope.dispatch.apply('update', viz);
+		scope.dispatch.apply('updated', viz);
 		
 	}
 	
@@ -464,24 +442,23 @@ vizuly2.viz.RadarChart = function (parent) {
 			 word,
 			 line = [],
 			 lineNumber = 0,
-		//	 lineHeight = 1.4, // ems
-			 y = text.attr("y"),
 			 x = text.attr("x"),
 			 dy = parseFloat(text.attr("dy")),
-			 lineHeight = dy;
+			 y = text.attr("y") - dy,
+			 lineHeight = dy,
 			 tspan = text.text(null).append("tspan").attr("x", x).attr("y", y).attr("dy", dy + "px");
 			
 			while (word = words.pop()) {
 				line.push(word);
 				tspan.text(line.join(" "));
-				if (tspan.node().getComputedTextLength() > width) {
+				if (tspan.node().getComputedTextLength() > width && words.length > 1) {
 					line.pop();
 					tspan.text(line.join(" "));
 					line = [word];
 					tspan = text.append("tspan").attr("x", x).attr("y", y).attr("dy", ++lineNumber * lineHeight + dy + "px").text(word);
 				}
 			}
-			text.selectAll('tspan').attr("y",y - ((line.length > 1) ? 0 : (line.length * dy)))
+			text.selectAll('tspan').attr("y",y - ((lineNumber) * dy))
 		})
 	};
 	
@@ -497,9 +474,11 @@ vizuly2.viz.RadarChart = function (parent) {
 	var styles_backgroundGradient;
 	
 	var stylesCallbacks = [
-		{on: "update.styles", callback: applyStyles},
+		{on: "updated.styles", callback: applyStyles},
 		{on: "mouseover.styles", callback: styles_onMouseOver},
-		{on: "mouseout.styles", callback: styles_onMouseOut}
+		{on: "mouseout.styles", callback: styles_onMouseOut},
+		{on: "vertex_mouseover.styles", callback: styles_vertexOnMouseOver},
+		{on: "vertex_mouseout.styles", callback: styles_vertexOnMouseOut}
 	];
 	
 	
@@ -513,7 +492,7 @@ vizuly2.viz.RadarChart = function (parent) {
 		// Grab the d3 selection from the viz so we can operate on it.
 		var selection = scope.selection;
 		
-		styles_backgroundGradient = vizuly2.svg.gradient.blend(viz, viz.getStyle('background-gradient-bottom'), viz.getStyle('background-gradient-top'));
+		styles_backgroundGradient = vizuly2.svg.gradient.blend(viz, viz.getStyle('background-color-bottom'), viz.getStyle('background-color-top'));
 		
 		// Update the background
 		selection.selectAll(".vz-background").style("fill", function () {
@@ -524,46 +503,48 @@ vizuly2.viz.RadarChart = function (parent) {
 		selection.selectAll(".vz-plot-background").style("opacity", 0);
 		
 		// Update any of the area paths based on the skin settings
-		selection.selectAll(".vz-area")
+		selection.selectAll(".vz-radar-area")
 		 .style("fill", function (d, i) {
 			 return viz.getStyle('area-fill', arguments);
 		 })
 		 .style("fill-opacity", function (d, i) {
 			 return viz.getStyle('area-fill-opacity', arguments)
-		 });
-		
-		// Update any of the line paths based on the skin settings
-		selection.selectAll(".vz-line")
-		 .style("stroke-width", function () {
-			 return outerRadius / 450
 		 })
 		 .style("stroke", function (d, i) {
-			 return viz.getStyle('line-stroke', arguments)
+			 return viz.getStyle('line-stroke', arguments);
 		 })
-		 .style("opacity", function (d, i) {
-			 return viz.getStyle('line-opacity', arguments)
+		 .style("stroke-opacity", function (d, i) {
+			 return viz.getStyle('line-stroke-opacity', arguments)
 		 });
+		
 		
 		// Hide all the data points
 		selection.selectAll(".vz-data-point").style("opacity", 0);
 		
 		// Update the x axis ticks
-		selection.selectAll(".vz-spider-x-axis-tick")
+		selection.selectAll(".vz-radar-x-axis-tick")
 		 .style("font-weight", function (d, i) {
 			 return viz.getStyle('x-axis-font-weight', arguments)
 		 })
 		 .style("fill", function (d, i) {
 			 return viz.getStyle('label-color', arguments)
 		 })
-		 .style("fill-opacity", .7)
 		 .style("font-size", Math.max(8, Math.round(outerRadius / 25)) + "px");
 		
-		// Update the y-axis ticks
-		selection.selectAll(".vz-spider-x-axis-tick line")
+		// Update the x-axis ticks
+		selection.selectAll(".vz-radar-x-axis-tick line")
 		 .style("stroke", function (d, i) {
 			 return viz.getStyle('x-axis-line-stroke', arguments)
 		 })
 		 .style("stroke-width", 1)
+		 .style("opacity", function (d, i) {
+			 return viz.getStyle('x-axis-line-opacity', arguments)
+		 })
+		
+		selection.selectAll(".vz-radar-x-axis-tick circle")
+		 .style("fill", function (d, i) {
+			 return viz.getStyle('x-axis-line-stroke', arguments)
+		 })
 		 .style("opacity", function (d, i) {
 			 return viz.getStyle('x-axis-line-opacity', arguments)
 		 })
@@ -575,8 +556,14 @@ vizuly2.viz.RadarChart = function (parent) {
 			 return viz.getStyle('y-axis-line-stroke', arguments)
 		 })
 		 .style("stroke-width", 1)
-		 .style("opacity", function (d, i) {
+		 .style("stroke-opacity", function (d, i) {
 			 return viz.getStyle('y-axis-line-opacity', arguments)
+		 })
+		 .style("fill", function (d, i) {
+			 return viz.getStyle('y-axis-fill', arguments)
+		 })
+		 .style("fill-opacity", function (d, i) {
+			 return viz.getStyle('y-axis-fill-opacity', arguments)
 		 })
 		
 		// Update the y-axis tick labels
@@ -585,36 +572,61 @@ vizuly2.viz.RadarChart = function (parent) {
 		 .style("fill", function (d, i) {
 			 return viz.getStyle('label-color', arguments)
 		 })
-		 .style("font-weight", 200)
-		 .style("fill-opacity", 0.5);
+		
 		
 		scope.dispatch.apply('styled', viz);
 		
 	}
 	
-	// This runs on every mouse over
-	function styles_onMouseOver(e, d, i, j) {
+	function styles_onMouseOver(e, d, i) {
 		
+		// Animate reduced opacity on area path
+		plot.selectAll(".vz-radar-area").transition('styles_mouseover')
+		 .style("fill-opacity", function (datum, index) {
+			 return (i == index) ? viz.getStyle('area-fill-opacity-over', arguments) : .2
+		 })
+		.style("stroke-opacity", function (datum, index) {
+			return (i == index) ? viz.getStyle('area-fill-opacity-over', arguments) : .2
+		});
+		
+		pointHitArea.selectAll('.vz-point-tip').remove();
+		
+		pointHitArea.selectAll('.vz-tip.series_' + i)
+		 .each(function (d,i) {
+			 d3.select(this).append("circle")
+				.attr("class", "vz-point-tip").attr("r", 4).style("fill", "#000").style("stroke", "#FFF").style("stroke-width", 2).style("pointer-events", "none");
+		 })
+		
+		viz.showDataTip(e, d, i);
+		
+	}
+	
+	function styles_onMouseOut(e, d, i) {
+		// Animate area opacity back to original
+		plot.selectAll(".vz-radar-area").transition('styles_mouseover')
+		 .style("fill-opacity", function (d,i) { return viz.getStyle('area-fill-opacity', arguments)})
+		 .style("stroke-opacity", function (d,i) { return viz.getStyle('area-fill-opacity', arguments)});
+		
+		pointHitArea.selectAll('.vz-point-tip').remove();
+		
+		viz.removeDataTip();
+	}
+	
+	
+	// This runs on every mouse over
+	function styles_vertexOnMouseOver(e, d, i, j) {
+
 		var selection = scope.selection;
 		
 		var datum = stackSeries[j][i];
 		
-		// Animate the changes to the line path
-		selection.selectAll(".vz-line").transition('styles_mouseover')
-		 .style("stroke-width", function () {
-			 return outerRadius / 270
-		 })
-		 .style("stroke", function (d, i) {
-			 return viz.getStyle('line-stroke-over', arguments)
-		 })
-		 .style("opacity", function (d, i) {
-			 return (i == j) ? 1 : 0
-		 });
-		
 		// Animate reduced opacity on area path
-		selection.selectAll(".vz-area").transition('styles_mouseover')
-		 .style("opacity", function (d, i) {
-			 return (i == j) ? 1 : .2
+		selection.selectAll(".vz-radar-area").transition('styles_mouseover')
+		 .style("fill-opacity", function (d, i) {
+			 return (i == j) ? viz.getStyle('area-fill-opacity-over', arguments) : .2
+		 })
+		 .style("stroke-opacity", function (datum, index) {
+			 return (i == j) ? viz.getStyle('area-fill-opacity-over', arguments) : .2
 		 });
 		
 		// Set the stroked dash highlight
@@ -624,14 +636,11 @@ vizuly2.viz.RadarChart = function (parent) {
 		 .attr("r", function () {
 			 return scope.radiusScale(datum[1])
 		 })
-		 .style("stroke", viz.getStyle('y-axis-line-stroke'))
+		 .style("stroke", viz.getStyle('x-axis-line-stroke'))
 		 .style("fill", "none")
 		 .style("stroke-dasharray", function () {
 			 return outerRadius / 80 + "," + outerRadius / 80
 		 });
-		
-		// Reduce the contrast on the y axis ticks
-		selection.selectAll(".vz-y-axis-tick").style("opacity", .1)
 		
 		// Remove any previous point tips
 		selection.selectAll(".vz-point-tip").remove();
@@ -640,91 +649,94 @@ vizuly2.viz.RadarChart = function (parent) {
 		d3.select(e).append("circle")
 		 .attr("class", "vz-point-tip").attr("r", 4).style("fill", "#000").style("stroke", "#FFF").style("stroke-width", 2).style("pointer-events", "none");
 		
-		// Add the arc we need to show the page views
-		defs.append("path")
-		 .attr("class", "vz-tip-path")
-		 .attr("id", function (d, i) {
-			 return viz.id() + "_tip_path_arc_1";
-		 })
-		 .attr("d", function () {
-			 return vizuly2.svg.text.textArcPath(scope.radiusScale(datum[1]) * 1.05, scope.xScale(scope.x(d)));
-		 });
+		xAxisPlot.selectAll('.vz-radar-x-axis-label').filter(function (d,index) { return index == i })
+		 .transition()
+		 .style('font-size',(viz.getStyle('x-axis-font-size') * 1.25) + 'px')
+		 .style('font-weight', 'bold');
 		
-		// Show the hour
-		plot.append("text")
-		 .attr("class", "vz-label-tip")
-		 .style("font-size",function (d,i) { return viz.getStyle('value-label-font-size',arguments)} + "px")
-		 .style("text-transform", "uppercase")
-		 .style("font-family", "Open Sans")
-		 .style("fill-opacity", .75)
-		 .style("fill", function (d, i) {
-			 return viz.getStyle('label-color', arguments)
-		 })
-		 .style('text-anchor','middle')
-		 .append("textPath")
-		 .attr("startOffset", "50%")
-		 .style("overflow", "visible")
-		 .attr("xlink:href", function (d, i) {
-			 return "#" + viz.id() + "_tip_path_arc_1";
-		 })
-		 .text(function () {
-			 return scope.seriesLabel(d) + ' - ' + scope.yAxisTickFormat(scope.y(d));
-		 });
-		
-		 xAxisPlot.selectAll('.vz-spider-x-axis-label').filter(function (d,index) { return index == i })
-		  .transition()
-		  .style('font-size',(viz.getStyle('x-axis-font-size') * 1.25) + 'px')
-		  .style('font-weight', 'bold');
-		
-		xAxisPlot.selectAll('.vz-spider-x-axis-tick line').filter(function (d,index) { return index == i })
+		xAxisPlot.selectAll('.vz-radar-x-axis-tick line').filter(function (d,index) { return index == i })
 		 .style('opacity', 1)
+		
+		xAxisPlot.selectAll('.vz-radar-x-axis-tick circle').filter(function (d,index) { return index == i })
+		 .style('opacity', 1)
+		
+		viz.showDataTip(e, d, i);
 	}
 	
 	// This runs on every mouse out
-	function styles_onMouseOut(e, d, i, j) {
+	function styles_vertexOnMouseOut(e, d, i, j) {
 		
 		var selection = scope.selection;
 		
-		// Animate the line paths back to original settings
-		selection.selectAll(".vz-line").transition('styles_mouseover')
-		 .style("stroke-width", function () {
-			 return outerRadius / 450
-		 })
-		 .style("stroke", function (d, i) {
-			 return viz.getStyle('line-stroke', arguments)
-		 })
-		 .style("opacity", function (d, i) {
-			 return viz.getStyle('line-opacity', arguments)
-		 })
 		
 		// Animate area opacity back to original
-		selection.selectAll(".vz-area").transition('styles_mouseover')
-		 .style("opacity", 1);
+		selection.selectAll(".vz-radar-area")
+		 .transition('styles_mouseover')
+		 .style("fill-opacity", function (d,i) { return viz.getStyle('area-fill-opacity', arguments) })
+		 .style("stroke-opacity", function (d,i) { return viz.getStyle('area-fill-opacity', arguments)});
 		
 		// Remove dashed line highlight
 		selection.selectAll(".vz-y-axis-mouseover").remove();
 		
 		// Remove the data tip
 		selection.selectAll(".vz-point-tip").remove();
-		selection.selectAll(".vz-label-tip").remove();
-		selection.selectAll(".vz-tip-path").remove();
-		
-		// Put the y-axis ticks back to original opacity
-		selection.selectAll(".vz-y-axis-tick")
-		 .style("opacity", function (d, i) {
-			 return viz.getStyle('y-axis-line-opacity', arguments)
-		 })
-		
-		xAxisPlot.selectAll('.vz-spider-x-axis-label')
+
+		xAxisPlot.selectAll('.vz-radar-x-axis-label')
 		 .transition()
 		 .style('font-size',(viz.getStyle('x-axis-font-size')) + 'px')
 		 .style('font-weight', 'normal');
 		
-		xAxisPlot.selectAll('.vz-spider-x-axis-tick line')
+		xAxisPlot.selectAll('.vz-radar-x-axis-tick line, circle')
 		 .style('opacity', viz.getStyle('x-axis-line-opacity'))
 		
+		viz.removeDataTip();
 		
 	}
+	
+	function dataTipRenderer(tip, e, d, i, x, y) {
+		
+		var bounds = e.getBoundingClientRect();
+		var x1 = d3.event.pageX; - bounds.left;
+		var y1 = d3.event.pageY; - bounds.top;
+		
+		var html = '<div class="vz-tip-header1">HEADER1</div>' +
+		 '<div class="vz-tip-header-rule"></div>' +
+		 '<div class="vz-tip-header2"> HEADER2 </div>' +
+		 '<div class="vz-tip-header-rule"></div>' +
+		 '<div class="vz-tip-header1"> HEADER3 </div>';
+		
+		var h1, h2, h3;
+		
+		if (d3.select(e).attr('class') == 'vz-radar-area') {
+		  h1=' ';
+		  h3=' ';
+		  h2 = scope.seriesLabel(scope.data[i][0]);
+			tip.style('height','50px')
+		}
+		else {
+			h1 = scope.seriesLabel(d);
+			h2 = scope.y(d);
+			h3 = scope.x(d);
+			tip.style('height','80px')
+		}
+		
+		html = html.replace("HEADER1", h1);
+		html = html.replace("HEADER2", h2);
+		html = html.replace("HEADER3", h3);
+	
+	  tip.html(html);
+		
+		if (d3.select(e).attr('class') == 'vz-radar-area') {
+			tip.selectAll('.vz-tip-header2')
+			 .style('color', function () {
+				 return viz.getStyle('area-fill', [scope.data[i], i])
+			 })
+		}
+		
+		return [x1 - 100, y1 - 120];
+		
+	}
+	
 	
 	// Returns viz component :)
 	return viz;

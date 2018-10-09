@@ -11,9 +11,6 @@
 
 vizuly2.viz.Venn = function (parent) {
 	
-	// This is the object that provides pseudo "protected" properties that the vizuly2.viz function helps create
-	var scope = {};
-	
 	var d3 = vizuly2.d3;
 	
 	var util = vizuly2.viz.VennUtil();
@@ -21,10 +18,10 @@ vizuly2.viz.Venn = function (parent) {
 	var properties = {
 		"data": null,
 		"margin": {                            // Our margin object
-			"top": "10",                       // Top margin
-			"bottom": "10",                    // Bottom margin
-			"left": "10",                      // Left margin
-			"right": "10"                      // Right margin
+			"top": "10%",                       // Top margin
+			"bottom": "10%",                    // Bottom margin
+			"left": "10%",                      // Left margin
+			"right": "10%"                      // Right margin
 		},
 		"width": 300,                          // Overall width of component
 		"height": 300,                         // Height of component
@@ -37,25 +34,38 @@ vizuly2.viz.Venn = function (parent) {
 	};
 	
 	var styles = {
-		'background': '#fff',
+		'background-top': '#FFF',
+		'background-bottom': '#DDD',
 		'fill-color': function (d,i) {
-			var colors = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"];
-			var ret = colors[d.sets % (colors.length-1)];
-			console.log('color: ' + ret);
-			return ret;
+			var axisColors = ['#f03b20', '#B02D5D', '#9B2C67', '#982B9A', '#692DA7','#bd0026', '#fecc5c', '#fd8d3c', '#5725AA', '#4823AF', '#d7b5d8', '#dd1c77', '#5A0C7A', '#5A0C7A'];
+			return axisColors[i % axisColors.length]
 		},
-		'fill-opacity': 0.25
+		'stroke-color': function (d,i) {
+			var axisColors = ['#f03b20', '#B02D5D', '#9B2C67', '#982B9A', '#692DA7','#bd0026', '#fecc5c', '#fd8d3c', '#5725AA', '#4823AF', '#d7b5d8', '#dd1c77', '#5A0C7A', '#5A0C7A'];
+			return axisColors[i % axisColors.length]
+		},
+		'fill-opacity': 0.25,
+		'stroke-opacity': 0.5
 	}
 	
-	// Create our viz and type it
-	var viz = vizuly2.core.component(parent, scope, properties, styles);
+	var events = ['mouseover', 'mouseout', 'click'];
+	
+	// This is the object that provides pseudo "protected" properties that the vizuly.viz function helps create
+	var scope = {};
+	scope.initialize = initialize;
+	scope.properties = properties;
+	scope.styles = styles;
+	scope.events = events;
+	
+	// Create our Vizuly component
+	var viz = vizuly2.core.component(parent, scope);
 	
 	var size;  // Holds the 'size' variable as defined in viz.util.size()
 	var totalSize;
 	
 	
 	// These are all d3.selection objects we use to insert and update svg elements into
-	var svg, plot, background, defs;
+	var svg, plot, labels, background, defs;
 	
 	var circles, labels, textCentres;
 	
@@ -69,9 +79,10 @@ vizuly2.viz.Venn = function (parent) {
 		svg = scope.selection.append("svg").attr("id", scope.id).style("overflow", "visible").attr("class", "vizuly");
 		background = svg.append("rect").attr("class", "vz-background");
 		plot = svg.append('g').attr("class","vz-plot");
+		labels = svg.append('g').attr("class","vz-labels");
 		defs = vizuly2.core.util.getDefs(viz);
 		
-		scope.dispatch.apply('initialize', viz);
+		scope.dispatch.apply('initialized', viz);
 	}
 	
 	
@@ -116,7 +127,7 @@ vizuly2.viz.Venn = function (parent) {
 		totalSize = d3.sum(scope.data,function (d) { return scope.value(d); })
 		
 		// Tell everyone we are done making our measurements
-		scope.dispatch.apply('measure', viz);
+		scope.dispatch.apply('measured', viz);
 		
 	}
 	
@@ -131,6 +142,7 @@ vizuly2.viz.Venn = function (parent) {
 		// Layout all of our primary SVG d3.elements.
 		svg.attr("width", size.measuredWidth).attr("height", size.measuredHeight);
 		background.attr("width", size.measuredWidth).attr("height", size.measuredHeight);
+		
 		
 		/***  BRUTE FORCE - FORCING REMOVAL OF ALL NODES ***/
 		// Should look at the remaining logic as it does not expect this
@@ -209,12 +221,12 @@ vizuly2.viz.Venn = function (parent) {
 		
 		//Adjust plot to center it
 		var bounds = plot.node().getBoundingClientRect();
-		var x = (size.width-bounds.width)/2;
-		var y = (size.height-bounds.height)/2;
+		var x = (size.measuredWidth-bounds.width)/2;
+		var y = (size.measuredHeight-bounds.height)/2;
 		
 		plot.attr('transform','translate(' + x + ',' + y + ')');
 		
-		scope.dispatch.apply('update', viz);
+		scope.dispatch.apply('updated', viz);
 		
 		// interpolate intersection area paths between previous and
 		// current paths
@@ -251,7 +263,7 @@ vizuly2.viz.Venn = function (parent) {
 	
 	// styless and styles
 	var stylesCallbacks = [
-		{on: 'update.styles', callback: applyStyles},
+		{on: 'updated.styles', callback: applyStyles},
 		{on: 'mouseover.styles', callback: styles_onMouseOver},
 		{on: 'mouseout.styles', callback: styles_onMouseOut}
 	];
@@ -266,12 +278,21 @@ vizuly2.viz.Venn = function (parent) {
 		var selection = scope.selection;
 		
 		// Update the background
-		selection.selectAll(".vz-background").attr("fill", function () { return viz.getStyle('background',viz) });
+		styles_backgroundGradient = vizuly2.svg.gradient.blend(viz, viz.getStyle('background-bottom'), viz.getStyle('background-top'));
+		
+		// Update the background
+		selection.selectAll(".vz-background").style("fill", function () {
+			return "url(#" + styles_backgroundGradient.attr("id") + ")";
+		});
+		
 		
 		selection.selectAll('.vz-venn-area.venn-circle')
 		 .style("fill", function(d,i) { return viz.getStyle('fill-color', arguments); })
+		 .style("stroke", function(d,i) { return viz.getStyle('stroke-color', arguments); })
+		 .style("stroke-opacity", function(d,i) { return viz.getStyle('stroke-opacity', arguments); })
 		
-		selection.selectAll('.vz-venn-area.venn-circle path').style("fill-opacity", function (d,i) { return viz.getStyle('fill-opacity', arguments)});
+		selection.selectAll('.vz-venn-area.venn-circle path')
+		 .style("fill-opacity", function (d,i) { return viz.getStyle('fill-opacity', arguments)});
 		
 		selection.selectAll('.vz-venn-area text.label').style("font-size", function (d,i) { return textScale(scope.value(d)) + 'px'});
 		
@@ -323,9 +344,6 @@ vizuly2.viz.Venn = function (parent) {
 		return [(Number(x) + Number(d3.select(e).attr('width'))),y - 50]
 		
 	}
-
-	
-	initialize();
 	
 	// Returns our glorious viz component :)
 	return viz;

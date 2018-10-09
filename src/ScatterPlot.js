@@ -16,9 +16,6 @@
 //
 vizuly2.viz.ScatterPlot = function (parent) {
 	
-	// This is the object that provides pseudo "protected" properties that the vizuly2.viz function helps create
-	var scope = {};
-	
 	var d3 = vizuly2.d3;
 	
 	var properties = {
@@ -50,38 +47,53 @@ vizuly2.viz.ScatterPlot = function (parent) {
 	};
 	
 	var styles = {
-		'fill-top': '#777',
-		'fill-bottom': '#CCC',
-		'label-color': '#FFF',
-		'axis-stroke': '#FFF',
-		'axis-opacity': 0.25,
+		'background-top': '#FFF',
+		'background-bottom': '#DDD',
+		'y-axis-label-show': true,
+		'x-axis-label-show': true,
+		'y-axis-font-style': 'normal',
+		'x-axis-font-style': 'normal',
+		'y-axis-label-color': '#444',
+		'x-axis-label-color': '#444',
+		'axis-stroke': '#777',
+		'axis-opacity': .5,
 		'axis-font-size': function (d, i) {
-			return Math.max(8, Math.round(size.width / 65))
+			return Math.max(10, Math.round(size.width / 65))
 		},
 		'node-stroke': function (d, i) {
 			return '#777';
 		},
 		'node-stroke-width': 1,
 		'node-fill': function (d, i) {
-			return '#FFF';
+			var axisColors = ['#bd0026', '#fecc5c', '#fd8d3c', '#f03b20', '#B02D5D', '#9B2C67', '#982B9A', '#692DA7', '#5725AA', '#4823AF', '#d7b5d8', '#dd1c77', '#5A0C7A', '#5A0C7A'];
+			return axisColors[i % axisColors.length]
 		},
 		'node-fill-opacity': function (d, i) {
 			return .7;
 		},
 		'node-stroke-opacity': .25,
-		'node-over-stroke': '#000',
-		'node-over-stroke-width': 2,
-		'node-over-stroke-opacity': .8,
-		'node-over-fill': function (d, i) {
+		'node-stroke-over': '#000',
+		'node-stroke-width-over': 2,
+		'node-stroke-opacity-over': .8,
+		'node-fill-over': function (d, i) {
 			return '#FFF';
 		},
-		'node-over-fill-opacity': function (d, i) {
+		'node-fill-opacity-over': function (d, i) {
 			return .9;
 		}
 	};
 	
-	//Create our viz and type it
-	var viz = vizuly2.core.component(parent, scope, properties, styles);
+	var events=['mouseover', 'mouseout', 'click']
+	
+	// This is the object that provides pseudo "protected" properties that the vizuly.viz function helps create
+	var scope = {};
+	scope.initialize = initialize;
+	scope.properties = properties;
+	scope.styles = styles;
+	scope.events = events;
+	
+	// Create our Vizuly component
+	var viz = vizuly2.core.component(parent, scope);
 	
 	//Measurements
 	var size;           // Holds the 'size' variable as defined in viz.util.size()
@@ -105,7 +117,7 @@ vizuly2.viz.ScatterPlot = function (parent) {
 		plotBackground = plot.append("rect").attr("class", "vz-plot-background").style("fill", "#FFF").style("fill-opacity", .01);
 		
 		// Tell everyone we are done initializing
-		scope.dispatch.apply('initialize', viz);
+		scope.dispatch.apply('initialized', viz);
 		
 	}
 	
@@ -145,11 +157,11 @@ vizuly2.viz.ScatterPlot = function (parent) {
 		scope.rScale.range([1, plotMaxRadius]);
 		
 		// Default our x and y axis
-		scope.xAxis.scale(scope.xScale).tickFormat(scope.xTickFormat)
+		scope.xAxis.scale(scope.xScale).tickFormat(scope.xTickFormat).tickSize(viz.getStyle('axis-font-size')/2)
 		scope.yAxis.scale(scope.yScale).tickFormat(scope.yTickFormat).tickSize(-vizuly2.core.util.size(scope.margin, size.measuredWidth, size.measuredHeight).width).ticks(5)
 		
 		// Tell everyone we are done making our measurements
-		scope.dispatch.apply('measure', viz);
+		scope.dispatch.apply('measured', viz);
 		
 	}
 	
@@ -230,7 +242,7 @@ vizuly2.viz.ScatterPlot = function (parent) {
 		
 		// Let everyone know we are doing doing our update
 		// Typically themes will attach a callback to this event so they can apply styles to the elements
-		scope.dispatch.apply('update', viz);
+		scope.dispatch.apply('updated', viz);
 		
 	}
 	
@@ -258,7 +270,7 @@ vizuly2.viz.ScatterPlot = function (parent) {
 	
 	// styless and styles
 	var stylesCallbacks = [
-		{on: 'update.styles', callback: applyStyles},
+		{on: 'updated.styles', callback: applyStyles},
 		{on: 'mouseover.styles', callback: styles_onMouseOver},
 		{on: 'mouseout.styles', callback: styles_onMouseOut}
 	];
@@ -273,25 +285,12 @@ vizuly2.viz.ScatterPlot = function (parent) {
 		var selection = scope.selection;
 		
 		// Update the background
-		styles_backgroundGradient = vizuly2.svg.gradient.blend(viz, viz.getStyle('fill-bottom'), viz.getStyle('fill-top'));
+		styles_backgroundGradient = vizuly2.svg.gradient.blend(viz, viz.getStyle('background-bottom'), viz.getStyle('background-top'));
 		
 		// Update the background
 		selection.selectAll(".vz-background").style("fill", function () {
 			return "url(#" + styles_backgroundGradient.attr("id") + ")";
 		});
-		
-		// Update the bottom axis
-		selection.selectAll(".vz-bottom-axis text, .vz-left-axis text")
-		 .style("font-weight", viz.getStyle('axis-font-weight'))
-		 .style("fill", viz.getStyle('label-color'))
-		 .style("font-size", viz.getStyle('axis-font-size') + "px")
-		
-		// Update the left axis
-		selection.selectAll(".vz-bottom-axis line, .vz-left-axis line")
-		 .style("stroke", viz.getStyle('axis-stroke'))
-		 .style("stroke-width", 1)
-		 .style("opacity", viz.getStyle('axis-opacity'));
-		
 		
 		// Update the scatter plots
 		selection.selectAll(".vz-scatter-node")
@@ -311,8 +310,64 @@ vizuly2.viz.ScatterPlot = function (parent) {
 			 return viz.getStyle('node-fill-opacity', arguments)
 		 })
 		
+		// Update axis fonts
+		selection.selectAll('.vz-bottom-axis text, .vz-left-axis text')
+		 .style('font-weight', function () {
+			 return viz.getStyle('axis-font-weight', arguments)
+		 })
+		 .style('font-size', function () {
+			 return viz.getStyle('axis-font-size', arguments) + 'px'
+		 })
+		
+		selection.selectAll('.vz-bottom-axis text')
+		 .style('display', function () {
+			 return viz.getStyle('x-axis-label-show', arguments) ? 'block' : 'none'
+		 })
+		 .style('font-style', function () {
+			 return viz.getStyle('x-axis-font-style', arguments)
+		 })
+		 .attr('dy', function (d, i) {
+			 return (viz.getStyle('axis-font-size', arguments)) + 'px';
+		 })
+		 .style('font-size', function (d, i) {
+			 return viz.getStyle('axis-font-size', arguments) + 'px'
+		 })
+		 .style('fill', function () {
+			 return viz.getStyle('x-axis-label-color', arguments)
+		 })
+		 .style('text-anchor', 'middle')
+		
+		
+		selection.selectAll('.vz-left-axis text')
+		 .style('display', function () {
+			 return viz.getStyle('y-axis-label-show', arguments) ? 'block' : 'none'
+		 })
+		 .style('font-style', function () {
+			 return viz.getStyle('y-axis-font-style', arguments)
+		 })
+		 .style('font-size', function (d, i) {
+			 return viz.getStyle('y-axis-font-size', arguments) + 'px'
+		 })
+		 .style('fill', function () {
+			 return viz.getStyle('y-axis-label-color', arguments)
+		 })
+		
+		// Update axis strokes
+		selection.selectAll('.vz-bottom-axis line, .vz-left-axis line')
+		 .style('stroke', function () {
+			 return viz.getStyle('axis-stroke')
+		 })
+		 .style('stroke-width', 1)
+		 .style('opacity', function () {
+			 return viz.getStyle('axis-opacity')
+		 })
+		
+		selection.selectAll('.vz-left-axis').attr('font-family', null)
+		selection.selectAll('.vz-bottom-axis').attr('font-family', null)
 		selection.selectAll('.vz-left-axis path.domain').style('display', 'none');
 		selection.selectAll('.vz-bottom-axis path.domain').style('display', 'none');
+	//	selection.selectAll('.vz-bottom-axis line').style('display', 'none');
+		
 		
 		scope.dispatch.apply('styled', viz);
 		
@@ -323,19 +378,19 @@ vizuly2.viz.ScatterPlot = function (parent) {
 		
 		d3.select(node)
 		 .style("stroke", function (d, i) {
-			 return viz.getStyle('node-over-stroke', arguments)
+			 return viz.getStyle('node-stroke-over', arguments)
 		 })
 		 .style("stroke-width", function (d, i) {
-			 return viz.getStyle('node-over-stroke-width', arguments)
+			 return viz.getStyle('node-stroke-width-over', arguments)
 		 })
 		 .style("stroke-opacity", function (d, i) {
-			 return viz.getStyle('node-over-stroke-opacity', arguments)
+			 return viz.getStyle('node-stroke-opacity-over', arguments)
 		 })
 		 .style("fill", function (d, i) {
-			 return viz.getStyle('node-over-fill', arguments)
+			 return viz.getStyle('node-fill-over', arguments)
 		 })
 		 .style("fill-opacity", function (d, i) {
-			 return viz.getStyle('node-over-fill-opacity', arguments)
+			 return viz.getStyle('node-fill-opacity-over', arguments)
 		 })
 		
 		viz.showDataTip(node, d, i);
@@ -371,8 +426,6 @@ vizuly2.viz.ScatterPlot = function (parent) {
 		tip.style('text-align', 'center').append('div').text(scope.y(d));
 		return [x-50, y-80];
 	}
-	
-	initialize();
 	
 	return viz;
 	
