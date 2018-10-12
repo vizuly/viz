@@ -42,8 +42,8 @@ vizuly2.viz.TreeMap = function (parent) {
 	};
 	
 	var styles = {
-		'background-gradient-top': '#FFF',
-		'background-gradient-bottom': '#DDD',
+		'background-color-top': '#FFF',
+		'background-color-bottom': '#DDD',
 		'cell-corner-radius': function (e, d, i) {
 			return Math.min((d.x1 - d.x0), (d.y1 - d.y0)) * .05
 		},
@@ -387,7 +387,7 @@ vizuly2.viz.TreeMap = function (parent) {
 		// Grab the d3.selection from the viz so we can operate on it.
 		var selection = scope.selection;
 		
-		styles_backgroundGradient = vizuly2.svg.gradient.blend(viz, viz.getStyle('background-gradient-bottom'), viz.getStyle('background-gradient-top'));
+		styles_backgroundGradient = vizuly2.svg.gradient.blend(viz, viz.getStyle('background-color-bottom'), viz.getStyle('background-color-top'));
 		
 		// Update the background
 		selection.selectAll(".vz-background").style("fill", function () {
@@ -444,10 +444,19 @@ vizuly2.viz.TreeMap = function (parent) {
 	function styles_onClick(e,d,i) {
 		if (!scope.children(d.data)) return;
 		
+		drillPath.push(d.parent)
+		update(d.parent.data)
+		
+		return;
+		
 		if (d3.select(d3.event.target).attr('class') == 'vz-treemap-cell-rect') {
-			drillPath.push(d.parent);
-		  drillPath.push(d);
-			update(d.data);
+			if (drillPath.indexOf(d.parent) < 0) {
+				drillPath.push(d.parent);
+			}
+			if (drillPath.indexOf(d) < 0) {
+				drillPath.push(d);
+			}
+			update(d.parent.data);
 		}
 		else {
 			drillPath.push(d.parent)

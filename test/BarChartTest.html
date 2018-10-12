@@ -65,14 +65,13 @@ Rotate labels (Coluimn chart)
              .x(function (d, i)
              { return Number(d.value); })    //property for x axis plot
              .y(function (d, i)
-           //  { return countries.indexOf(d.country); })//property for y axis plot
              { return d.country; })//property for y axis plot
-             .seriesLabel( function (d,i)
-             { return d.category })
+             .seriesLabel( function (d,i) { return d.category })
              .style('show-value-labels',false)
              .on('mouseover', onMouseOver)
              .on('mouseout', onMouseOut)
-            // .dataTipRenderer(function () { return false })
+          //   .style('value-label-show',function (d,i) { return (d.value > 200) ? true : false})
+
 
             viz.update();
 

@@ -43,17 +43,17 @@
 		console.log("fix bug with NAN labelings")
 
 
-    d3.json('data/FederalBudget.json').then(function (json) {
+    d3.json('data/FederalBudgetAggregated.json').then(function (json) {
 
         viz
          .width('100%')
          .height('100%')
-         .data({key: 'Overall', values: json.values})
+         .data({key: 'Overall', values: json})
          .children(function (d) {
 	         return d.values
          })
          .value(function (d) {
-	         return Number(d.Federal);
+	         return Number(d.Total);
          })
          .valueFormatter(function (d) {
          	return d3.format('$,')(d) + ' Million'

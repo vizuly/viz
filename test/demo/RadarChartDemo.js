@@ -21,6 +21,9 @@ var styles = {
 	'x-axis-font-size': 16
 };
 
+
+var defaultStyles = {};
+
 var fireStyles =
  {
 	 'background-color-top': '#4b4b4b',
@@ -41,8 +44,6 @@ var fireStyles =
 		 return strokeColors[i % 5];
 	 }
  }
-
-var defaultStyles = {};
 
 var autumnStyles =
  {
@@ -111,7 +112,6 @@ var businessStyles =
 		 return businessColors(i);
 	 }
  }
-
 
 function changeStyles(val) {
 	var styles = this[val];
