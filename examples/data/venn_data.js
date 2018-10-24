@@ -1,4 +1,4 @@
-[
+var data = [
   {
     "sets": [
       0

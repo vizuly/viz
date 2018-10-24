@@ -1,5 +1,12 @@
 # vizuly
 
+## Getting Started
+
+1. Clone or copy this repo to your local machine.
+2. Open up the 'examples' directory.
+3. Launch any of the examples within such as BarChartTest.html
+4. Use the testing/demo tool at the top of the window to test various styles and settings dynamically.
+
 ## Vizuly Component Lifecycle
 All data visualization components follow the Vizuly component lifecycle and utlize the base class functions.  Vizuly is 
 a lightweight framework and set of design patterns that make it easer to build and modify reusable data visualization 

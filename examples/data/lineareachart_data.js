@@ -1,4 +1,4 @@
-[
+var data = [
   [
     {
       "symbol": "AAPL",  "name": "Apple Inc", "date": "2010-01-05T08:00:00.000Z", "Open": 30.66, "High": 30.8, "Low": 30.46, "Close": 30.63, "Volume": 150476004

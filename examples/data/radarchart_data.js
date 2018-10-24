@@ -1,4 +1,4 @@
-[
+var data = [
   [
     {
       "axis": "Appearance",

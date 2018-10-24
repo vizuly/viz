@@ -14,6 +14,7 @@
 
     <script src="../lib/vizuly2_core.min.js"></script>
     <script src="../src/BarChart.js"></script>
+    <script src="data/barchart_data.js"></script>
 
     <!-- DEMO CODE:START -->
     <link rel="stylesheet" href="demo/scripts/cssmenu.css">
@@ -51,40 +52,23 @@ Rotate labels (Coluimn chart)
 	// our radial components and an array to hold them
 	var viz = vizuly2.viz.BarChart("#viz_container");
 
-	var data = {};
+    var countries = ['USA', 'USSR', 'GB', 'GER', 'FR', 'ITL', 'SWE', 'CHINA', 'RU', 'E. GER' ]
 
-	var initialize = function () {
+    viz
+     .data(data)
+     .width('100%')
+     .height('100%')
+     .x(function (d, i)  { return Number(d.value); })
+     .y(function (d, i)  { return d.country; })
+     .seriesLabel( function (d,i) { return d.category })
+     .style('show-value-labels',false)
+     .on('mouseover', onMouseOver)
+     .on('mouseout', onMouseOut)
+     .updateOnResize(true)
 
-		d3.json("data/barchart_olympics.json").then(function (json) {
+    viz.update();
 
-			data = json;
-
-            var countries = ['USA', 'USSR', 'GB', 'GER', 'FR', 'ITL', 'SWE', 'CHINA', 'RU', 'E. GER' ]
-
-            viz
-             .data(data)
-             .width('100%').height('100%')     //initial component display size
-             .x(function (d, i)
-             { return Number(d.value); })    //property for x axis plot
-             .y(function (d, i)
-             { return d.country; })//property for y axis plot
-             .seriesLabel( function (d,i) { return d.category })
-             .barWidth(20)
-             .barPadding('15%')
-             .groupPadding('10%')
-             .style('show-value-labels',false)
-             .on('mouseover', onMouseOver)
-             .on('mouseout', onMouseOut)
-             .updateOnResize(true)
-          //   .style('value-label-show',function (d,i) { return (d.value > 200) ? true : false})
-
-
-            viz.update();
-
-			//if (runDemo) runDemo();
-
-		});
-	};
+    if (runDemo) runDemo();
 
 	function onMouseOver(e, d, i, j) {
         console.log('onMouseOver ' + d.country + ' series = ' + i + ' index = ' + j)
@@ -93,8 +77,6 @@ Rotate labels (Coluimn chart)
     function onMouseOut(e, d, i, j) {
 	    console.log('onMouseOut ' + d.country + ' series = ' + i + ' index = ' + j)
     }
-
-	initialize();
 
 </script>
 

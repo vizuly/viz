@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Vizuly 2.0 - Column Chart</title>
+
+    <!-- We use google fonts for many of the examples, but they are not necessary -->
+    <link href='https://fonts.googleapis.com/css?family=Raleway:600,400,200' rel='stylesheet' type='text/css'>
+
+    <!-- vizuly2.specific style sheets -->
+    <link rel="stylesheet" href="../lib/styles/vizuly.css">
+
+    <script src="../lib/d3_v5.7.min.js"></script>
+
+    <script src="../lib/vizuly2_core.min.js"></script>
+    <script src="../src/ColumnChart.js"></script>
+    <script src="data/columnchart_data.js"></script>
+
+    <!-- DEMO CODE:START -->
+    <link rel="stylesheet" href="demo/scripts/cssmenu.css">
+    <script type="text/javascript" src="demo/scripts/jquery-2.1.1.min.js"></script>
+    <script src="demo/scripts/cssmenu.js"></script>
+    <script src="demo/ColumnChartDemo.js"></script>
+    <!-- DEMO CODE: END -->
+
+</head>
+
+<body>
+
+<!-- Our main content container-->
+<div class="container" style="width:100%">
+    <div id="viz_container" class="z-depth-3" style="width:600px; height:600px; border-radius:10px; overflow:hidden">
+    </div>
+</div>
+
+<script id="testscript">
+
+	var viz = vizuly2.viz.ColumnChart("#viz_container");
+
+    var countries = ['USA', 'USSR', 'GB', 'GER', 'FR', 'ITL', 'SWE', 'CHINA', 'RU', 'E. GER' ]
+
+    viz.data(data)
+     .width('100%')
+     .height('100%')
+     .y(function (d, i) { return Number(d.value); })
+     .x(function (d, i, index) { return d.country; })
+     .seriesLabel(function (d) { return d.category; })
+     .on('mouseover', onMouseOver)
+     .on('mouseout', onMouseOut);
+
+    viz.update();
+
+    if (runDemo) runDemo();
+
+    function onMouseOver(e, d, i, j) {
+        console.log('onMouseOver ' + d.country + ' series = ' + i + ' index = ' + j)
+    }
+
+    function onMouseOut(e, d, i, j) {
+        console.log('onMouseOut ' + d.country + ' series = ' + i + ' index = ' + j)
+    }
+
+
+</script>
+
+</body>
+
+</html>

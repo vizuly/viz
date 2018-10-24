@@ -1,4 +1,4 @@
-{
+var data = {
   "key": "Federal Budget",
   "values": [
     {
