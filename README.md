@@ -4,7 +4,7 @@
 
 1. Clone or copy this repo to your local machine.
 2. Open up the 'examples' directory.
-3. Launch any of the examples within such as BarChartTest.html
+3. Launch any of the examples within such as BarChartTest.html in the browser of your choice (Chrome is best.)
 4. Use the testing/demo tool at the top of the window to test various styles and settings dynamically.
 
 ## Vizuly Component Lifecycle
@@ -143,13 +143,13 @@ and avoid creating internal code that becomes brittle and hard to maintain.
     
     `myViz.on('eventname', myCallBackFunction)`
     
-    *`initalize`* - Called at end of component instantiation after all public accessors, styles, events, and DOM scaffold 
+    *`initalized`* - Called at end of component instantiation after all public accessors, styles, events, and DOM scaffold 
     elements have been created. 
     
-    *`measure`* - Called at end of measure function (which is called for each update.)  This is a good place to override 
+    *`measured`* - Called at end of measure function (which is called for each update.)  This is a good place to override 
     properties you may need to immediately prior to rendering.
     
-    *`update`* - Called at end of update (render) function prior to any styles being applied.
+    *`updated`* - Called at end of update (render) function prior to any styles being applied.
     
     *`styled`* - Called at end of styles being applied to rendered DOM elements.
     
