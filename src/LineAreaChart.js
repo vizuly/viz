@@ -484,6 +484,8 @@ vizuly2.viz.LineAreaChart = function (parent) {
 		// Initialize our zoom operations (this is optional)
 		initializeZoom();
 		
+		scope.size = size;
+		
 		scope.dispatch.apply('measured', viz);
 		//Can override all settings here;
 		

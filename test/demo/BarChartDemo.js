@@ -117,6 +117,7 @@ function runDemo() {
 		{
 			'name': 'Display',
 			'values': [
+				{'label': '800px - 1200px', 'value': '800,1200'},
 				{'label': '800px - 800px', 'value': '800,800'},
 				{'label': '375px - 667px', 'value': '375,667'},
 				{'label': '320px - 568px', 'value': '320,568'}

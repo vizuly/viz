@@ -88,8 +88,7 @@ var neonStyles =
 	 'y-axis-fill': '#FFF',
 	 'x-axis-line-stroke': '#FFF',
 	 'area-fill': function (d, i) {
-		 var fillColors = ['#D1F704', '#D1F704', '#D1F704', '#D1F704', '#D1F704']
-		 return 'url(#' + vizuly2.svg.gradient.fade(viz, fillColors[i % 5], 'vertical', [.35, 1]).attr('id') + ')';
+		 return 'url(#' + vizuly2.svg.gradient.fade(viz, '#D1F704', 'vertical', [.35, 1]).attr('id') + ')';
 	 },
 	 'line-stroke': '#FFFF00',
 	 'line-stroke-over': null

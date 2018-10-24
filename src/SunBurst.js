@@ -184,6 +184,7 @@ vizuly2.viz.Sunburst = function (parent) {
 		
 		yScale.range([0, radius]).domain([0,1]);
 		
+		scope.size = size;
 		
 		// Tell everyone we are done making our measurements
 		scope.dispatch.apply('measured', viz);

@@ -13,31 +13,7 @@ var styles = {
 	'header-font-size': 20
 };
 
-
-
-var axiisStyles = {
- 'stroke': function (d, i) {
-		var colors = ['#bd0026', '#fecc5c', '#fd8d3c', '#f03b20', '#B02D5D', '#9B2C67', '#982B9A', '#692DA7', '#5725AA', '#4823AF', '#d7b5d8', '#dd1c77', '#5A0C7A', '#5A0C7A']
-		var c = d3.rgb(colors[(d.data.rootIndex ? d.data.rootIndex : 0) % colors.length]);
-		return c.darker((d.depth) / (4 * .75))
-	},
-	'stroke-opacity': 0.9,
-	 'fill': function (d, i) {
-		var colors = ['#bd0026', '#fecc5c', '#fd8d3c', '#f03b20', '#B02D5D', '#9B2C67', '#982B9A', '#692DA7', '#5725AA', '#4823AF', '#d7b5d8', '#dd1c77', '#5A0C7A', '#5A0C7A']
-		var c = d3.rgb(colors[(d.data.rootIndex ? d.data.rootIndex : 0) % colors.length]);
-		return c.darker((d.depth - 1) / 4)
-	},
-	'fill-over': function (d, i) {
-		var colors = ['#bd0026', '#fecc5c', '#fd8d3c', '#f03b20', '#B02D5D', '#9B2C67', '#982B9A', '#692DA7', '#5725AA', '#4823AF', '#d7b5d8', '#dd1c77', '#5A0C7A', '#5A0C7A']
-		var c = d3.rgb(colors[(d.data.rootIndex ? d.data.rootIndex : 0) % colors.length]);
-		return c.brighter((d.depth) / 4)
-	},
-	'label-color': function (d,i) {
-		var colors = ['#bd0026', '#fecc5c', '#fd8d3c', '#f03b20', '#B02D5D', '#9B2C67', '#982B9A', '#692DA7', '#5725AA', '#4823AF', '#d7b5d8', '#dd1c77', '#5A0C7A', '#5A0C7A']
-		var c = d3.rgb(colors[(d.data.rootIndex ? d.data.rootIndex : 0) % colors.length]);
-		return vizuly2.core.util.colorBrightness(c) > 128 ? '#333' : '#DDD';
-	}
-}
+var defaultStyles = {};
 
 var iceStyles = {
 	'background-color-bottom': '#B9D7E3',
@@ -163,6 +139,7 @@ function changeStyles(val) {
 //This sets the same value for each radial progress
 function changeData(val) {
 	valueField = valueFields[Number(val)];
+	viz.data().key = valueField + " Budget";
 	viz.update();
 }
 
@@ -182,7 +159,7 @@ function runDemo() {
 		{
 			'name': 'Theme',
 			'values': [
-				{'label': 'Axiis', 'value': 'axiisStyles', selected: true},
+				{'label': 'Default', 'value': 'defaultStyles', selected: true},
 				{'label': 'Ice', 'value': 'iceStyles'},
 				{'label': 'Rose', 'value': 'roseStyles'},
 				{'label': 'Umber', 'value': 'umberStyles'},

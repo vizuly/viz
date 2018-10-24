@@ -10,7 +10,7 @@
     <!-- vizuly2.specific style sheets -->
     <link rel="stylesheet" href="../lib/styles/vizuly.css">
 
-    <script src="../lib/d3.min.js"></script>
+    <script src="../lib/d3_v5.7.min.js"></script>
 
     <script src="../lib/vizuly2_core.min.js"></script>
     <script src="../src/TreeMap.js"></script>
@@ -34,7 +34,7 @@
 <script id="testscript">
 
     // our radial components and an array to hold them
-	var viz = vizuly2.viz.TreeMap(document.getElementById("viz_container"));
+	var viz = vizuly2.viz.TreeMap("#viz_container");
 
 	var data = {};
 
@@ -43,7 +43,7 @@
 		console.log("fix bug with NAN labelings")
 
 
-    d3.json('data/FederalBudgetAggregated.json').then(function (json) {
+    d3.json('data/treemap_federal_budget.json').then(function (json) {
 
         viz
          .width('100%')
@@ -53,19 +53,19 @@
 	         return d.values
          })
          .value(function (d) {
-	         return Number(d.Total);
+         	return Number(d.Total)
          })
          .valueFormatter(function (d) {
-         	return d3.format('$,')(d) + ' Million'
+         	return d3.format('$,.2f')(d) + ' Billion'
          })
          .key(function (d) {
 	         return (d.key) ? d.key : d.Category
          })
          .label(function (d) {
-	         return String((d.key) ? d.key : d.Category).toUpperCase()
+         	return String((d.key) ? d.key : d.Category).toUpperCase()
          })
          .groupLabel(function (d) {
-	         return String((d.data.key) ? d.data.key : d.data.Category).toUpperCase() + ' ' + d3.format('$,.0f')(d.value) + ' Million'
+           return String((d.data.key) ? d.data.key : d.data.Category).toUpperCase() + ' ' + d3.format('$,.0f')(d.value) + ' Billion'
          })
          .update();
 

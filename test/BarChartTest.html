@@ -10,7 +10,7 @@
     <!-- vizuly2.specific style sheets -->
     <link rel="stylesheet" href="../lib/styles/vizuly.css">
 
-    <script src="../lib/d3.min.js"></script>
+    <script src="../lib/d3_v5.7.min.js"></script>
 
     <script src="../lib/vizuly2_core.min.js"></script>
     <script src="../src/BarChart.js"></script>
@@ -28,7 +28,7 @@
 
 <!-- Our main content container-->
 <div class="container" style="width:100%">
-    <div id="viz_container" class="z-depth-3" style="width:600px; height:600px; border-radius:10px; overflow:hidden">
+    <div id="viz_container" class="z-depth-3" style="width:50%; height:600px; border-radius:10px; overflow:hidden">
     </div>
 </div>
 
@@ -46,8 +46,10 @@ Rotate labels (Coluimn chart)
 
 <script id="testscript">
 
+    console.log("version = " + d3.version)
+
 	// our radial components and an array to hold them
-	var viz = vizuly2.viz.BarChart(document.getElementById("viz_container"));
+	var viz = vizuly2.viz.BarChart("#viz_container");
 
 	var data = {};
 
@@ -67,15 +69,19 @@ Rotate labels (Coluimn chart)
              .y(function (d, i)
              { return d.country; })//property for y axis plot
              .seriesLabel( function (d,i) { return d.category })
+             .barWidth(20)
+             .barPadding('15%')
+             .groupPadding('10%')
              .style('show-value-labels',false)
              .on('mouseover', onMouseOver)
              .on('mouseout', onMouseOut)
+             .updateOnResize(true)
           //   .style('value-label-show',function (d,i) { return (d.value > 200) ? true : false})
 
 
             viz.update();
 
-			if (runDemo) runDemo();
+			//if (runDemo) runDemo();
 
 		});
 	};

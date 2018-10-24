@@ -10,7 +10,7 @@
     <!-- vizuly2.specific style sheets -->
     <link rel="stylesheet" href="../lib/styles/vizuly.css">
 
-    <script src="../lib/d3.min.js"></script>
+    <script src="../lib/d3_v5.7.min.js"></script>
 
     <script src="../lib/vizuly2_core.min.js"></script>
     <script src="../src/SunBurst.js"></script>
@@ -45,7 +45,7 @@
     var d3 = vizuly2.d3;
 
 	// our radial components and an array to hold them
-	var viz = vizuly2.viz.Sunburst(document.getElementById("viz_container"));
+	var viz = vizuly2.viz.Sunburst("#viz_container");
 
 	var data = {};
 
@@ -65,7 +65,8 @@
 
 		d3.json("data/sunburst_federal_budget.json").then(function (json) {
 
-			viz.data(json)                                                      // Expects hierarchical array of objects.
+			data = json
+			viz.data(data)                                                      // Expects hierarchical array of objects.
 				.width('100%')                                                     // Width of component
 				.height('100%')                                                    // Height of component
 				.children(function (d) {

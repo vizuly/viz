@@ -10,7 +10,7 @@
     <!-- vizuly2.specific style sheets -->
     <link rel="stylesheet" href="../lib/styles/vizuly.css">
 
-    <script src="../lib/d3.min.js"></script>
+    <script src="../lib/d3_v5.7.min.js"></script>
 
     <script src="../lib/vizuly2_core.min.js"></script>
     <script src="../src/ColumnChart.js"></script>
@@ -39,7 +39,7 @@
 <script id="testscript">
 
 	// our radial components and an array to hold them
-	var viz = vizuly2.viz.ColumnChart(document.getElementById("viz_container"));
+	var viz = vizuly2.viz.ColumnChart("#viz_container");
 
 	var data = {};
 
@@ -61,9 +61,9 @@
            //  { return countries.indexOf(d.country); })          //property for y axis plot
              .seriesLabel(function (d)
              { return d.category; })
-           //  .barWidth(5)
-           //  .barPadding(1)
-           //  .groupPadding(1)
+            // .barWidth('10%')
+            // .barPadding(2)
+            // .groupPadding('100%')
              .on('mouseover', onMouseOver)
              .on('mouseout', onMouseOut)
              .on('initialized',function () { console.log("INTIALIXED" + this.id())});

@@ -25,17 +25,19 @@ vizuly2.viz.Venn = function (parent) {
 		},
 		"width": 300,                          // Overall width of component
 		"height": 300,                         // Height of component
+		"duration": 500,
 		"padding": 15,
 		"wrapLabels": true,
 		"key": function (d) { return d.setKey },
 		"label": function (d) { return d.label },
 		"value": function (d) { return d.value },
+		"valueFormatter": function (d) { return d3.format(',')(d) },
 		"dataTipRenderer" : dataTipRenderer
 	};
 	
 	var styles = {
-		'background-top': '#FFF',
-		'background-bottom': '#DDD',
+		'background-color-top': '#FFF',
+		'background-color-bottom': '#DDD',
 		'fill-color': function (d,i) {
 			var axisColors = ['#f03b20', '#B02D5D', '#9B2C67', '#982B9A', '#692DA7','#bd0026', '#fecc5c', '#fd8d3c', '#5725AA', '#4823AF', '#d7b5d8', '#dd1c77', '#5A0C7A', '#5A0C7A'];
 			return axisColors[i % axisColors.length]
@@ -126,6 +128,8 @@ vizuly2.viz.Venn = function (parent) {
 		
 		totalSize = d3.sum(scope.data,function (d) { return scope.value(d); })
 		
+		scope.size = size;
+		
 		// Tell everyone we are done making our measurements
 		scope.dispatch.apply('measured', viz);
 		
@@ -171,8 +175,7 @@ vizuly2.viz.Venn = function (parent) {
 		 .append('g')
 		 .attr("class", function(d) {
 			 return "vz-venn-area venn-" +
-				(d.sets.length == 1 ? "circle" : "intersection")
-			  ;
+				(d.sets.length == 1 ? "circle" : "intersection");
 		 })
 		 .attr("data-venn-sets", function(d) {
 			 return d.sets.join("_");
@@ -278,7 +281,7 @@ vizuly2.viz.Venn = function (parent) {
 		var selection = scope.selection;
 		
 		// Update the background
-		styles_backgroundGradient = vizuly2.svg.gradient.blend(viz, viz.getStyle('background-bottom'), viz.getStyle('background-top'));
+		styles_backgroundGradient = vizuly2.svg.gradient.blend(viz, viz.getStyle('background-color-bottom'), viz.getStyle('background-color-top'));
 		
 		// Update the background
 		selection.selectAll(".vz-background").style("fill", function () {
@@ -287,6 +290,11 @@ vizuly2.viz.Venn = function (parent) {
 		
 		
 		selection.selectAll('.vz-venn-area.venn-circle')
+		 .style("fill", function(d,i) { return viz.getStyle('fill-color', arguments); })
+		 .style("stroke", function(d,i) { return viz.getStyle('stroke-color', arguments); })
+		 .style("stroke-opacity", function(d,i) { return viz.getStyle('stroke-opacity', arguments); })
+		
+		selection.selectAll('.vz-venn-area.venn-intersection')
 		 .style("fill", function(d,i) { return viz.getStyle('fill-color', arguments); })
 		 .style("stroke", function(d,i) { return viz.getStyle('stroke-color', arguments); })
 		 .style("stroke-opacity", function(d,i) { return viz.getStyle('stroke-opacity', arguments); })
@@ -302,14 +310,34 @@ vizuly2.viz.Venn = function (parent) {
 	
 	
 	function styles_onMouseOver(e, d, i) {
+		plot.selectAll('.vz-venn-area')
+		 .transition('mouseover')
+		 .style('opacity', .3);
+		
+		d3.select(e)
+		 .transition('mouseover')
+		 .style('opacity', 1)
+		 .selectAll('path')
+		 .style('fill-opacity', .8)
+		
 		viz.showDataTip(e, d, i);
 	}
 	
 	function styles_onMouseOut(e, d, i) {
+		plot.selectAll('.venn-circle, .vz-venn-area path')
+		 .transition('mouse-over')
+		 .style('opacity',1)
+		 .selectAll('path')
+		 .style("fill-opacity", function (d,i) { return viz.getStyle('fill-opacity', arguments)});
+		
 		viz.removeDataTip();
 	}
 	
 	function dataTipRenderer(tip, e, d, i, x, y) {
+		
+		var bounds = e.getBoundingClientRect();
+		var x1 = x + bounds.width/2;
+		var y1 = y;
 		
 		var html = '<div class="vz-tip-header1">HEADER1</div>' +
 		 '<div class="vz-tip-header-rule"></div>' +
@@ -319,29 +347,27 @@ vizuly2.viz.Venn = function (parent) {
 		
 		
 		var h1 = scope.label(d);
-		var h2 = scope.value(d) + ' : ' + (Math.round((scope.value(d)/totalSize) * 100)) + '%';
+		var h2 = scope.valueFormatter(scope.value(d));
 		var h3 = ''; //scope.series(d);
-		var h = 70;
 		
 		if (d.parentSets) {
 			h1 = '';
 			h3 = '';
 			d.parentSets.forEach(function (set) {
-				if (h1.length > 0) h1 = h1 + ' - ';
+				if (h1.length > 0) h1 = h1 + '<br><br>';
 				h1 = h1 + scope.label(set);
-				h3 = h3 + '<div style="margin:5px">' + scope.label(set) + ' : ' + (Math.round((scope.value(d)/scope.value(set)) * 100)) + '%</div>';
+			//	h3 = h3 + '<div style="margin:5px">' + scope.label(set) + ' : ' + (Math.round((scope.value(d)/scope.value(set)) * 100)) + '%</div>';
 			})
-			
-			h = h + (25 * (d.parentSets.length-1));
+
 		}
 		
 		html = html.replace("HEADER1", h1);
 		html = html.replace("HEADER2", h2);
 		html = html.replace("HEADER3", h3);
 		
-		tip.style('height', h + 'px').html(html);
+		tip.html(html);
 		
-		return [(Number(x) + Number(d3.select(e).attr('width'))),y - 50]
+		return [x1 - 100, y1 - 120];
 		
 	}
 	

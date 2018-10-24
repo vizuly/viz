@@ -16,9 +16,6 @@
 //
 vizuly2.viz.TreeMap = function (parent) {
 	
-	
-	
-	
 	var d3 = vizuly2.d3;
 	
 	var properties = {
@@ -58,8 +55,7 @@ vizuly2.viz.TreeMap = function (parent) {
 		'cell-label-opacity': 1,
 		'cell-fill': function (e, d, i) {
 			var colors = ['#bd0026', '#fecc5c', '#fd8d3c', '#f03b20', '#B02D5D', '#9B2C67', '#982B9A', '#692DA7', '#5725AA', '#4823AF', '#d7b5d8', '#dd1c77', '#5A0C7A', '#5A0C7A'];
-			var color = colors[d.data._rootIndex % colors.length];
-			console.log("color = " + color)
+			var color = colors[d.rootIndex % colors.length];
 			var color1 = vizuly2.core.util.rgbToHex(d3.rgb(color));
 			var color2 = vizuly2.core.util.rgbToHex(d3.rgb(color).darker(1));
 			return 'url(#' + vizuly2.svg.gradient.blend(viz, color2, color1).attr('id') + ')';
@@ -122,8 +118,6 @@ vizuly2.viz.TreeMap = function (parent) {
 		// Call our validate routine and make sure all component properties have been set
 		viz.validate();
 		
-		if (treeData == scope.data) drillPath = [];
-		
 		// Get our size based on height, width, and margin
 		size = vizuly2.core.util.size(scope.margin, scope.width, scope.height, scope.parent);
 		
@@ -134,14 +128,16 @@ vizuly2.viz.TreeMap = function (parent) {
 		
 		root = d3.hierarchy(treeData, scope.children)
 		 .eachBefore(function(d) {
-		 	d.id = (d.parent ? d.parent.id + "." : "") + vizuly2.core.util.createCSSKey(scope.key(d.data));
+		 	d.id = (d.parent ? d.parent.id + "_" : "") + vizuly2.core.util.createCSSKey(scope.key(d.data));
 		 	if (d.depth > 0) {
-		 		d.data._rootAncestor = d.parent.data._rootAncestor ? d.parent.data._rootAncestor : scope.key(d.data);
-		 		d.data._rootIndex = rootAncestors.indexOf(d.data._rootAncestor);
+		 		d.rootAncestor = d.parent.rootAncestor ? d.parent.rootAncestor : scope.key(d.data);
+		 		d.rootIndex = rootAncestors.indexOf(d.rootAncestor);
 		  }
 		 })
 		 .sum(scope.value)
 		 .sort(function(a, b) { return b.height - a.height || b.value - a.value; });
+		
+		if (treeData === scope.data) drillPath = [root.data];
 		
 		headerHeight = viz.getStyle('header-font-size') + viz.getStyle('cell-padding-top', [{'depth': 1}]);
 		
@@ -153,6 +149,8 @@ vizuly2.viz.TreeMap = function (parent) {
 		 .paddingTop(viz.style('cell-padding-top'))
 		
 		treemap(root);
+		
+		scope.size = size;
 		
 		// Tell everyone we are done making our measurements
 		scope.dispatch.apply('measured', viz);
@@ -180,23 +178,31 @@ vizuly2.viz.TreeMap = function (parent) {
 		//var cell = plot.selectAll('.vz-treemap-cell-group')
 		// .data(root.leaves(), function (d, i) { return d.id });
 		
+		//Find out Max depth
+		var maxDepth = d3.max(root.descendants(),function (d) { return d.depth });
 		
-		var renderData = root.descendants().filter(function (d) { return (d.parent && d.parent.parent == root) })
+		var depthToShow = (maxDepth > 1) ? 2 : 1;
+		
+		var renderData = root.descendants().filter(function (d) {
+			return (d.depth == depthToShow)
+	  })
+		
 		var cell = plot.selectAll('.vz-treemap-cell-group')
 		 .data(renderData, function (d, i) { return d.id });
 		
 		cell.exit().remove();
 		
 	  var cellEnter = cell.enter().append('g')
-		 .attr('class', function (d) { return 'vz-treemap-cell-group group_' + d.id.split('.')[1] })
+		 .attr('class', function (d) { return 'vz-treemap-cell-group group_' + d.id.split('_')[1] })
 		 .attr('transform', function(d) {return 'translate(' + d.x0 + ',' + d.y0 + ')'; })
 	   .on('mouseover',function (d,i) { scope.dispatch.apply('mouseover',viz, [this, d, i])})
 	   .on('mouseout',function (d,i) { scope.dispatch.apply('mouseout',viz, [this, d, i])})
-	   .on('click',function (d,i) { scope.dispatch.apply('click',viz, [this, d, i])})
+	   .style('cursor',function (d) { return d.children ? 'pointer' : 'not-allowed'})
 		
 		cellEnter.append('rect')
 		 .attr('class','vz-treemap-cell-rect')
 		 .attr('id', function(d) { return d.id; })
+		 .on('click',function (d,i) { scope.dispatch.apply('click',viz, [this, d, i])})
 		
 		cell = cellEnter.merge(cell);
 	 
@@ -247,30 +253,31 @@ vizuly2.viz.TreeMap = function (parent) {
 			
 		})
 		
-	 
 		cell
 		 .transition().duration(scope.duration)
 		 .attr('transform', function(d) { return 'translate(' + d.x0 + ',' + d.y0 + ')'; });
 		
 		root.children.forEach(function (d,i) {
-			var group = plot.select('.group_' + d.id.split('.')[1])
+			var group = plot.select('.group_' + d.id.split('_')[1])
 			group.selectAll('.vz-group-label').remove();
 			
-			var labelText = scope.groupLabel(d.depth > 1 ? d.parent : d)
-			
-			var label = group.append('text')
-			 .attr('class','vz-group-label')
-			 .attr('transform','translate(0,-5)')
-			 .style('cursor','pointer')
-			 .style('font-size',function (d,i) { return viz.getStyle('cell-font-size',[this, d, i]) + 'px'})
-			 .text(labelText);
-			
-			if (label.node()) {
-			
-				var labelWidthRatio = (d.x1-d.x0)/label.node().getComputedTextLength()
+			if (d.children) {
+				var labelText = scope.groupLabel(d.depth > 1 ? d.parent : d)
 				
-				if (labelWidthRatio < 1) {
-					label.text(labelText.substr(0, Math.round(labelText.length * labelWidthRatio)-3) + '...');
+				var label = group.append('text')
+				 .datum(d)
+				 .attr('class','vz-group-label')
+				 .attr('transform','translate(0,-5)')
+				 .style('cursor','pointer')
+				 .style('font-size',function (d,i) { return viz.getStyle('cell-font-size',[this, d, i]) + 'px'})
+				 .text(labelText)
+				 .on('click',function (d,i) { scope.dispatch.apply('click',viz, [this, d, i])})
+				
+				if (label.node()) {
+					var labelWidthRatio = (d.x1-d.x0)/label.node().getComputedTextLength()
+					if (labelWidthRatio < 1) {
+						label.text(labelText.substr(0, Math.round(labelText.length * labelWidthRatio)-3) + '...');
+					}
 				}
 			}
 		})
@@ -319,17 +326,21 @@ vizuly2.viz.TreeMap = function (parent) {
 	function updateDrillPath() {
 		header.selectAll('.vz-drill-label').remove();
 		
+		/*
 		var rootLabel = header.append('text')
 		 .datum(scope.data)
 		 .attr('font-size',function (d,i) { return viz.getStyle('header-font-size',arguments) + 'px'})
 		 .text(scope.label(scope.data));
+		*/
 		
-		var xOffset = rootLabel.node().getBoundingClientRect().width + viz.getStyle('header-font-size',arguments)/2;
+		var xOffset = 0; // rootLabel.node().getBoundingClientRect().width + viz.getStyle('header-font-size',arguments)/2;
 		
-		header.selectAll('.vz-drill-label').data(drillPath).enter()
+		var drillLabels = header.selectAll('.vz-drill-label').data(drillPath);
+		
+		drillLabels.enter()
 		 .append('text')
 		 .attr('class','vz-drill-label')
-		 .text(function (d,i) { return ' > ' + scope.label(d.data)})
+		 .text(function (d,i) { return (i > 0 ? ' > ' : '') + scope.label(d)})
 		 .attr('font-size',function (d,i) { return viz.getStyle('header-font-size',arguments) + 'px'})
 		 .attr('x',function (d,i) {
 		 	  var x = xOffset;
@@ -338,7 +349,7 @@ vizuly2.viz.TreeMap = function (parent) {
 		 })
 		
 		//Apply after we use select above so it doesn't get collected.
-		rootLabel.attr('class','vz-drill-label')
+	//	rootLabel.attr('class','vz-drill-label')
 		
 		var headerWidthRatio = size.width/header.node().getBoundingClientRect().width;
 		
@@ -355,10 +366,10 @@ vizuly2.viz.TreeMap = function (parent) {
 		}
 		
 		header.selectAll('.vz-drill-label')
-		 .on('click', function (d,i) { drillPath_onClick(d) })
-		 .style('cursor', function (d,i) { return i < drillPath.length ? 'pointer' : 'auto' })
-		 .style('pointer-events', function (d,i) { return i < drillPath.length ? 'auto' : 'none' })
-		 .style('font-weight', function (d,i) { return i < drillPath.length ? 'bold' : 'normal' })
+		 .on('click', function (d,i) { if (i < drillPath.length) drillPath_onClick(d) })
+		 .style('cursor', function (d,i) { return i < drillPath.length - 1 ? 'pointer' : 'auto' })
+		 .style('pointer-events', function (d,i) { return i < drillPath.length - 1 ? 'auto' : 'none' })
+		 .style('font-weight', function (d,i) { return i < drillPath.length - 1 ? 'bold' : 'normal' })
 	}
 	
 	// This is our public update call that all vizuly2.viz's implement
@@ -410,6 +421,7 @@ vizuly2.viz.TreeMap = function (parent) {
 		 	  return 'translate(' + padding + ',' + padding + ')'
 		 })
 		 .style('fill',function (d,i) { return viz.getStyle('cell-label-color', [this, d, i])})
+		 .style('pointer-events','none')
 		 .style('display',function (d,i) { return this.getBoundingClientRect().width * 0.9 > d.x1-d.x0 ? 'none' : 'block'})
 		
 		plot.selectAll('.vz-group-label')
@@ -430,7 +442,7 @@ vizuly2.viz.TreeMap = function (parent) {
 		 .style('opacity',function (datum) { return (d != datum) ? .25 : 1 })
 		
 		viz.removeDataTip();
-		viz.showDataTip(e,d.data,i)
+		viz.showDataTip(e,d,i)
 	}
 	
 	function styles_onMouseOut(e,d,i) {
@@ -441,32 +453,23 @@ vizuly2.viz.TreeMap = function (parent) {
 		viz.removeDataTip();
 	}
 	
+	
 	function styles_onClick(e,d,i) {
-		if (!scope.children(d.data)) return;
+		if (!d.children) { return; }
 		
-		drillPath.push(d.parent)
-		update(d.parent.data)
-		
-		return;
-		
-		if (d3.select(d3.event.target).attr('class') == 'vz-treemap-cell-rect') {
-			if (drillPath.indexOf(d.parent) < 0) {
-				drillPath.push(d.parent);
-			}
-			if (drillPath.indexOf(d) < 0) {
-				drillPath.push(d);
-			}
-			update(d.parent.data);
+		if (drillPath.indexOf(d.parent.data) < 0) {
+			drillPath.push(d.parent.data);
 		}
-		else {
-			drillPath.push(d.parent)
-			update(d.parent.data)
+		if (drillPath.indexOf(d) < 0) {
+			drillPath.push(d.data);
 		}
+		update(d.data);
+		
 	}
 	
 	function drillPath_onClick(d) {
-		drillPath.pop();
-		update((d.data) ? d.data : d);
+		drillPath.splice(drillPath.indexOf(d)+1,drillPath.length - drillPath.indexOf(d) - 1);
+		update(d);
 	}
 	
 	function getCellParent(d) {
@@ -482,8 +485,8 @@ vizuly2.viz.TreeMap = function (parent) {
 		 '<div class="vz-tip-header-rule"></div>' +
 		 '<div class="vz-tip-header2"> HEADER2 </div>';
 		
-		var h1 = scope.label(d);
-		var h2 = scope.valueFormatter(scope.value(d));
+		var h1 = scope.label(d.data);
+		var h2 = scope.valueFormatter(d.value);
 		
 		html = html.replace("HEADER1", h1);
 		html = html.replace("HEADER2", h2);

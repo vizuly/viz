@@ -29,6 +29,7 @@ vizuly2.viz.WordCloud = function (parent) {
 		},
 		"width": 300,                          // Overall width of component
 		"height": 300,                     // Height of component
+		"duration": 500,
 		"hideWords": "i,me,my,myself,we,us,our,ours,ourselves,you,your,yours,yourself,yourselves,he,him,his,himself,she,her,hers,herself,it,its,itself,they,them,their,theirs,themselves,what,which,who,whom,whose,this,that,these,those,am,is,are,was,were,be,been,being,have,has,had,having,do,does,did,doing,will,would,should,can,could,ought,i'm,you're,he's,she's,it's,we're,they're,i've,you've,we've,they've,i'd,you'd,he'd,she'd,we'd,they'd,i'll,you'll,he'll,she'll,we'll,they'll,isn't,aren't,wasn't,weren't,hasn't,haven't,hadn't,doesn't,don't,didn't,won't,wouldn't,shan't,shouldn't,can't,cannot,couldn't,mustn't,let's,that's,who's,what's,here's,there's,when's,where's,why's,how's,a,an,the,and,but,if,or,because,as,until,while,of,at,by,for,with,about,against,between,into,through,during,before,after,above,below,to,from,up,upon,down,in,out,on,off,over,under,again,further,then,once,here,there,when,where,why,how,all,any,both,each,few,more,most,other,some,such,no,nor,not,only,own,same,so,than,too,very,say,says,said,shall",          // Remove these words from results
 		"showNumbers": false,
 		"fontSizeMax": 30,
@@ -38,8 +39,10 @@ vizuly2.viz.WordCloud = function (parent) {
 	var styles = {
 		'background-color-top': '#FFF',
 		'background-color-bottom': '#DDD',
-		'text-fill-colors': [ '#1f77b4', '#aec7e8', '#ff7f0e', '#ffbb78', '#2ca02c', '#98df8a', '#d62728', '#ff9896', '#9467bd', '#c5b0d5', '#8c564b', '#c49c94', '#e377c2', '#f7b6d2', '#7f7f7f', '#c7c7c7', '#bcbd22', '#dbdb8d', '#17becf', '#9edae5'],
-		'text-color': function (d,i) { var colors = this.getStyle('text-fill-colors'); return colors[i % colors.length] },
+		'label-color': function (d,i) {
+			var colors = ['#1f77b4', '#aec7e8', '#ff7f0e', '#ffbb78', '#2ca02c', '#98df8a', '#d62728', '#ff9896', '#9467bd', '#c5b0d5', '#8c564b', '#c49c94', '#e377c2', '#f7b6d2', '#7f7f7f', '#c7c7c7', '#bcbd22', '#dbdb8d', '#17becf', '#9edae5'];
+			return colors[i % colors.length]
+		},
 		'font-family': 'Impact'
 	}
 	
@@ -122,6 +125,8 @@ vizuly2.viz.WordCloud = function (parent) {
 		 .font(viz.getStyle('font-family'))
 		 .fontSize(function(d) { return fontScale(+d.value); } )
 		
+		scope.size = size;
+		
 		// Tell everyone we are done making our measurements
 		scope.dispatch.apply('measured', viz);
 		
@@ -197,9 +202,9 @@ vizuly2.viz.WordCloud = function (parent) {
 		});
 		
 		plot.selectAll('.vz-wordcloud-word')
-		 .style('fill',function (d,i) { return viz.getStyle('text-color', arguments) })
+		 .style('fill',function (d,i) { return viz.getStyle('label-color', arguments) })
 		 .style("font-size", function(d) { return fontScale(d.value) + "px"; })
-		 .style("font-family", "Impact");
+		 .style("font-family", function (d,i) { return viz.getStyle('font-family', arguments); })
 		
 		scope.dispatch.apply('styled', viz);
 		

@@ -160,6 +160,8 @@ vizuly2.viz.ScatterPlot = function (parent) {
 		scope.xAxis.scale(scope.xScale).tickFormat(scope.xTickFormat).tickSize(viz.getStyle('axis-font-size')/2)
 		scope.yAxis.scale(scope.yScale).tickFormat(scope.yTickFormat).tickSize(-vizuly2.core.util.size(scope.margin, size.measuredWidth, size.measuredHeight).width).ticks(5)
 		
+		scope.size = size;
+		
 		// Tell everyone we are done making our measurements
 		scope.dispatch.apply('measured', viz);
 		

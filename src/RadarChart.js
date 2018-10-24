@@ -209,7 +209,6 @@ vizuly2.viz.RadarChart = function (parent) {
 		outerRadius = Math.round(Math.min(size.width, size.height)/2)
 		innerRadius = 0;
 		
-		
 		// Set our radius scale range
 		scope.radiusScale.range([innerRadius, outerRadius]);
 		
@@ -250,6 +249,8 @@ vizuly2.viz.RadarChart = function (parent) {
 		
 		// Measure the tipRadius (used to detect interaction events)
 		tipRadius = Math.min(size.width / 50, size.height / 50);
+		
+		scope.size = size;
 		
 		// Tell everyone we are done measuring.
 		scope.dispatch.apply('measured', viz);
@@ -667,7 +668,6 @@ vizuly2.viz.RadarChart = function (parent) {
 	function styles_vertexOnMouseOut(e, d, i, j) {
 		
 		var selection = scope.selection;
-		
 		
 		// Animate area opacity back to original
 		selection.selectAll(".vz-radar-area")

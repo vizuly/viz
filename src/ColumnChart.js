@@ -90,22 +90,23 @@ vizuly2.viz.ColumnChart = function (parent) {
 		 */
 		'duration': 500,
 		/**
-		 * The height of each bar in pixels.  The default value of "-1" will auto size bars based on padding and chart height.
+		 * The width of each bar in pixels.  The default value of "auto" will auto size bars based on padding and chart height.
 		 * @member {Number}
-		 * @default  -1
+		 * @default  'auto'
 		 */
-		'barWidth': -1,
+		'barWidth': 'auto',
 		/**
 		 * <img src='BarChartPadding.png'><br><br>
 		 * Determines space between bars within a series group.  Can be represented as a pixel (Number) or a percentage ('20%').
 		 * Using a percentage will try and optimize the spacing based on the number of bars and the height of the chart.  Using a fixed number
 		 * will ignore the chart "height" property and space bars a fixed distance apart, so the resulting chart height may differ.
 		 * This allows for creating consistently padded charts regardless of the number of elements within the series.
+		 * NEED TO UPDATE DOCS FOR NEW AUTO SETTING
 		 * @member {String}
 		 * @default 20%
 		 *
 		 */
-		'barPadding': '20%',
+		'barPadding': 'auto',
 		/**
 		 * <img src='BarChartPadding.png'><br><br>
 		 * Determines space between series groups.  Can be represented as a pixel (Number) or a percentage ('20%').
@@ -116,7 +117,7 @@ vizuly2.viz.ColumnChart = function (parent) {
 		 * @default 20%
 		 *
 		 */
-		'groupPadding': '30%',
+		'groupPadding': 'auto',
 		/**
 		 * Function that returns the datum property used to calculate the width of the bar.  This accessor is called for each bar that is being rendered.
 		 * @member {Function}
@@ -400,24 +401,24 @@ vizuly2.viz.ColumnChart = function (parent) {
 		// Get our size based on height, width, and margin
 		size = vizuly2.core.util.size(scope.margin, scope.width, scope.height, scope.parent);
 		
-		//If we have fixed bar width then we will override the height of the component
-		if (scope.barWidth > 0) {
+		//If we have fixed bar width then we will override the width of the component
+		if (scope.barWidth != 'auto') {
 			barWidth = scope.barWidth;
-			barPadding = calculatePadding(scope.barPadding, barWidth);
+			barPadding = calculateBarPadding(scope.barPadding, barWidth);
 			groupWidth = (scope.layout == vizuly2.viz.layout.STACKED) ? (barWidth + barPadding) : (barWidth + barPadding) * scope.data.length;
-			groupPadding = calculatePadding(scope.groupPadding, groupWidth);
+			groupPadding = calculateGroupPadding(scope.groupPadding, groupWidth);
 			size.width = (groupWidth + groupPadding) * scope.data[0].length;
 			size.left = (size.measuredWidth - size.width)/2;
 			size.right = size.left;
 		}
 		else {
 			// The width of each group of bars for a given data point and all of series
-			groupWidth = (size.width / scope.data[0].length);
-			groupPadding = calculatePadding(scope.groupPadding, groupWidth);
+			groupWidth = (size.width / scope.data[0].length) * .9;
+			groupPadding = calculateGroupPadding(scope.groupPadding, groupWidth);
 			groupWidth = groupWidth - groupPadding;
 			// The width of an individual bar for a given data point a single series
 			barWidth = (scope.layout == vizuly2.viz.layout.STACKED) ? groupWidth : (groupWidth / scope.data.length);
-			barPadding = calculatePadding((scope.layout == vizuly2.viz.layout.STACKED)  ? 0 : scope.barPadding, barWidth);
+			barPadding = calculateBarPadding((scope.layout == vizuly2.viz.layout.STACKED)  ? 0 : scope.barPadding, barWidth);
 			if (barPadding > barWidth) barPadding = barWidth-2;
 			barWidth = barWidth - barPadding;
 		}
@@ -506,13 +507,37 @@ vizuly2.viz.ColumnChart = function (parent) {
 		scope.xAxis.tickFormat(scope.xTickFormat).tickSize(-size.height);
 		scope.yAxis.tickFormat(scope.yTickFormat).tickSize(-size.width).ticks(5);
 		
+		scope.size = size;
+		
 		// Tell everyone we are done making our measurements
 		scope.dispatch.apply('measured', viz);
 	}
 	
-	function calculatePadding(padding, w) {
+	function calculateBarPadding(padding, w) {
 		var val = 0;
-		if(typeof padding == 'string' && padding.substr(padding.length-1) == '%') {
+		
+		if (String(padding).toLowerCase() == 'auto') {
+			val = Math.round(w * 0.2)
+		}
+		else if(typeof padding == 'string' && padding.substr(padding.length-1) == '%') {
+			var r = Math.min(Number(padding.substr(0,padding.length-1)),100)/100;
+			val = Math.round(w * r);
+		}
+		else if (!isNaN(Number(padding))) {
+			val = Number(padding);
+		}
+		else {
+			val = 10;
+		}
+		return val;
+	}
+	
+	function calculateGroupPadding(padding, w) {
+		var val = 0;
+		if (String(padding).toLowerCase() == 'auto') {
+			val = Math.round((size.width-(w * scope.data[0].length))/scope.data[0].length);
+		}
+		else if(typeof padding == 'string' && padding.substr(padding.length-1) == '%') {
 			var r = Math.min(Number(padding.substr(0,padding.length-1)),100)/100;
 			val = Math.round(w * r);
 		}

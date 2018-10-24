@@ -10,7 +10,7 @@
     <!-- vizuly2.specific style sheets -->
     <link rel="stylesheet" href="../lib/styles/vizuly.css">
 
-    <script src="../lib/d3.min.js"></script>
+    <script src="../lib/d3_v5.7.min.js"></script>
 
     <script src="../lib/vizuly2_core.min.js"></script>
     <script src="../src/ScatterPlot.js"></script>
@@ -34,7 +34,7 @@
 <script id="testscript">
 
 	// our radial components and an array to hold them
-	var viz = vizuly2.viz.ScatterPlot(document.getElementById("viz_container"));
+	var viz = vizuly2.viz.ScatterPlot("#viz_container");
 
 	var data;
 

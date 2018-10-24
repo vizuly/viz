@@ -24,17 +24,15 @@ var defaultStyles = {};
 
 var autumnStyles =
  {
-	 'background-color-top': '#FFF',
-	 'background-color-bottom': '#FFF',
-	 'label-color': '#000',
-	 'y-axis-line-stroke': '#000',
-	 'area-fill': function (d, i) {
-		 var fillColors = ['#f00a0a', '#C2185B', '#F57C00', '#FF9800', '#FFEB3B'];
-		 return 'url(#' + vizuly2.svg.gradient.radialFade(viz, fillColors[i % 5], [.35, 1]).attr('id') + ')';
-	 },
-	 'line-stroke': function (d, i) {
-		 var strokeColors = ['#FFA000', '#FF5722', '#F57C00', '#FF9800', '#FFEB3B'];
-		 return strokeColors[i % 5];
+	 'background-color-top': '#fff3e7',
+	 'background-color-bottom': '#ffd7d1',
+	 'group-label-color': '#000',
+	 'header-label-color': '#FF6D6F',
+	 'cell-fill': function (e, d, i) {
+		 var colors = ['#F57C00', '#FF9800', '#FFEB3B', '#ff0a0a', '#fa1c6e'];
+		 var color = colors[d.rootIndex % colors.length];
+		 var color1 = vizuly2.core.util.rgbToHex(d3.rgb(color).brighter(1));
+		 return 'url(#' + vizuly2.svg.gradient.blend(viz, color1, color).attr('id') + ')';
 	 }
  }
 
@@ -44,22 +42,16 @@ var fireStyles =
 	 'background-color-bottom': '#950101',
 	 'group-label-color': '#FFF',
 	 'cell-label-opacity': 0.7,
-	 'header-label-color': function (d, i) {
-	 	 if (!d.data) return '#BBB';
-		 var colors = ['#F57C00', '#FF9800', '#FFEB3B', '#f00a0a', '#C2185B'];
-		 var color = colors[d.data._rootIndex % colors.length];
-		 var color1 = vizuly2.core.util.rgbToHex(d3.rgb(color).brighter(1));
-		 return color1;
-	 },
+	 'header-label-color': '#BBB',
 	 'cell-fill': function (e, d, i) {
 		 var colors = ['#F57C00', '#FF9800', '#FFEB3B', '#ff0a0a', '#fa1c6e'];
-		 var color = colors[d.data._rootIndex % colors.length];
+		 var color = colors[d.rootIndex % colors.length];
 		 return color
 	 },
 	 'area-fill-opacity-over': 1,
 	 'cell-stroke': function (e, d, i) {
 		 var colors = ['#F57C00', '#FF9800', '#FFEB3B', '#f00a0a', '#C2185B'];
-		 var color = colors[d.data._rootIndex % colors.length];
+		 var color = colors[d.rootIndex % colors.length];
 		 var color1 = vizuly2.core.util.rgbToHex(d3.rgb(color).brighter(1));
 		 return color1;
 	 }
@@ -69,51 +61,43 @@ var oceanStyles =
  {
 	 'background-color-top': '#039FDB',
 	 'background-color-bottom': '#021F51',
-	 'label-color': '#FFF',
-	 'y-axis-fill': '#FFF',
-	 'y-axis-line-stroke': '#FFF',
-	 'x-axis-line-stroke': '#FFF',
-	 'area-fill': function (d, i) {
-		 return 'url(#' + vizuly2.svg.gradient.radialFade(viz, '#FFF', [.35, 1]).attr('id') + ')';
+	 'group-label-color': '#FFF',
+	 'header-label-color': function (d, i) {
+		 return '#FFF';
 	 },
-	 'line-stroke': function (d, i) {
-		 var strokeColors = 	['#0b4ca1', '#0b4ca1', '#0b4ca1', '#0b4ca1', '#0b4ca1'];
-		 return strokeColors[i % 5];
-	 },
-	 'line-stroke-over': '#FFF'
+	 'cell-fill': function (e, d, i) {
+		 var color = '#FFF'
+		 var color1 = vizuly2.core.util.rgbToHex(d3.rgb('#039FDB').brighter(1));
+		 return 'url(#' + vizuly2.svg.gradient.blend(viz, color, color1).attr('id') + ')';
+	 }
  }
 
 var neonStyles =
  {
 	 'background-color-top': '#474747',
 	 'background-color-bottom': '#000000',
-	 'label-color': '#FFF',
-	 'y-axis-line-stroke': '#FFF',
-	 'y-axis-fill': '#FFF',
-	 'x-axis-line-stroke': '#FFF',
-	 'area-fill': function (d, i) {
-		 var fillColors = ['#D1F704', '#D1F704', '#D1F704', '#D1F704', '#D1F704']
-		 return 'url(#' + vizuly2.svg.gradient.fade(viz, fillColors[i % 5], 'vertical', [.35, 1]).attr('id') + ')';
-	 },
-	 'line-stroke': '#FFFF00',
-	 'line-stroke-over': null
+	 'group-label-color': '#FFF',
+	 'header-label-color': '#e7f710',
+	 'cell-label-color': '#000',
+	 'cell-fill': function (e, d, i) {
+		 var color = '#E7F710';
+		 var color1 = vizuly2.core.util.rgbToHex(d3.rgb('#E7F710').darker(1));
+		 return 'url(#' + vizuly2.svg.gradient.blend(viz, color1, color).attr('id') + ')';
+	 }
  }
 
-var businessColors = d3.scaleOrdinal(d3.schemeCategory10).domain([0,5]);
+var businessColors = d3.scaleOrdinal(d3.schemeCategory10).domain([0,10]);
 
 var businessStyles =
  {
 	 'background-color-top': '#FEFEFE',
 	 'background-color-bottom': '#DADADA',
-	 'label-color': '#000',
-	 'y-axis-stroke': '#000',
-	 'x-axis-stroke': '#F000',
-	 'area-fill': function (d, i) {
-		 console.log(businessColors(i))
-		 return businessColors(i);
+	 'header-label-color': function (d, i) {
+		 if (!d.rootIndex) return '#BBB';
+		 return businessColors(d.rootIndex);
 	 },
-	 'line-stroke': function (d, i) {
-		 return businessColors(i);
+	 'cell-fill': function (e, d, i) {
+		 return businessColors(d.rootIndex);
 	 }
  }
 
