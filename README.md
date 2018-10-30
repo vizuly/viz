@@ -1,4 +1,4 @@
-# vizuly
+# Vizuly 2.0 Beta
 
 ## Getting Started
 
