@@ -3,6 +3,7 @@ var viz_container;
 var businessColors = d3.scaleOrdinal(d3.schemeCategory10).domain([0,5]);
 
 var styles = {
+	'background-opacity': 0,
 	'label-color': '#0000FF',
 	'background-color-top': '#0000FF',
 	'background-color-bottom': '#0000FF',
@@ -18,23 +19,7 @@ var styles = {
 }
 
 
-var defaultStyles =
- {
-	 'background-color-top': '#FEFEFE',
-	 'background-color-bottom': '#DADADA',
-	 'label-color': '#000',
-	 'axis-stroke': '#000',
-	 'area-fill': function (d, i) {
-		 var axiisColors = ['#B02D5D', '#9B2C67', '#982B9A', '#692DA7', '#5725AA', '#4823AF', '#d7b5d8', '#dd1c77', '#5A0C7A', '#5A0C7A', '#bd0026', '#fecc5c', '#fd8d3c', '#f03b20'];
-		 return axiisColors[i % axiisColors.length]
-	 },
-	 'line-stroke': function (d, i) {
-		 var axiisColors = ['#B02D5D', '#9B2C67', '#982B9A', '#692DA7', '#5725AA', '#4823AF', '#d7b5d8', '#dd1c77', '#5A0C7A', '#5A0C7A', '#bd0026', '#fecc5c', '#fd8d3c', '#f03b20'];
-		 return axiisColors[i % axiisColors.length]
-	 },
-	 'line-stroke-over': null
- }
-
+var defaultStyles = {}
  
 var fireStyles =
  {
@@ -211,8 +196,7 @@ function runDemo() {
 	]
 
 	
-		createDemoMenu(demoOptions,600, 600,'vizuly - linearea chart', styles);
-		changeSize(600 + ',' + 600);
-		changeStyles('defaultStyles');
+		createDemoMenu(demoOptions,600, 600,'vizuly 2.0 - linearea chart', styles);
+
 }
 

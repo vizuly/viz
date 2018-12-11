@@ -1,46 +1,185 @@
 /*
- Starting point for a vizuly2.core.component
+ Copyright (c) 2019, BrightPoint Consulting, Inc.
  
- // @version 2.1.45
- 
+ All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification,
+are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
+
+* Neither the name of the author nor the names of contributors may be used to
+  endorse or promote products derived from this software without specific prior
+  written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
+// @version 2.1.45
+
+/**
+ * @class
  */
-vizuly2.viz.Sunburst = function (parent) {
-	
-	
-	
+vizuly2.viz.SunBurst = function (parent) {
 	
 	var d3 = vizuly2.d3;
 	
+	/** @lends vizuly2.viz.SunBurst.properties */
 	var properties = {
-		"data": null,              	// nested hierarchy of objects
-		"margin": {                	// Our marign object
-			"top": "5%",           	// Top margin
-			"bottom": "5%",        		// Bottom margin
-			"left": "5%",          		// Left margin
-			"right": "5%"          		// Right margin
+		/**
+		 * Hierarchical nested array of nodes to be rendered.
+		 * @member {Array}
+		 * @default Needs to be set at runtime
+		 * @example
+		 * [{
+		 * "key": "Pensions",
+		 * "values": [
+		 *  {
+		 *  "key": "Old age",
+		 *  "values": [
+		 *   {
+		 *     "key": "Federal employee retirement and disability (602)",
+		 *     "values": [
+		 *      {
+		 *        "Category": "Special Benefits",
+		 *        "Level1": "Pensions",
+		 *        "Level2": "Old age",
+		 *        "Level3": "Federal employee retirement and disability (602)",
+		 *        "Level4": "Special Benefits",
+		 *        "Federal": "0.38",
+		 *         ...
+		 */
+		'data': null,
+		/**
+		 * Width of component in either pixels (Number) or percentage of parent container (%)
+		 * @member {Number}
+		 * @default 600
+		 */
+		'width': 600,
+		/**
+		 * Height of component in either pixels (Number) or percentage of parent container (%)
+		 * @member {Number}
+		 * @default 600
+		 */
+		'height': 600,
+		/**
+		 * Margins between component render area and border of container.  This can either be a fixed pixels (Number) or a percentage (%) of height/width.
+		 * @member {Object}
+		 * @default  {top:'5%', bottom:'5%', left:'8%', right:'10%'}
+		 */
+		'margin': {
+			'top': '5%',
+			'bottom': '5%',
+			'left': '5%',
+			'right': '5%'
 		},
-		"duration": 750,            // This the time in ms used for any component generated transitions
-		"width": 300,               // Overall width of component
-		"height": 300,              // Height of component
-		"children": function (d) {	// Child accessor function for nest
+		/**
+		 * Duration (in milliseconds) of any component transitions.
+		 * @member {Number}
+		 * @default  500
+		 */
+		'duration': 500,
+		/**
+		 * Function used to access the array of values representing child nodes for a given branch.
+		 * @member {Function}
+		 * @default function (d) { return d.values }
+		 */
+		'children': function (d) {
 			return d.values
 		},
-		"value": function (d) {			// Accessor for value used to calculate arc segment
+		/**
+		 * Function that returns value that determines arc length of a given segment
+		 * @member {String}
+		 * @default function (d) { return d.value }
+		 */
+		'value': function (d) {
 			return d.value
 		},
-		"valueLabel": function (d) {
+		/**
+		 * Function that returns string value used in data tip.
+		 * @member {String}
+		 * @default function (d) { return d.value }
+		 */
+		'valueLabel': function (d) {
 			return d.value;
 		},
-		"key": function (d) {				// Accessor used for unique key in nest
+		/**
+		 * Function that returns a unique identifier for a given datum.
+		 *
+		 * @member {String}
+		 * @default function (d) { return d.key }
+		 *
+		 */
+		'key': function (d) {
 			return d.key
 		},
-		"label": function (d) {			// Accessor used for arc segment label
+		/**
+		 * Function that returns string label displayed in each arc.
+		 * @member {String}
+		 * @default function (d) { return d.label }
+		 */
+		'label': function (d) {
 			return d.label
 		},
-		"dataTipRenderer": dataTipRenderer
+		/**
+		 *  The dataTipRenderer is used to customize the data tip that is shown on mouse-over events.
+		 *  You can append to or modify the 'tip' parameter to customize the data tip.
+		 *  You can also return modified x, y coordinates to place the data tip in a different location.
+		 * @member {function}
+		 * @default internal.dataTipRenderer
+		 * @example
+		 * // tip - html DIV element
+		 * // e - svg rect of the bar being moused over
+		 * // d - datum
+		 * // i - datum index
+		 * // x - suggested x position of data tip
+		 * // y - suggested y position of data tip
+		 * // return {Array} [x, y] - x and y coordinates placing data tip.
+		 *
+		 *function dataTipRenderer(tip, e, d, i, x, y) {
+		 *	  var html = '<div class="vz-tip-header1">HEADER1</div>' +
+		 *		var bounds = e.getBoundingClientRect();
+		 *		var x1 = d3.event.pageX; - bounds.left;
+		 *		var y1 = d3.event.pageY; - bounds.top;
+		 *
+		 *		var html = '<div class="vz-tip-header1">HEADER1</div>' +
+		 *		 '<div class="vz-tip-header-rule"></div>' +
+		 *		 '<div class="vz-tip-header2"> HEADER2 </div>' +
+		 *		 '<div class="vz-tip-header-rule"></div>' +
+		 *		 '<div class="vz-tip-header3" style="font-size:12px;"> HEADER3 </div>';
+		 *
+		 *		var h1 = scope.label(d.data);
+		 *		var h2 = scope.valueLabel(d.data);
+		 *		var h3 = "Level: " + d.depth;
+		 *
+		 *		html = html.replace("HEADER1", h1);
+		 *		html = html.replace("HEADER2", h2);
+		 *		html = html.replace("HEADER3", h3);
+		 *
+		 *		tip.style('height','80px').html(html);
+		 *
+		 *		return [x1 - 100, y1 - 120];
+		 *}
+		 */
+		'dataTipRenderer': dataTipRenderer
 	};
 	
 	var styles = {
+		'background-opacity': 1,
 		'background-color-top': "#FFF",
 		'background-color-bottom': "#e2e2e2",
 		'stroke': function (d, i) {
@@ -72,7 +211,46 @@ vizuly2.viz.Sunburst = function (parent) {
 		}
 	};
 	
-	var events = ['mouseover', 'mouseout', 'click']
+	
+	/** @lends vizuly2.viz.SunBurst.events */
+	var events = [
+		/**
+		 * Fires when user moves the mouse over an arc plot.
+		 * @event vizuly2.viz.SunBurst.mouseover
+		 * @type {VizulyEvent}
+		 * @param e - DOM element that fired event
+		 * @param d - Datum associated with DOM element
+		 * @param i - Index of datum in display series
+		 * @param j -  The series index of the datum
+		 * @param this -  Vizuly Component that emitted event
+		 * @example  viz.on('mouseover', function (e, d, i) { ... });
+		 */
+		'mouseover',
+		/**
+		 * Fires when user moves the mouse off an arc plot.
+		 * @event vizuly2.viz.SunBurst.mouseout
+		 * @type {VizulyEvent}
+		 * @param e - DOM element that fired event
+		 * @param d - Datum associated with DOM element
+		 * @param i - Index of datum in display series
+		 * @param j -  The series index of the datum
+		 * @param this -  Vizuly Component that emitted event
+		 * @example  viz.on('mouseout', function (e, d, i) { ... });
+		 */
+		'mouseout',
+		/**
+		 * Fires when user clicks on a given arc plot.
+		 * @event vizuly2.viz.SunBurst.click
+		 * @type {VizulyEvent}
+		 * @param e - DOM element that fired event
+		 * @param d - Datum associated with DOM element
+		 * @param i - Index of datum in display series
+		 * @param j -  The series index of the datum
+		 * @param this -  Vizuly Component that emitted event
+		 * @example  viz.on('click', function (e, d, i) { ... });
+		 */
+		'click'
+	 ];
 	
 	// This is the object that provides pseudo "protected" properties that the vizuly.viz function helps create
 	var scope = {};
@@ -388,8 +566,6 @@ vizuly2.viz.Sunburst = function (parent) {
 		return viz;
 	};
 	
-	var styles_backgroundGradient;
-	
 	// styles and styles
 	var stylesCallbacks = [
 		{on: 'updated.styles', callback: applyStyles},
@@ -422,17 +598,14 @@ vizuly2.viz.Sunburst = function (parent) {
 		// If we don't have a styles we want to exit - as there is nothing we can do.
 		if (!scope.styles || scope.styles == null) return;
 		
-		styles_backgroundGradient = vizuly2.svg.gradient.blend(viz, viz.getStyle('background-color-bottom'), viz.getStyle('background-color-top'));
+		var styles_backgroundGradient = vizuly2.svg.gradient.blend(viz, viz.getStyle('background-color-bottom'), viz.getStyle('background-color-top'));
 		
 		// Update the background
 		scope.selection.selectAll(".vz-background").style("fill", function () {
 			return "url(#" + styles_backgroundGradient.attr("id") + ")";
-		});
+		})
+		 .style('opacity',viz.getStyle('background-opacity'));
 		
-		
-		plot.selectAll(".vz-sunburst-arc")
-		 .filter(function (d) { return d.depth == 0})
-		 .style('display', 'none')
 		
 		plot.selectAll(".vz-sunburst-arc")
 		 .style("fill", function (d, i) {
@@ -494,8 +667,6 @@ vizuly2.viz.Sunburst = function (parent) {
 		tip.style('height','80px').html(html);
 		
 		return [x1 - 100, y1 - 120];
-		
-		//return [(Number(x) + Number(d3.select(e).attr('width'))),y - 50]
 		
 	}
 	

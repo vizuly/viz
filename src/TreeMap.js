@@ -1,44 +1,178 @@
 /*
- Copyright (c) 2016, BrightPoint Consulting, Inc.
+ Copyright (c) 2019, BrightPoint Consulting, Inc.
  
- This source code is covered under the following license: http://vizuly2.io/commercial-license/
- 
- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
- THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS
- OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
- TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- */
+ All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification,
+are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
+
+* Neither the name of the author nor the names of contributors may be used to
+  endorse or promote products derived from this software without specific prior
+  written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
 
 // @version 2.1.24
 
-//
-// This is the base component for a vizuly2.bar chart.
-//
+/**
+ * @class
+ */
 vizuly2.viz.TreeMap = function (parent) {
 	
 	var d3 = vizuly2.d3;
 	
+	/** @lends vizuly2.viz.TreeMap.properties */
 	var properties = {
+		/**
+		 * Hierarchical nested array of nodes to be rendered.
+		 * @member {Array}
+		 * @default Needs to be set at runtime
+		 * @example
+		 * [{
+		 * "key": "Pensions",
+		 * "values": [
+		 *  {
+		 *  "key": "Old age",
+		 *  "values": [
+		 *   {
+		 *     "key": "Federal employee retirement and disability (602)",
+		 *     "values": [
+		 *      {
+		 *        "Category": "Special Benefits",
+		 *        "Level1": "Pensions",
+		 *        "Level2": "Old age",
+		 *        "Level3": "Federal employee retirement and disability (602)",
+		 *        "Level4": "Special Benefits",
+		 *        "Federal": "0.38",
+		 *         ...
+		*/
 		'data': null,
-		'margin': {                            // Our margin object
-			'top': 10,                       // Top margin
-			'bottom': 10,                    // Bottom margin
-			'left': 10,                      // Left margin
-			'right': 10                      // Right margin
+		/**
+		 * Width of component in either pixels (Number) or percentage of parent container (%)
+		 * @member {Number}
+		 * @default 600
+		 */
+		'width': 600,
+		/**
+		 * Height of component in either pixels (Number) or percentage of parent container (%)
+		 * @member {Number}
+		 * @default 600
+		 */
+		'height': 600,
+		/**
+		 * Margins between component render area and border of container.  This can either be a fixed pixels (Number) or a percentage (%) of height/width.
+		 * @member {Object}
+		 * @default  {top:'5%', bottom:'5%', left:'8%', right:'10%'}
+		 */
+		'margin': {
+			'top': '2%',
+			'bottom': '2%',
+			'left': '2%',
+			'right': '2%'
 		},
-		'width': 300,                          // Overall width of component
-		'height': 300,                         // Height of component
-		'duration': 500,                        // duration of transition
-		'value': function (d) { return d.size },
+		/**
+		 * Duration (in milliseconds) of any component transitions.
+		 * @member {Number}
+		 * @default  500
+		 */
+		'duration': 500,
+		/**
+		 * Function used to access the array of values representing child nodes for a given branch.
+		 * @member {Function}
+		 * @default function (d) { return d.values }
+		 */
+		'children': function (d) {
+			return d.values
+		},
+		/**
+		 * Function that returns value that determines the total area of a given rectangle plot.
+		 * @member {String}
+		 * @default function (d) { return d.value }
+		 */
+		'value': function (d) {
+			return d.value
+		},
+		/**
+		 * Function that returns value that determines the total area of a given rectangle plot.
+		 * @member {String}
+		 * @default function (d) { return d3.format(',')(d) }
+		 */
 		'valueFormatter': function (d) { return d3.format(',')(d) },
+		/**
+		 * Function that returns a unique identifier for a given datum.
+		 *
+		 * @member {String}
+		 * @default function (d) { return d.key }
+		 *
+		 */
 		'key': function (d) { return d.key },
+		/**
+		 * Function that returns string label displayed in rectangle plot.
+		 * @member {String}
+		 * @default function (d) { return d.label }
+		 */
 		'label': function (d) { return d.label },
+		/**
+		 * Function that returns string label positioned above child rectangles plots.
+		 * @member {String}
+		 * @default function (d) { return d.label }
+		 */
 		'groupLabel': function (d) { return d.label },
-		'children': function (d) { return d.children },
+		/**
+		 *  The dataTipRenderer is used to customize the data tip that is shown on mouse-over events.
+		 *  You can append to or modify the 'tip' parameter to customize the data tip.
+		 *  You can also return modified x, y coordinates to place the data tip in a different location.
+		 * @member {function}
+		 * @default internal.dataTipRenderer
+		 * @example
+		 * // tip - html DIV element
+		 * // e - svg rect of the bar being moused over
+		 * // d - datum
+		 * // i - datum index
+		 * // x - suggested x position of data tip
+		 * // y - suggested y position of data tip
+		 * // return {Array} [x, y] - x and y coordinates placing data tip.
+		 *
+		 *function dataTipRenderer(tip, e, d, i, x, y) {
+		 *     var html = '<div class="vz-tip-header1">HEADER1</div>' +
+		 *		 '<div class="vz-tip-header-rule"></div>' +
+		 *		 '<div class="vz-tip-header2"> HEADER2 </div>';
+		 *
+		 *		var h1 = scope.label(d.data);
+		 *		var h2 = scope.valueFormatter(d.value);
+		 *
+		 *		html = html.replace("HEADER1", h1);
+		 *		html = html.replace("HEADER2", h2);
+		 *
+		 *		y = d3.select(e).select('rect').node().getBoundingClientRect().top + window.pageYOffset;
+		 *
+		 *		tip.style('height',null).html(html).style('display','block');
+		 *
+		 *		return [(Number(x) + e.getBoundingClientRect().width)+10,y-10]
+		 *}
+		 */
 		'dataTipRenderer' : dataTipRenderer
 	};
 	
 	var styles = {
+		'background-opacity': 1,
 		'background-color-top': '#FFF',
 		'background-color-bottom': '#DDD',
 		'cell-corner-radius': function (e, d, i) {
@@ -72,7 +206,45 @@ vizuly2.viz.TreeMap = function (parent) {
 		'group-label-color': '#777'
 	}
 	
-	var events = ['mouseover', 'mouseout', 'click'];
+	/** @lends vizuly2.viz.TreeMap.events */
+	var events = [
+		/**
+		 * Fires when user moves the mouse over a node rectangle.
+		 * @event vizuly2.viz.TreeMap.mouseover
+		 * @type {VizulyEvent}
+		 * @param e - DOM element that fired event
+		 * @param d - Datum associated with DOM element
+		 * @param i - Index of datum in display series
+		 * @param j -  The series index of the datum
+		 * @param this -  Vizuly Component that emitted event
+		 * @example  viz.on('mouseover', function (e, d, i) { ... });
+		 */
+		'mouseover',
+		/**
+		 * Fires when user moves the mouse off a node rectangle.
+		 * @event vizuly2.viz.TreeMap.mouseout
+		 * @type {VizulyEvent}
+		 * @param e - DOM element that fired event
+		 * @param d - Datum associated with DOM element
+		 * @param i - Index of datum in display series
+		 * @param j -  The series index of the datum
+		 * @param this -  Vizuly Component that emitted event
+		 * @example  viz.on('mouseout', function (e, d, i) { ... });
+		 */
+		'mouseout',
+		/**
+		 * Fires when user clicks on a given node rectangle.
+		 * @event vizuly2.viz.TreeMap.click
+		 * @type {VizulyEvent}
+		 * @param e - DOM element that fired event
+		 * @param d - Datum associated with DOM element
+		 * @param i - Index of datum in display series
+		 * @param j -  The series index of the datum
+		 * @param this -  Vizuly Component that emitted event
+		 * @example  viz.on('click', function (e, d, i) { ... });
+		 */
+		'click'
+	];
 	
 	// This is the object that provides pseudo "protected" properties that the vizuly.viz function helps create
 	var scope = {};
@@ -378,8 +550,6 @@ vizuly2.viz.TreeMap = function (parent) {
 		return viz;
 	};
 	
-	var styles_backgroundGradient;
-	
 	// styles and styles
 	var stylesCallbacks = [
 		{on: 'updated.styles', callback: applyStyles},
@@ -398,12 +568,13 @@ vizuly2.viz.TreeMap = function (parent) {
 		// Grab the d3.selection from the viz so we can operate on it.
 		var selection = scope.selection;
 		
-		styles_backgroundGradient = vizuly2.svg.gradient.blend(viz, viz.getStyle('background-color-bottom'), viz.getStyle('background-color-top'));
+		var styles_backgroundGradient = vizuly2.svg.gradient.blend(viz, viz.getStyle('background-color-bottom'), viz.getStyle('background-color-top'));
 		
 		// Update the background
 		selection.selectAll(".vz-background").style("fill", function () {
 			return "url(#" + styles_backgroundGradient.attr("id") + ")";
-		});
+		})
+		 .style('opacity',viz.getStyle('background-opacity'));
 		
 		plot.selectAll('.vz-treemap-cell-rect')
 		 .attr('vz', function (d,i) { return viz.getStyle('cell-corner-radius',[this, d])})

@@ -2,27 +2,28 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Vizuly 2.0 - Venn</title>
+    <title>Vizuly 2.0 - WordCloud</title>
 
     <!-- We use google fonts for many of the examples, but they are not necessary -->
     <link href='https://fonts.googleapis.com/css?family=Raleway:600,400,200' rel='stylesheet' type='text/css'>
 
     <!-- vizuly2.specific style sheets -->
-    <link rel="stylesheet" href="../lib/styles/vizuly.css">
+    <link rel="stylesheet" href="lib/styles/vizuly.css">
 
-    <script src="../lib/d3_v5.7.min.js"></script>
+    <script src="lib/d3_v5.7.min.js"></script>
 
-    <script src="../lib/vizuly2_core.min.js"></script>
-    <script src="../src/VennUtil.js"></script>
-    <script src="../src/Venn.js"></script>
-    <script src="data/venn_data.js"></script>
+    <script src="lib/vizuly2_core.min.js"></script>
+    <script src="src/WordCloud.js"></script>
+    <script src="data/wordcloud_data.js"></script>
+
 
     <!-- DEMO CODE:START -->
     <link rel="stylesheet" href="demo/scripts/cssmenu.css">
     <script type="text/javascript" src="demo/scripts/jquery-2.1.1.min.js"></script>
     <script src="demo/scripts/cssmenu.js"></script>
-    <script src="demo/VennDemo.js"></script>
+    <script src="demo/WordCloudDemo.js"></script>
     <!-- DEMO CODE: END -->
+
 
 </head>
 
@@ -34,28 +35,34 @@
     </div>
 </div>
 
-
 <script id="testscript">
 
-	var viz = vizuly2.viz.Venn("#viz_container");
-
-    var totalSize = d3.sum(data, function (d) { return d.size; })
+  var viz = vizuly2.viz.WordCloud("#viz_container");
 
     viz
-     .data(data)
-     .width(600)
-     .height(600)
-     .value(function (d) {
-         return d.size
-     })
-     .label(function (d) {
-         if (!d.label) return '';
-         return d.label + ' ' + (Math.round((d.size / totalSize) * 100)) + '%';
-     })
+       .data(data)
+       .width('100%')
+       .height('100%')
+       .on('mouseover', onMouseOver)
+       .on('mouseout', onMouseOut)
+       .on('click', onClick)
 
     viz.update();
 
     if (runDemo) runDemo();
+
+	function onMouseOver(e, d, i) {
+		console.log('onMouseOver ' + d.key)
+    }
+
+    function onMouseOut(e, d, i) {
+	    console.log('onMouseOut ' + d.key)
+    }
+
+    function onClick(e, d, i) {
+	    console.log('onClick ' + d.key)
+    }
+
 
 </script>
 

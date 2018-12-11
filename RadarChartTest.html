@@ -8,12 +8,12 @@
     <link href='https://fonts.googleapis.com/css?family=Raleway:600,400,200' rel='stylesheet' type='text/css'>
 
     <!-- vizuly2.specific style sheets -->
-    <link rel="stylesheet" href="../lib/styles/vizuly.css">
+    <link rel="stylesheet" href="lib/styles/vizuly.css">
 
-    <script src="../lib/d3_v5.7.min.js"></script>
+    <script src="lib/d3_v5.7.min.js"></script>
 
-    <script src="../lib/vizuly2_core.min.js"></script>
-    <script src="../src/RadarChart.js"></script>
+    <script src="lib/vizuly2_core.min.js"></script>
+    <script src="src/RadarChart.js"></script>
     <script src="data/radarchart_data.js"></script>
 
     <!-- DEMO CODE:START -->
@@ -30,7 +30,7 @@
 
 <!-- Our main content container-->
 <div class="container" style="width:100%;">
-    <div id="viz_container" class="z-depth-3" style="width:1000px; height:600px; border-radius:10px; overflow:hidden">
+    <div id="viz_container" class="z-depth-3" style="width:600px; height:600px; border-radius:10px; overflow:hidden">
     </div>
 </div>
 
@@ -39,11 +39,11 @@
 	var viz = vizuly2.viz.RadarChart("#viz_container");
 
     viz.data(data)
-     .width(1000).height(600)
+     .width(600).height(600)
      .x(function (d,i) { return String(d.axis).toUpperCase() })
      .y(function (d,i) { return d.value })
      .seriesLabel(function (d) { return d.category })
-     .yAxisTickFormat(function (d) { return d3.format('.0f')(d*100) + '%'})
+     .yTickFormat(function (d) { return d3.format('.0f')(d*100) + '%'})
 
     viz.update();
 

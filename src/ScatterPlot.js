@@ -1,52 +1,207 @@
 /*
- Copyright (c) 2016, BrightPoint Consulting, Inc.
+ Copyright (c) 2019, BrightPoint Consulting, Inc.
  
- This source code is covered under the following license: http://vizuly2.io/commercial-license/
- 
- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
- THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS
- OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
- TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- */
+ All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification,
+are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
+
+* Neither the name of the author nor the names of contributors may be used to
+  endorse or promote products derived from this software without specific prior
+  written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
 
 // @version 2.1.45
 
-//
-// This is the base component for a vizuly2.scatter
-//
+/**
+ * @class
+ */
 vizuly2.viz.ScatterPlot = function (parent) {
 	
 	var d3 = vizuly2.d3;
 	
+	/** @lends vizuly2.viz.ScatterPlot.properties */
 	var properties = {
-		'data': null,                            // Expects array of single series of data;
-		'margin': {                              // Our margin object
-			'top': '10%',                          // Top margin
-			'bottom': '7%',                        // Bottom margin
-			'left': '9%',                          // Left margin
-			'right': '7%'                          // Right margin
+		/**
+		 * Array of datums to be ploted.
+		 * @member {Array}
+		 * @default Needs to be set at runtime
+		 *
+		 * @example
+		 * [
+		 *   {"xValue": 20, "yValue": 20, "rValue": 30, "category": "Gold"},
+		 *   {"xValue": 40, "yValue": 50, "rValue": 60, "category": "Silver"},
+		 *   ...
+		 * ]
+		 */
+		'data': null,
+		/**
+		 * Width of component in either pixels (Number) or percentage of parent container (%)
+		 * @member {Number}
+		 * @default 600
+		 */
+		'width': 600,
+		/**
+		 * Height of component in either pixels (Number) or percentage of parent container (%)
+		 * @member {Number}
+		 * @default 600
+		 */
+		'height': 600,
+		/**
+		 * Margins between component render area and border of container.  This can either be a fixed pixels (Number) or a percentage (%) of height/width.
+		 * @member {Object}
+		 * @default  {top:'5%', bottom:'5%', left:'8%', right:'10%'}
+		 */
+		'margin': {
+			'top': '10%',
+			'bottom': '7%',
+			'left': '12%',
+			'right': '9%'
 		},
-		'duration': 500,                         // This the time in ms used for any component generated transitions
-		'width': 300,                            // Overall width of component
-		'height': 300,                           // Height of component
-		'x': null,                               // Function that returns xScale data value
-		'y': null,                               // Function that returns yScale data value
+		/**
+		 * Duration (in milliseconds) of any component transitions.
+		 * @member {Number}
+		 * @default  500
+		 */
+		'duration': 500,
+		/**
+		 * Function that returns the datum property used to calculate the X position of the plot.  This accessor is called for each plot that is being rendered.
+		 * @member {Function}
+		 * @default  Must be set at runtime
+		 * @example
+		 * viz.x(function(d,i) { return Number(d.myProperty) });
+		 */
+		'x': null,
+		/**
+		 * Function that returns the datum property used to calculate the y position of the plot.  This accessor is called for each plot that is being rendered.
+		 * @member {Function}
+		 * @default  Must be set at runtime
+		 * @example
+		 * viz.y(function(d,i) { return Number(d.myProperty) });
+		 */
+		'y': null,
+		/**
+		 * Function that returns the datum property used to calculate the radius of the plot.  This accessor is called for each plot that is being rendered.
+		 * @member {Function}
+		 * @default  Must be set at runtime
+		 * @example
+		 * viz.y(function(d,i) { return Number(d.myProperty) });
+		 */
 		'r': null,                               // Function that returns rScale data value
-		'xScale': 'undefined',                   // Default xScale (can be overridden after 'validate' event via callback)
-		'yScale': 'undefined',                   // Default yScale (can be overridden after 'validate' event via callback)
-		'rScale': 'undefined',                   // Default rScale - radius (can be overridden after 'validate' event via callback)
-		'xAxis': d3.axisBottom(),                // Default xAxis (can be overridden after 'validate' event via callback)
-		'yAxis': d3.axisLeft(),                  // Default xAxis (can be overridden after 'validate' event via callback)
-		'xTickFormat': function (d) {
-			return d
-		},
+		/**
+		 * Scale type used to measure and position plots along the x-axis.  The chart will try and auto-determine the scale type based on
+		 * the value type being returned by the viz.y accessor.  String values will use a d3.scaleBand, date values will use a d3.scaleTime,
+		 * and numeric values will use a d3.scaleLinear. The scale, or scale properties can be overridden by capturing the
+		 * "measure" event and accessing/modifying the scale.
+		 * @member {d3.scale}
+		 * @default undefined - set at runtime automatically
+		 * @example
+		 * viz.on('measure', function () { viz.xScale().range([0, 600]) }) //Sets max width of scale to 600
+		 */
+		'xScale': 'undefined',
+		/**
+		 * Scale type used to measure and position plots along the y-axis.  The chart will try and auto-determine the scale type based on
+		 * the value type being returned by the viz.y accessor.  String values will use a d3.scaleBand, date values will use a d3.scaleTime,
+		 * and numeric values will use a d3.scaleLinear. The scale, or scale properties can be overridden by capturing the
+		 * "measure" event and accessing/modifying the scale.
+		 * @member {d3.scale}
+		 * @default  undefined - set at runtime automatically
+		 * @example
+		 * viz.on('measure', function () { viz.yScale().range([0, 600]) }) //Sets max height of scale to 600;
+		 */
+		'yScale': 'undefined',
+		/**
+		 * Scale type used to measure the radius of each plot.  The chart will try and auto-determine the scale type based on
+		 * the value type being returned by the viz.y accessor.  String values will use a d3.scaleBand, date values will use a d3.scaleTime,
+		 * and numeric values will use a d3.scaleLinear. The scale, or scale properties can be overridden by capturing the
+		 * "measure" event and accessing/modifying the scale.
+		 * @member {d3.scale}
+		 * @default  undefined - set at runtime automatically
+		 * @example
+		 * viz.on('measure', function () { viz.yScale().range([0, 600]) }) //Sets max height of scale to 600;
+		 */
+		'rScale': 'undefined',
+		/**
+		 * D3 Axis used to render x (bottom) axis.  This axis can be overriden with custom settings by capturing the 'measure' event.
+		 * @member {d3.axis}
+		 * @default d3.axisBottom
+		 * @example
+		 * viz.on('measure', function () { viz.xAxis().tickSize(10) }) //Sets each axis tick to 10 pixels
+		 */
+		'xAxis': d3.axisBottom(),
+		/**
+		 * D3 Axis used to render y (left) axis.  This axis can be overriden with custom settings by capturing the 'measure' event.
+		 * @member {d3.axis}
+		 * @default d3.axisLeft
+		 * @example
+		 * viz.on('measure', function () { viz.yAxis().tickSize(10) }) //Sets each axis tick to 10 pixels
+		 */
+		'yAxis': d3.axisLeft(),
+		/**
+		 * Label formatter for the y axis.  Can be customized to modify labels along axis.
+		 * @member {function}
+		 * @default function (d) { return d }
+		 * @example
+		 * //Sets each axis tick label to a currency format
+		 * viz.yTickFormat(function (d, i) { return '$' + d3.format('.2f')(d) })
+		 */
 		'yTickFormat': function (d) {
 			return d
 		},
+		/**
+		 * Label formatter for the x axis.  Can be customized to modify labels along axis.
+		 * @member {function}
+		 * @default function (d) { return d }
+		 * @example
+		 * //Sets each axis tick label to a currency format
+		 * viz.xTickFormat(function (d, i) { return '$' + d3.format('.2f')(d) })
+		 */
+		'xTickFormat': function (d) {
+			return d
+		},
+		/**
+		 *  The dataTipRenderer is used to customize the data tip that is shown on mouse-over events.
+		 *  You can append to or modify the 'tip' parameter to customize the data tip.
+		 *  You can also return modified x, y coordinates to place the data tip in a different location.
+		 * @member {function}
+		 * @default internal.dataTipRenderer
+		 * @example
+		 * // tip - html DIV element
+		 * // e - svg rect of the bar being moused over
+		 * // d - datum
+		 * // i - datum index
+		 * // x - suggested x position of data tip
+		 * // y - suggested y position of data tip
+		 * // return {Array} [x, y] - x and y coordinates placing data tip.
+		 *
+		 *function dataTipRenderer(tip, e, d, i, x, y) {
+		 *     tip.style('text-align', 'center').append('div').text(scope.y(d));
+		 *     return [x-50, y-80];
+		 *}
+		 */
 		'dataTipRenderer': dataTipRenderer
 	};
 	
 	var styles = {
+		'background-opacity': 1,
 		'background-top': '#FFF',
 		'background-bottom': '#DDD',
 		'y-axis-label-show': true,
@@ -83,7 +238,45 @@ vizuly2.viz.ScatterPlot = function (parent) {
 		}
 	};
 	
-	var events=['mouseover', 'mouseout', 'click']
+	/** @lends vizuly2.viz.ScatterPlot.events */
+	var events = [
+		/**
+		 * Fires when user moves the mouse over a plot
+		 * @event vizuly2.viz.ScatterPlot.mouseover
+		 * @type {VizulyEvent}
+		 * @param e - DOM element that fired event
+		 * @param d - Datum associated with DOM element
+		 * @param i - Index of datum in display series
+		 * @param j -  The series index of the datum
+		 * @param this -  Vizuly Component that emitted event
+		 * @example  viz.on('mouseover', function (e, d, i) { ... });
+		 */
+		'mouseover',
+		/**
+		 * Fires when user moves the mouse off plot.
+		 * @event vizuly2.viz.ScatterPlot.mouseout
+		 * @type {VizulyEvent}
+		 * @param e - DOM element that fired event
+		 * @param d - Datum associated with DOM element
+		 * @param i - Index of datum in display series
+		 * @param j -  The series index of the datum
+		 * @param this -  Vizuly Component that emitted event
+		 * @example  viz.on('mouseout', function (e, d, i) { ... });
+		 */
+		'mouseout',
+		/**
+		 * Fires when user clicks on a given plot.
+		 * @event vizuly2.viz.ScatterPlot.click
+		 * @type {VizulyEvent}
+		 * @param e - DOM element that fired event
+		 * @param d - Datum associated with DOM element
+		 * @param i - Index of datum in display series
+		 * @param j -  The series index of the datum
+		 * @param this -  Vizuly Component that emitted event
+		 * @example  viz.on('click', function (e, d, i) { ... });
+		 */
+		'click'
+	 ]
 	
 	// This is the object that provides pseudo "protected" properties that the vizuly.viz function helps create
 	var scope = {};
@@ -287,12 +480,13 @@ vizuly2.viz.ScatterPlot = function (parent) {
 		var selection = scope.selection;
 		
 		// Update the background
-		styles_backgroundGradient = vizuly2.svg.gradient.blend(viz, viz.getStyle('background-bottom'), viz.getStyle('background-top'));
+		var styles_backgroundGradient = vizuly2.svg.gradient.blend(viz, viz.getStyle('background-bottom'), viz.getStyle('background-top'));
 		
 		// Update the background
 		selection.selectAll(".vz-background").style("fill", function () {
 			return "url(#" + styles_backgroundGradient.attr("id") + ")";
-		});
+		})
+		 .style('opacity',viz.getStyle('background-opacity'));
 		
 		// Update the scatter plots
 		selection.selectAll(".vz-scatter-node")

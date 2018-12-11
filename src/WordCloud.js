@@ -1,42 +1,111 @@
 /*
- Copyright (c) 2016, BrightPoint Consulting, Inc.
+ Copyright (c) 2019, BrightPoint Consulting, Inc.
  
- This source code is covered under the following license: http://vizuly2.io/commercial-license/
- 
- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
- THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS
- OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
- TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- */
+ All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification,
+are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
+
+* Neither the name of the author nor the names of contributors may be used to
+  endorse or promote products derived from this software without specific prior
+  written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
 
 // @version 2.1.45
 
-//
-// This is the base component for a vizuly2.bar chart.
-//
+/**
+ * @class
+ */
 vizuly2.viz.WordCloud = function (parent) {
 	
 	var d3 = vizuly2.d3;
 	var d3v3 = vizuly2.d3v3;
 	
+	/** @lends vizuly2.viz.WordCloud.properties */
 	var properties = {
-		"data": null,
-		"margin": {                            // Our margin object
-			"top": "10%",                       // Top margin
-			"bottom": "10%",                    // Bottom margin
-			"left": "10%",                      // Left margin
-			"right": "10%"                      // Right margin
+		/**
+		 * String containing words that will be used to generate word cloud
+		 * @member {String}
+		 * @default Needs to be set at runtime
+		 * @example
+		 * "Of course that’s your contention. You’re a first year grad student. You just got finished readin’ some Marxian historian, Pete Garrison probably. You’re gonna be convinced of that ’til next month when you get to James Lemon and then you’re gonna be talkin’ about how the economies of Virginia and Pennsylvania were entrepreneurial and capitalist way back in 1740. That’s gonna last until next year. You’re gonna be in here regurgitating Gordon Wood, talkin’ about, you know, the Pre-Revolutionary utopia and the capital-forming effects of military mobilization… ‘Wood drastically underestimates the impact of social distinctions predicated upon wealth, especially inherited wealth.’ You got that from Vickers, Work in Essex County, page 98, right? Yeah, I read that, too. Were you gonna plagiarize the whole thing for us? Do you have any thoughts of your own on this matter? Or do you, is that your thing? You come into a bar. You read some obscure passage and then pretend, you pawn it off as your own, as your own idea just to impress some girls and embarrass my friend? See, the sad thing about a guy like you is in 50 years, you’re gonna start doin’ some thinkin’ on your own and you’re gonna come up with the fact that there are two certainties in life. One: don’t do that. And two: you dropped a hundred and fifty grand on a fuckin’ education you coulda got for a dollar fifty in late charges at the public library.";
+		 */
+		'data': null,
+		/**
+		 * Width of component in either pixels (Number) or percentage of parent container (%)
+		 * @member {Number}
+		 * @default 600
+		 */
+		'width': 600,
+		/**
+		 * Height of component in either pixels (Number) or percentage of parent container (%)
+		 * @member {Number}
+		 * @default 600
+		 */
+		'height': 600,
+		/**
+		 * Margins between component render area and border of container.  This can either be a fixed pixels (Number) or a percentage (%) of height/width.
+		 * @member {Object}
+		 * @default  {top:'5%', bottom:'5%', left:'8%', right:'10%'}
+		 */
+		'margin': {
+			'top': '5%',
+			'bottom': '5%',
+			'left': '5%',
+			'right': '5%'
 		},
-		"width": 300,                          // Overall width of component
-		"height": 300,                     // Height of component
-		"duration": 500,
-		"hideWords": "i,me,my,myself,we,us,our,ours,ourselves,you,your,yours,yourself,yourselves,he,him,his,himself,she,her,hers,herself,it,its,itself,they,them,their,theirs,themselves,what,which,who,whom,whose,this,that,these,those,am,is,are,was,were,be,been,being,have,has,had,having,do,does,did,doing,will,would,should,can,could,ought,i'm,you're,he's,she's,it's,we're,they're,i've,you've,we've,they've,i'd,you'd,he'd,she'd,we'd,they'd,i'll,you'll,he'll,she'll,we'll,they'll,isn't,aren't,wasn't,weren't,hasn't,haven't,hadn't,doesn't,don't,didn't,won't,wouldn't,shan't,shouldn't,can't,cannot,couldn't,mustn't,let's,that's,who's,what's,here's,there's,when's,where's,why's,how's,a,an,the,and,but,if,or,because,as,until,while,of,at,by,for,with,about,against,between,into,through,during,before,after,above,below,to,from,up,upon,down,in,out,on,off,over,under,again,further,then,once,here,there,when,where,why,how,all,any,both,each,few,more,most,other,some,such,no,nor,not,only,own,same,so,than,too,very,say,says,said,shall",          // Remove these words from results
-		"showNumbers": false,
-		"fontSizeMax": 30,
-		"fontSizeMin": 10
+		/**
+		 * Duration (in milliseconds) of any component transitions.
+		 * @member {Number}
+		 * @default  500
+		 */
+		'duration': 500,
+		/**
+		 * Words that won't be displayed in word cloud. Passed in as a comma-delimited string.
+		 * @member {String}
+		 * @default  "i,me,my,myself,we,us,our,ours,ourselves,you,your,yours,yourself,yourselves,he,him,his,himself,she,her,hers,herself,it,its,itself,they,them,their,theirs,themselves,what,which,who,whom,whose,this,that,these,those,am,is,are,was,were,be,been,being,have,has,had,having,do,does,did,doing,will,would,should,can,could,ought,i'm,you're,he's,she's,it's,we're,they're,i've,you've,we've,they've,i'd,you'd,he'd,she'd,we'd,they'd,i'll,you'll,he'll,she'll,we'll,they'll,isn't,aren't,wasn't,weren't,hasn't,haven't,hadn't,doesn't,don't,didn't,won't,wouldn't,shan't,shouldn't,can't,cannot,couldn't,mustn't,let's,that's,who's,what's,here's,there's,when's,where's,why's,how's,a,an,the,and,but,if,or,because,as,until,while,of,at,by,for,with,about,against,between,into,through,during,before,after,above,below,to,from,up,upon,down,in,out,on,off,over,under,again,further,then,once,here,there,when,where,why,how,all,any,both,each,few,more,most,other,some,such,no,nor,not,only,own,same,so,than,too,very,say,says,said,shall"
+		 */
+		'hideWords': "i,me,my,myself,we,us,our,ours,ourselves,you,your,yours,yourself,yourselves,he,him,his,himself,she,her,hers,herself,it,its,itself,they,them,their,theirs,themselves,what,which,who,whom,whose,this,that,these,those,am,is,are,was,were,be,been,being,have,has,had,having,do,does,did,doing,will,would,should,can,could,ought,i'm,you're,he's,she's,it's,we're,they're,i've,you've,we've,they've,i'd,you'd,he'd,she'd,we'd,they'd,i'll,you'll,he'll,she'll,we'll,they'll,isn't,aren't,wasn't,weren't,hasn't,haven't,hadn't,doesn't,don't,didn't,won't,wouldn't,shan't,shouldn't,can't,cannot,couldn't,mustn't,let's,that's,who's,what's,here's,there's,when's,where's,why's,how's,a,an,the,and,but,if,or,because,as,until,while,of,at,by,for,with,about,against,between,into,through,during,before,after,above,below,to,from,up,upon,down,in,out,on,off,over,under,again,further,then,once,here,there,when,where,why,how,all,any,both,each,few,more,most,other,some,such,no,nor,not,only,own,same,so,than,too,very,say,says,said,shall",
+		/**
+		 * Determines whether to show any numerals within the word cloud
+		 * @member {Boolean}
+		 * @default  false
+		 */
+		'showNumerals': false,
+		/**
+		 * Function that returns maximum font size to use.
+		 * @member {Function}
+		 * @default  function () { return Math.min(size.width, size.height)/10 }
+		 */
+		'fontSizeMax': function () { return Math.min(size.width, size.height)/10 },
+		/**
+		 * Function that returns minimum font size to use.
+		 * @member {Function}
+		 * @default  function () { return Math.min(size.width, size.height)/40 }
+		 */
+		'fontSizeMin': function () { return Math.min(size.width, size.height)/40 }
 	};
 	
 	var styles = {
+		'background-opacity': 1,
 		'background-color-top': '#FFF',
 		'background-color-bottom': '#DDD',
 		'label-color': function (d,i) {
@@ -45,6 +114,43 @@ vizuly2.viz.WordCloud = function (parent) {
 		},
 		'font-family': 'Impact'
 	}
+	
+	/** @lends vizuly2.viz.WordCloud.events */
+	var events = [
+		/**
+		 * Fires when user moves the mouse over a word.
+		 * @event vizuly2.viz.WordCloud.mouseover
+		 * @type {VizulyEvent}
+		 * @param e - DOM element that fired event
+		 * @param d - Datum associated with DOM element
+		 * @param i - Index of datum in display series
+		 * @param this -  Vizuly Component that emitted event
+		 * @example  viz.on('mouseover', function (e, d, i) { ... });
+		 */
+		'mouseover',
+		/**
+		 * Fires when user moves the mouse off a word.
+		 * @event vizuly2.viz.WordCloud.mouseout
+		 * @type {VizulyEvent}
+		 * @param e - DOM element that fired event
+		 * @param d - Datum associated with DOM element
+		 * @param i - Index of datum in display series
+		 * @param this -  Vizuly Component that emitted event
+		 * @example  viz.on('mouseout', function (e, d, i) { ... });
+		 */
+		'mouseout',
+		/**
+		 * Fires when user clicks a word.
+		 * @event vizuly2.viz.WordCloud.click
+		 * @type {VizulyEvent}
+		 * @param e - DOM element that fired event
+		 * @param d - Datum associated with DOM element
+		 * @param i - Index of datum in display series
+		 * @param this -  Vizuly Component that emitted event
+		 * @example  viz.on('click', function (e, d, i) { ... });
+		 */
+		'click'
+	]
 	
 	var events = ['mouseover', 'mouseout', 'click']
 	
@@ -95,13 +201,18 @@ vizuly2.viz.WordCloud = function (parent) {
 		
 		var wordHash = {};
 		
+		console.log('size.width = ' + size.width)
+		
 		var words = scope.data.split(/[ '\-\(\)\*":;\[\]|{},.!?]+/);
 		if (words.length == 1){
 			wordHash[words[0]] = 1;
 		} else {
 			words.forEach(function(word){
 				var word = word.toLowerCase();
-				if (word != "" && scope.hideWords.indexOf(word)==-1 && word.length>1 && (scope.showNumbers == false && isNaN(Number(word)))){
+				var isNumber = !isNaN(Number(word));
+				var numberCondition = (scope.showNumerals === true && isNumber === true) || isNumber === false;
+				
+				if ((word != "" && scope.hideWords.indexOf(word) == -1) && numberCondition ){
 					if (wordHash[word]){
 						wordHash[word]++;
 					} else {
@@ -114,7 +225,7 @@ vizuly2.viz.WordCloud = function (parent) {
 		var wordEntries = d3.entries(wordHash);
 		
 		fontScale.domain([0, d3.max(wordEntries, function(d) { return d.value; })])
-		 .range([scope.fontSizeMin,scope.fontSizeMax]);
+		 .range([scope.fontSizeMin(),scope.fontSizeMax()]);
 		
 		wordLayout
 		 .words(wordEntries)
@@ -175,8 +286,6 @@ vizuly2.viz.WordCloud = function (parent) {
 		return viz;
 	};
 	
-	var styles_backgroundGradient;
-	
 	// styles and styles
 	var stylesCallbacks = [
 		{on: 'updated.styles', callback: applyStyles},
@@ -194,12 +303,13 @@ vizuly2.viz.WordCloud = function (parent) {
 		// Grab the d3.selection from the viz so we can operate on it.
 		var selection = scope.selection;
 		
-		styles_backgroundGradient = vizuly2.svg.gradient.blend(viz, viz.getStyle('background-color-bottom'), viz.getStyle('background-color-top'));
+		var styles_backgroundGradient = vizuly2.svg.gradient.blend(viz, viz.getStyle('background-color-bottom'), viz.getStyle('background-color-top'));
 		
 		// Update the background
 		selection.selectAll(".vz-background").style("fill", function () {
 			return "url(#" + styles_backgroundGradient.attr("id") + ")";
-		});
+		})
+		 .style('opacity',viz.getStyle('background-opacity'));
 		
 		plot.selectAll('.vz-wordcloud-word')
 		 .style('fill',function (d,i) { return viz.getStyle('label-color', arguments) })
@@ -229,7 +339,7 @@ vizuly2.viz.WordCloud = function (parent) {
 	}
 
 	
-	// Returns our viz component :)
+	// Returns our viz component
 	return viz;
 	
 	// Word cloud layout by Jason Davies, http://www.jasondavies.com/word-cloud/

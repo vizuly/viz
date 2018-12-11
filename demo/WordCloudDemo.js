@@ -1,4 +1,5 @@
 var styles = {
+	'background-opacity': 0,
 	'background-color-top': '#0000FF',
 	'background-color-bottom': '#0000FF',
 	'label-color': '#0000FF',
@@ -84,10 +85,8 @@ function runDemo() {
 			'callback': changeStyles
 		}
 	]
-
 	
-		createDemoMenu(demoOptions, 600, 600, 'vizuly - WordCloud', styles);
+	createDemoMenu(demoOptions, 600, 600, 'vizuly 2.0 - WordCloud', styles);
 
-		changeSize('600,600');
 }
 

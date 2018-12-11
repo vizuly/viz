@@ -4,6 +4,7 @@ var viz_container;
 var businessColors = d3.scaleOrdinal(d3.schemeCategory20);
 
 var styles = {
+	'background-opacity': 0,
 	'background-top': '#0000FF',
 	'background-bottom': '#0000FF',
 	'y-axis-label-show': false,
@@ -16,7 +17,7 @@ var styles = {
 	'axis-opacity': 1,
 	'axis-font-size': 16,
 	'node-stroke': '#0000FF',
-	'node-stroke-width': [{'name': 'node-stroke-width', 'value': 4}, {'name': 'node-stroke', 'value': '#0000FF'}],
+	'node-stroke-width': {'node-stroke-width' : 4, 'node-stroke' : '#0000FF'},
   'node-fill': '#0000FF',
 	'node-fill-opacity': 1,
 	'node-stroke-opacity': 1,
@@ -163,10 +164,7 @@ function runDemo() {
 			'callback': changeY
 		}
 	]
-
 	
-		createDemoMenu(demoOptions, 600, 600, 'vizuly - scatter plot', styles);
-
-		changeSize('600,600');
+	createDemoMenu(demoOptions, 600, 600, 'vizuly 2.0 - scatter plot', styles);
 }
 

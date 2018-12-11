@@ -1,6 +1,7 @@
 var styles = {
-	'background-top': '#0000FF',
-	'background-bottom': '#0000FF',
+	'background-opacity': 0,
+	'background-color-top': '#0000FF',
+	'background-color-bottom': '#0000FF',
 	'fill-color': '#0000FF',
 	'stroke-color': '#0000FF',
 	'fill-opacity': 1,
@@ -103,8 +104,7 @@ function runDemo() {
 	]
 	
 		//Set display size based on window size.
-		createDemoMenu(demoOptions, 600, 600, 'vizuly - Venn Beta', styles);
+		createDemoMenu(demoOptions, 600, 600, 'vizuly 2.0 - Venn', styles);
 
-		changeSize('600, 600');
 }
 

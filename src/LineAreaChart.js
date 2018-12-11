@@ -1,13 +1,33 @@
 /*
- Copyright (c) 2016, BrightPoint Consulting, Inc.
+ Copyright (c) 2019, BrightPoint Consulting, Inc.
  
- This source code is covered under the following license: http://vizuly2.io/commercial-license/
- 
- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
- THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS
- OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
- TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- */
+ All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification,
+are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
+
+* Neither the name of the author nor the names of contributors may be used to
+  endorse or promote products derived from this software without specific prior
+  written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
 
 // @version 2.1.45
 
@@ -34,7 +54,7 @@ vizuly2.viz.LineAreaChart = function (parent) {
 		 *    {"symbol": "AAPL", "name": "Apple Inc", "date": "2010-01-06T08:00:00.000Z", "Open": 30.63, "High": 30.75, "Low": 30.11, "Close": 30.14, "Volume": 138039594},
 		 *    ...
 		 *  ],
-		 *  // Series 2 (Googlea Stocks)
+		 *  // Series 2 (Google Stocks)
 		 *  [
 		 *    {"symbol": "GOOGL", "name": "Google Inc", "date": "2010-01-05T08:00:00.000Z", "Open": 313.9, "High": 314.23, "Low": 311.08, "Close": 312.31, "Volume": 3007857},
 		 *    {"symbol": "GOOGL", "name": "Google Inc", "date": "2010-01-06T08:00:00.000Z", "Open": 313.24, "High": 313.24, "Low": 303.48, "Close": 304.43, "Volume": 3980628},
@@ -59,15 +79,15 @@ vizuly2.viz.LineAreaChart = function (parent) {
 		 */
 		'height': 600,
 		/**
-		 * Margins between tree and border of container.  This can either be a fixed pixels (Number) or a percentage (%) of height/width.
+		 * Margins between component render area and border of container.  This can either be a fixed pixels (Number) or a percentage (%) of height/width.
 		 * @member {Object}
 		 * @default  {top:'5%', bottom:'5%', left:'8%', right:'10%'}
 		 */
-		'margin': {                            // Our margin object
-			'top': '10%',                       // Top margin
-			'bottom': '7%',                    // Bottom margin
-			'left': '12%',                      // Left margin
-			'right': '9%'                      // Right margin
+		'margin': {
+			'top': '10%',
+			'bottom': '7%',
+			'left': '12%',
+			'right': '9%'
 		},
 		/**
 		 * Duration (in milliseconds) of any component transitions.
@@ -107,7 +127,7 @@ vizuly2.viz.LineAreaChart = function (parent) {
 		 * @member {d3.scale}
 		 * @default  undefined - set at runtime automatically
 		 * @example
-		 * viz.on('measure', function () { viz.scaleX().range([0, 600]) }) //Sets max width of scale to 600
+		 * viz.on('measure', function () { viz.xScale().range([0, 600]) }) //Sets max width of scale to 600
 		 */
 		'xScale': 'undefined',
 		/**
@@ -211,14 +231,14 @@ vizuly2.viz.LineAreaChart = function (parent) {
 		'useZoom': true
 	};
 	
-	
 	var styles = {
-		'label-color': '#333',
-		'background-color-top': '#EEE',
-		'background-color-bottom': '#FFF',
+		'background-opacity': 1,
+		'background-color-top': '#FFF',
+		'background-color-bottom': '#DDD',
+		'label-color': '#000',
 		'line-stroke': function (d, i) {
-			var strokeColors = ['#FFA000', '#FF5722', '#F57C00', '#FF9800', '#FFEB3B']
-			return strokeColors[i % 5];
+			var colors = [ '#fecc5c', '#fd8d3c', '#f03b20', '#B02D5D', '#9B2C67', '#982B9A', '#692DA7', '#5725AA', '#4823AF', '#d7b5d8', '#dd1c77', '#5A0C7A', '#5A0C7A', '#bd0026'];
+			return colors[i % colors.length]
 		},
 		'line-stroke-over': function (d, i) {
 			return d3.color(viz.getStyle('line-stroke',arguments)).brighter();
@@ -227,14 +247,14 @@ vizuly2.viz.LineAreaChart = function (parent) {
 			return (scope.layout === vizuly2.viz.layout.STREAM) ? .3 : .6;
 		},
 		'area-fill': function (d, i) {
-			var fillColors = ['#C50A0A', '#C2185B', '#F57C00', '#FF9800', '#FFEB3B'];
-			return 'url(#' + vizuly2.svg.gradient.fade(viz, fillColors[i % 5], 'vertical', [.35, 1]).attr('id') + ')';
+			var colors = [ '#fecc5c', '#fd8d3c', '#f03b20', '#B02D5D', '#9B2C67', '#982B9A', '#692DA7', '#5725AA', '#4823AF', '#d7b5d8', '#dd1c77', '#5A0C7A', '#5A0C7A', '#bd0026'];
+			return colors[i % colors.length]
 		},
 		'area-fill-opacity': function (d, i) {
 			return (scope.layout === vizuly2.viz.layout.OVERLAP) ? .7 : .9;
 		},
 		'axis-font-weight': 400,
-		'axis-stroke': '#333',
+		'axis-stroke': '#000',
 		'axis-opacity': .25,
 		'axis-font-size': function () {
 			return Math.max(10, Math.round(size.width / 65))
@@ -252,7 +272,7 @@ vizuly2.viz.LineAreaChart = function (parent) {
 	var events = [
 		/**
 		 * Fires when user moves the mouse over a bar.
-		 * @event vizuly2.viz.BarChart.mouseover
+		 * @event vizuly2.viz.LineAreaChart.mouseover
 		 * @type {VizulyEvent}
 		 * @param e - DOM element that fired event
 		 * @param d - Datum associated with DOM element
@@ -307,7 +327,7 @@ vizuly2.viz.LineAreaChart = function (parent) {
 		 * @param i - Index of datum in display series
 		 * @param j -  The series index of the datum
 		 * @param this -  Vizuly Component that emitted event
-		 * @example  viz.on('touch', function (e, d, i) { ... });
+		 * @example  viz.on('zoom', function (e, d, i) { ... });
 		 */
 	  'zoom',
 		/**
@@ -319,7 +339,7 @@ vizuly2.viz.LineAreaChart = function (parent) {
 		 * @param i - Index of datum in display series
 		 * @param j -  The series index of the datum
 		 * @param this -  Vizuly Component that emitted event
-		 * @example  viz.on('touch', function (e, d, i) { ... });
+		 * @example  viz.on('zoomstart', function (e, d, i) { ... });
 		 */
 		'zoomstart',
 		/**
@@ -331,7 +351,7 @@ vizuly2.viz.LineAreaChart = function (parent) {
 		 * @param i - Index of datum in display series
 		 * @param j -  The series index of the datum
 		 * @param this -  Vizuly Component that emitted event
-		 * @example  viz.on('touch', function (e, d, i) { ... });
+		 * @example  viz.on('zoomend', function (e, d, i) { ... });
 		 */
 		'zoomend'
 	]
@@ -745,9 +765,6 @@ vizuly2.viz.LineAreaChart = function (parent) {
 		//Emit our zoomend event.
 		scope.dispatch.apply('zoomend', viz);
 	}
-
-	var styles_businessColors = d3.scaleOrdinal(d3.schemeCategory20);
-	var styles_backgroundGradient;
 	
 	// styles and styles
 	var stylesCallbacks = [
@@ -770,12 +787,13 @@ vizuly2.viz.LineAreaChart = function (parent) {
 		// Grab the d3.selection from the viz so we can operate on it.
 		var selection = scope.selection;
 		
-		styles_backgroundGradient = vizuly2.svg.gradient.blend(viz, viz.getStyle('background-color-bottom'), viz.getStyle('background-color-top'));
+		var styles_backgroundGradient = vizuly2.svg.gradient.blend(viz, viz.getStyle('background-color-bottom'), viz.getStyle('background-color-top'));
 		
 		// Update the background
 		selection.selectAll('.vz-background').style('fill', function () {
 			return 'url(#' + styles_backgroundGradient.attr('id') + ')';
-		});
+		})
+		 .style('opacity',viz.getStyle('background-opacity'));
 		
 		// Hide the plot background
 		selection.selectAll('.vz-plot-background').style('opacity', 0);

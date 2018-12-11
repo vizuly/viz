@@ -154,12 +154,16 @@ function createDemoMenu(options, w, h, title, styles) {
 			 .style('position', 'absolute')
 			 .style('left', '260px')
 			 .style('right', '0px')
-			 .style('width',null)
+			 .style('width', '600px')
+			 .style('height', '600px')
+			 .style('margin', '0px auto')
 			
 			styleList.selectAll('.style').data(keys)
 			 .enter()
 			 .append('div')
 			 .attr('class', 'styleCode')
+			 .on('mouseover',function (d) { setStyle(d, styles[d])})
+			 .on('mouseout',function (d) { removeStyle(d)})
 			 .text(function (d) { return d })
 		}
 		else {
@@ -181,17 +185,21 @@ function createDemoMenu(options, w, h, title, styles) {
 	
 	options.forEach(function (option) {
 		
+		if (!(useInDocs && option.name == 'Display')) {
+		
 		var menuItem = menu.append('li').attr('class','active');
 		
-		var a = menuItem.append('a');
-		a.append('span').text(option.name);
-		a.append('br');
-		a.append('span').attr('class','setting');
-		
-		var list = menuItem.append('ul').attr('id','menu-' + String(option.name).replace(/ /g,'')).attr('class','options').attr('callback',option.callback.name);
-		option.values.forEach(function (value) {
-			list.append('li').attr("class",function() { return (value.selected) ? 'selected' : null }).attr('item_value',value.value).append('a').text(value.label);
-		})
+			var a = menuItem.append('a');
+			a.append('span').text(option.name);
+			a.append('br');
+			a.append('span').attr('class','setting');
+			
+			var list = menuItem.append('ul').attr('id','menu-' + String(option.name).replace(/ /g,'')).attr('class','options').attr('callback',option.callback.name);
+			option.values.forEach(function (value) {
+				list.append('li').attr("class",function() { return (value.selected) ? 'selected' : null }).attr('item_value',value.value).append('a').text(value.label);
+			})
+			
+		}
 	})
 	
 	d3.select('#menu-Display')
@@ -217,8 +225,6 @@ function createDemoMenu(options, w, h, title, styles) {
 		styleMenu.selectAll('li a')
 		 .style('width','200px')
 		 .on('click', function (d, i) { setStyle(options[0].values[i].label)  })
-		// .on('mouseover', function (d,i) { setStyle(options[0].values[i].label) })
-		// .on('mouseout', function (d,i) { removeStyle(options[0].values[i].label) })
 		
 		styleMenu.selectAll('li')
 		 .style('height','25px')

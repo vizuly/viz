@@ -2,6 +2,7 @@
 var viz_container;
 
 var styles = {
+	'background-opacity': 0,
 	'background-color-top': '#0000FF',
 	'background-color-bottom': '#0000FF',
 	'value-label-color': {'value-label-color': '#0000FF', 'value-label-show' : true},
@@ -154,10 +155,8 @@ function runDemo() {
 		}
 	]
 	
-	var title = window.location.href.indexOf('nologo') > -1 ? '' : 'vizuly - bar chart';
+	var title = window.location.href.indexOf('nologo') > -1 ? '' : 'vizuly 2.0 - bar chart';
 	createDemoMenu(demoOptions, 600, 600, title, styles);
-	
-	changeSize(600 + ',' + 600);
 	
 }
 

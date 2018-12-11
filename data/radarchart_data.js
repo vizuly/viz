@@ -1,15 +1,7 @@
 var data = [
   [
-    {
-      "axis": "Appearance",
-      "value": 0.22,
-      "category": "Ages 18-25"
-    },
-    {
-      "axis": "Speed",
-      "value": 0.28,
-      "category": "Ages 18-25"
-    },
+    { "axis": "Appearance",  "value": 0.22, "category": "Ages 18-25" },
+    { "axis": "Speed", "value": 0.28, "category": "Ages 18-25"},
     {
       "axis": "Handling",
       "value": 0.29,
@@ -42,16 +34,8 @@ var data = [
     }
   ],
   [
-    {
-      "axis": "Appearance",
-      "value": 0.27,
-      "category": "Ages 26-35"
-    },
-    {
-      "axis": "Speed",
-      "value": 0.16,
-      "category": "Ages 26-35"
-    },
+    {"axis": "Appearance", "value": 0.27, "category": "Ages 26-35"},
+    {"axis": "Speed", "value": 0.16, "category": "Ages 26-35"},
     {
       "axis": "Handling",
       "value": 0.35,

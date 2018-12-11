@@ -2,6 +2,7 @@
 var viz_container;
 
 var styles = {
+	'background-opacity': 0,
 	'background-color-top': '#0000FF',
 	'background-color-bottom': '#0000FF',
 	'value-label-color': {'value-label-color': '#0000FF', 'value-label-show' : true},
@@ -155,8 +156,7 @@ function runDemo() {
 		}
 	]
 		//Set display size based on window size.
-		createDemoMenu(demoOptions, 600, 600, 'vizuly - column chart', styles);
-
-		changeSize(600 + ',' + 600);
+		createDemoMenu(demoOptions, 600, 600, 'vizuly 2.0 - column chart', styles);
+	
 }
 

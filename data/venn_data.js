@@ -1,74 +1,74 @@
 var data = [
   {
     "sets": [
-      0
+	    "AUTO BUYER"
     ],
     "label": "AUTO BUYER",
     "size": 95782360,
-    "setKey": "AUTO BUYER"
+    "key": "AUTO BUYER"
   },
   {
     "sets": [
-      1
+	    "HOME BUYER"
     ],
     "label": "HOME BUYER",
     "size": 118335000,
-    "setKey": "HOME BUYER"
+    "key": "HOME BUYER"
   },
   {
     "sets": [
-      2
+	    "AUTO AND HOME BUYER"
     ],
     "label": "AUTO AND HOME BUYER",
     "size": 214117360,
-    "setKey": "AUTO AND HOME BUYER"
+    "key": "AUTO AND HOME BUYER"
   },
   {
     "sets": [
-      3
+	    "FINANCE"
     ],
     "label": "FINANCE",
     "size": 49949000,
-    "setKey": "FINANCE"
+    "key": "FINANCE"
   },
   {
     "sets": [
-      4
+	    "SPORTS"
     ],
     "label": "SPORTS",
     "size": 40559360,
-    "setKey": "SPORTS"
+    "key": "SPORTS"
   },
   {
     "sets": [
-      0,
-      2
+	    "AUTO BUYER",
+	    "AUTO AND HOME BUYER"
     ],
-    "setKey": "AUTO BUYER_AUTO AND HOME BUYER",
+    "key": "AUTO BUYER - AUTO AND HOME BUYER",
     "size": 95782360
   },
   {
     "sets": [
-      1,
-      2
+	    "HOME BUYER",
+	    "AUTO AND HOME BUYER"
     ],
-    "setKey": "HOME BUYER_AUTO AND HOME BUYER",
+    "key": "HOME BUYER AUTO - AUTO AND HOME BUYER",
     "size": 118335000
   },
   {
     "sets": [
-      1,
-      3
+	    "HOME BUYER",
+	    "FINANCE"
     ],
-    "setKey": "HOME BUYER_FINANCE",
+    "key": "HOME BUYER - FINANCE",
     "size": 0
   },
   {
     "sets": [
-      2,
-      3
+	    "AUTO AND HOME BUYER",
+	    "FINANCE"
     ],
-    "setKey": "AUTO AND HOME BUYER_FINANCE",
+    "key": "AUTO AND HOME BUYER - FINANCE",
     "size": 0
   }
 ]

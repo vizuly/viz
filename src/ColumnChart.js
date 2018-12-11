@@ -1,14 +1,33 @@
 /*
- Copyright (c) 2016, BrightPoint Consulting, Inc.
+ Copyright (c) 2019, BrightPoint Consulting, Inc.
  
- This source code is covered under the following license: http://vizuly.io/commercial-license/
- 
- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
- THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS
- OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
- TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- */
+ All rights reserved.
 
+Redistribution and use in source and binary forms, with or without modification,
+are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
+
+* Neither the name of the author nor the names of contributors may be used to
+  endorse or promote products derived from this software without specific prior
+  written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
 // @version 2.1.45
 
 /**
@@ -73,15 +92,15 @@ vizuly2.viz.ColumnChart = function (parent) {
 		 */
 		'height': 600,
 		/**
-		 * Margins between tree and border of container.  This can either be a fixed pixels (Number) or a percentage (%) of height/width.
+		 * Margins between component render area and border of container.  This can either be a fixed pixels (Number) or a percentage (%) of height/width.
 		 * @member {Object}
 		 * @default  {top:'5%', bottom:'5%', left:'8%', right:'10%'}
 		 */
-		'margin': {                            // Our margin object
-			'top': '10%',                       // Top margin
-			'bottom': '10%',                    // Bottom margin
-			'left': '10%',                      // Left margin
-			'right': '10%'                      // Right margin
+		'margin': {
+			'top': '10%',
+			'bottom': '10%',
+			'left': '10%',
+			'right': '10%'
 		},
 		/**
 		 * Duration (in milliseconds) of any component transitions.
@@ -90,7 +109,7 @@ vizuly2.viz.ColumnChart = function (parent) {
 		 */
 		'duration': 500,
 		/**
-		 * The width of each bar in pixels.  The default value of "auto" will auto size bars based on padding and chart height.
+		 * The width of each bar in pixels.  The default value of `auto` will auto size bars based on padding and chart height.
 		 * @member {Number}
 		 * @default  'auto'
 		 */
@@ -101,9 +120,9 @@ vizuly2.viz.ColumnChart = function (parent) {
 		 * Using a percentage will try and optimize the spacing based on the number of bars and the height of the chart.  Using a fixed number
 		 * will ignore the chart "height" property and space bars a fixed distance apart, so the resulting chart height may differ.
 		 * This allows for creating consistently padded charts regardless of the number of elements within the series.
-		 * NEED TO UPDATE DOCS FOR NEW AUTO SETTING
+		 * The default value of `auto` will auto pad bars based on number of bars and chart height.
 		 * @member {String}
-		 * @default 20%
+		 * @default auto
 		 *
 		 */
 		'barPadding': 'auto',
@@ -111,10 +130,11 @@ vizuly2.viz.ColumnChart = function (parent) {
 		 * <img src='BarChartPadding.png'><br><br>
 		 * Determines space between series groups.  Can be represented as a pixel (Number) or a percentage ('20%').
 		 * Using a percentage will try and optimize the spacing based on the number of bars and the height of the chart.  Using a fixed number
-		 * will ignore the chart "height" property and space series groups a fixed distance apart, so the resulting chart height may differ.
+		 * will ignore the chart `width` property and space series groups a fixed distance apart, so the resulting chart width may differ.
 		 * This allows for creating consistently padded charts regardless of the number of elements within the series.
+		 * The default value of `auto` will group bars based on number of bars and chart width.
 		 * @member {String}
-		 * @default 20%
+		 * @default auto
 		 *
 		 */
 		'groupPadding': 'auto',
@@ -145,23 +165,23 @@ vizuly2.viz.ColumnChart = function (parent) {
 			return d.series
 		},
 		/**
-		 * Scale type used to measure and position bars along the x-axis.  The scale, or scale properties can be overridden by capturing the
-		 * "measure" event and accessing/modifying the scale.
-		 * @member {d3.scale}
-		 * @default  d.scaleLinear()
-		 * @example
-		 * viz.on('measure', function () { viz.scaleX().range([0, 600]) }) //Sets max width of scale to 600
-		 */
-		'xScale': 'undefined',
-		/**
-		 * Scale type used to measure and position bars along the y-axis.  The bar chart will try and auto-determine the scale type based on
+		 * Scale type used to measure and position bars along the x-axis.  The bar chart will try and auto-determine the scale type based on
 		 * the value type being returned by the viz.y accessor.  String values will use a d3.scaleBand, date values will use a d3.scaleTime,
 		 * and numeric values will use a d3.scaleLinear. The scale, or scale properties can be overridden by capturing the
 		 * "measure" event and accessing/modifying the scale.
 		 * @member {d3.scale}
+		 * @default  d.scaleLinear()
+		 * @example
+		 * viz.on('measure', function () { viz.xScale().range([0, 600]) }) //Sets max width of scale to 600
+		 */
+		'xScale': 'undefined',
+		/**
+		 * Scale type used to measure and position bars along the y-axis.  The scale, or scale properties can be overridden by capturing the
+		 * "measure" event and accessing/modifying the scale.
+		 * @member {d3.scale}
 		 * @default  undefined - set at runtime automatically
 		 * @example
-		 * viz.on('measure', function () { viz.scaleY().range([0, 600]) }) //Sets max height of scale to 600;
+		 * viz.on('measure', function () { viz.yScale().range([0, 600]) }) //Sets max height of scale to 600;
 		 */
 		'yScale': d3.scaleLinear(),
 		/**
@@ -253,6 +273,7 @@ vizuly2.viz.ColumnChart = function (parent) {
 	};
 	
 	var styles = {
+		'background-opacity': 1,
 		'background-color-top': '#FFF',
 		'background-color-bottom': '#DDD',
 		'value-label-color': '#444',
@@ -568,8 +589,8 @@ vizuly2.viz.ColumnChart = function (parent) {
 		
 		// Select, create, and destroy our bar groups as needed
 		barGroup = plot.selectAll('.vz-bar-group').data(stackSeries[0]);
-		barGroup = barGroup.enter().append('g').attr('class', 'vz-bar-group').merge(barGroup);
 		barGroup.exit().remove();
+		barGroup = barGroup.enter().append('g').attr('class', 'vz-bar-group').merge(barGroup);
 		
 		// Create bars in each group - even if there is only one
 		barGroup.each(function (datum, index) {
@@ -668,9 +689,6 @@ vizuly2.viz.ColumnChart = function (parent) {
 		return viz;
 	};
 	
-	var styles_businessColors = d3.scaleOrdinal(d3.schemeCategory20);
-	var styles_backgroundGradient;
-	
 	// styless and styles
 	var stylesCallbacks = [
 		{on: 'updated.styles', callback: applyStyles},
@@ -695,12 +713,13 @@ vizuly2.viz.ColumnChart = function (parent) {
 		// Hide the plot background
 		selection.selectAll('.vz-plot-background').style('opacity', 0);
 		
-		styles_backgroundGradient = vizuly2.svg.gradient.blend(viz, viz.getStyle('background-color-bottom'), viz.getStyle('background-color-top'));
+		var styles_backgroundGradient = vizuly2.svg.gradient.blend(viz, viz.getStyle('background-color-bottom'), viz.getStyle('background-color-top'));
 		
 		// Update the background
 		selection.selectAll('.vz-background').style('fill', function () {
 			return 'url(#' + styles_backgroundGradient.attr('id') + ')';
-		});
+		})
+		 .style('opacity',viz.getStyle('background-opacity'));
 		
 		
 		//Here we select all the bars and apply filters and fills.  In the case of these styless

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Vizuly 2.0 - Venn</title>
+
+    <!-- We use google fonts for many of the examples, but they are not necessary -->
+    <link href='https://fonts.googleapis.com/css?family=Raleway:600,400,200' rel='stylesheet' type='text/css'>
+
+    <!-- vizuly2.specific style sheets -->
+    <link rel="stylesheet" href="lib/styles/vizuly.css">
+
+    <script src="lib/d3_v5.7.min.js"></script>
+
+    <script src="lib/vizuly2_core.min.js"></script>
+    <script src="src/Venn.js"></script>
+    <script src="data/venn_data.js"></script>
+
+    <!-- DEMO CODE:START -->
+    <link rel="stylesheet" href="demo/scripts/cssmenu.css">
+    <script type="text/javascript" src="demo/scripts/jquery-2.1.1.min.js"></script>
+    <script src="demo/scripts/cssmenu.js"></script>
+    <script src="demo/VennDemo.js"></script>
+    <!-- DEMO CODE: END -->
+
+</head>
+
+<body>
+
+<!-- Our main content container-->
+<div class="container" style="width:100%;">
+    <div id="viz_container" class="z-depth-3" style="width:600px; height:600px; border-radius:10px; overflow:hidden">
+    </div>
+</div>
+
+
+<script id="testscript">
+
+	var viz = vizuly2.viz.Venn("#viz_container");
+
+    var totalSize = d3.sum(data, function (d) { return d.size; })
+
+    viz
+     .data(data)
+     .width(600)
+     .height(600)
+     .value(function (d) {
+         return d.size
+     })
+     .label(function (d) {
+         if (!d.label) return '';
+         return d.label + ' ' + (Math.round((d.size / totalSize) * 100)) + '%';
+     })
+
+    viz.update();
+
+    if (runDemo) runDemo();
+
+</script>
+
+</body>
+
+</html>

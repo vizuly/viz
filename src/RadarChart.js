@@ -1,62 +1,255 @@
 /*
- Copyright (c) 2016, BrightPoint Consulting, Inc.
+ Copyright (c) 2019, BrightPoint Consulting, Inc.
  
- This source code is covered under the following license: http://vizuly2.io/commercial-license/
- 
- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
- THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS
- OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
- TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- */
+ All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification,
+are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
+
+* Neither the name of the author nor the names of contributors may be used to
+  endorse or promote products derived from this software without specific prior
+  written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
 
 // @version 2.1.45
 
 /**
- * A base vizuly component used as a template for creating other components.
  * @class
- * @constructor
- * @param {DOMElement} parent - Container element that will render the component.
- *
  */
 vizuly2.viz.RadarChart = function (parent) {
 	
-	// This is the object that provides pseudo "protected" properties that the vizuly.viz function helps create
+	// Get the d3 library set by vizuly
+	var d3 = vizuly2.d3;
 	
-	
-	/** @lends vizuly2.viz.Corona.properties */
+	/** @lends vizuly2.viz.RadarChart.properties */
 	var properties = {
 		/**
-		 * Hierarchal nested array of nodes to be rendered.
+		 * Array of Arrays. Each array represents a series of data.  Assumes each series contains all the datum properties referenced by each radial axis group of the radar chart.
 		 * @member {Array}
+		 * @default Needs to be set at runtime
+		 *
+		 * @example
+		 *[
+		 *  // Series 1
+		 *  [
+		 *    { "axis": "Appearance",  "value": 0.22, "category": "Ages 18-25" },
+		 *    { "axis": "Speed", "value": 0.28, "category": "Ages 18-25"},
+		 *    ...
+		 *  ],
+		 *  // Series 2
+		 *  [
+		 *    {"axis": "Appearance", "value": 0.27, "category": "Ages 26-35"},
+		 *    {"axis": "Speed", "value": 0.16, "category": "Ages 26-35"},
+		 *    ...
+		 *  ],
+		 *  ...
+		 * ]
 		 */
-		"data": null,                          //Expects array of data - assumes identical length and xScale values;
-		"margin": {                             // Our margin object
-			"top": "12%",                        // Top margin
-			"bottom": "12%",                     // Bottom margin
-			"left": "15%",                       // Left margin
-			"right": "15%"                       // Right margin
+		'data': null,
+		'width': 600,
+		/**
+		 * Height of component in either pixels (Number) or percentage of parent container (%)
+		 * @member {Number}
+		 * @default 600
+		 */
+		'height': 600,
+		/**
+		 * Margins between component render area and border of container.  This can either be a fixed pixels (Number) or a percentage (%) of height/width.
+		 * @member {Object}
+		 * @default  {top:'5%', bottom:'5%', left:'8%', right:'10%'}
+		 */
+		'margin': {
+			'top': '10%',
+			'bottom': '10%',
+			'left': '15%',
+			'right': '15%'
 		},
-		"duration": 500,                        // This the time in ms used for any component generated transitions
-		"width": 300,                           // Overall width of component
-		"height": 300,                          // Height of component
-		"dataTipRenderer": dataTipRenderer,
-		"labelRadiusFactor": 1.15,
-		"radiusScale": d3.scaleLinear(),      // Radius scale (defaults to linear)
-		"y": null,                             // Function to return 'y' value - cartesian y translates to distance from center in polar coordinates.
-		"x": null,                              // Function to return 'x' value - cartesian x translates to the angle from 0 degrees around the center of corona.
-		"seriesLabel": function (d) { return d.series },
-		"yAxis": d3.axisLeft(),                // Axis shown along perimeter of the corona
-		"xAxis": d3.axisBottom(),                // Axis shown radiating out from center of corona
-		"xScale": "undefined",             // The scale to determine the distribution of angles around the center for each 'x' plot
-		"yAxisTickFormat": function (d,i) { return d },
-		"xAxisTickFormat": function (d,i) { return d },
-		"curve": d3.curveLinearClosed    // Used to determine vertex type of lines
+		/**
+		 * Duration (in milliseconds) of any component transitions.
+		 * @member {Number}
+		 * @default  500
+		 */
+		'duration': 500,
+		/**
+		 * The dataTipRenderer is used to customize the data tip that is shown on mouse-over events.
+		 *  You can append to or modify the 'tip' parameter to customize the data tip.
+		 *  You can also return modified x, y coordinates to place the data tip in a different location.
+		 * @member {function}
+		 * @default internal.dataTipRenderer
+		 * @example
+		 * // tip - html DIV element
+		 * // e - svg rect of the bar being moused over
+		 * // d - datum
+		 * // i - datum index
+		 * // x - suggested x position of data tip
+		 * // y - suggested y position of data tip
+		 * // return {Array} [x, y] - x and y coordinates placing data tip.
+		 *
+		 *function dataTipRenderer(tip, e, d, i, x, y) {
+		 *		var bounds = e.getBoundingClientRect();
+		 *		var x1 = d3.event.pageX; - bounds.left;
+		 *		var y1 = d3.event.pageY; - bounds.top;
+		 *
+		 *		var html = '<div class="vz-tip-header1">HEADER1</div>' +
+		 *		 '<div class="vz-tip-header-rule"></div>' +
+		 *		 '<div class="vz-tip-header2"> HEADER2 </div>' +
+		 *		 '<div class="vz-tip-header-rule"></div>' +
+		 *		 '<div class="vz-tip-header1"> HEADER3 </div>';
+		 *
+		 *		var h1, h2, h3;
+		 *
+		 *		if (d3.select(e).attr('class') == 'vz-radar-area') {
+		 *		  h1=' ';
+		 *		  h3=' ';
+		 *		  h2 = scope.seriesLabel(scope.data[i][0]);
+		 *			tip.style('height','50px')
+		 *		}
+		 *		else {
+		 *			h1 = scope.seriesLabel(d);
+		 *			h2 = scope.y(d);
+		 *			h3 = scope.x(d);
+		 *			tip.style('height','80px')
+		 *		}
+		 *
+		 *		html = html.replace("HEADER1", h1);
+		 *		html = html.replace("HEADER2", h2);
+		 *		html = html.replace("HEADER3", h3);
+		 *
+		 *	  tip.html(html);
+		 *
+		 *		if (d3.select(e).attr('class') == 'vz-radar-area') {
+		 *			tip.selectAll('.vz-tip-header2')
+		 *			 .style('color', function () {
+		 *				 return viz.getStyle('area-fill', [scope.data[i], i])
+		 *			 })
+		 *		}
+		 *
+		 *		return [x1 - 100, y1 - 120];
+		 *}
+		 */
+		'dataTipRenderer': dataTipRenderer,
+		/**
+		 * Radius to position labels as a percentage of the components radius;
+		 * @member {Number}
+		 * @default  1.15 (115%)
+		 */
+		'labelRadiusPercent': 1.15,
+		/**
+		 * Scale type used to measure and position plots along the radial (y) axis. The scale, or scale properties can be overridden by capturing the
+		 * "measure" event and accessing/modifying the scale.
+		 * @member {d3.scale}
+		 * @default d3.scaleLinear
+		 * @example
+		 * viz.on('measure', function () { viz.yScale().range([0, 600]) }) //Sets max width of scale to 600
+		 */
+		'yScale': d3.scaleLinear(),
+		/**
+		 * Function that returns the datum property used to calculate the value used by xScale and position radar vertex radially along 360 degrees.  This accessor is called for each vertex that is being rendered.
+		 * @member {Function}
+		 * @default  Must be set at runtime
+		 * @example
+		 * viz.x(function(d,i) { return Number(d.myProperty) });
+		 */
+		'x': null,
+		/**
+		 * Function that returns the datum property used to calculate the values used by the yScale to position radar vertex at a specified radius from center .  This accessor is called for each vertex that is being rendered.
+		 * @member {Function}
+		 * @default  Must be set at runtime
+		 * @example
+		 * viz.y(function(d,i) { return Number(d.myProperty) });
+		 */
+		'y': null,
+		/**
+		 * Function that returns the series label of the datum
+		 * @member {Function}
+		 * @default  function (d) { return d.series }
+		 * @example
+		 * viz.seriesLabel(function(d,i) { return d.myProperty });
+		 */
+		'seriesLabel': function (d) { return d.series },
+		/**
+		 * D3 Axis used to render x (radial) axis.  This axis can be overriden with custom settings by capturing the 'measure' event.
+		 * @member {d3.axis}
+		 * @default d3.axisLeft
+		 * @example
+		 * viz.on('measure', function () { viz.xAxis().tickSize(10) }) //Sets each axis tick to 10 pixels
+		 */
+		'xAxis': d3.axisBottom(),
+		/**
+		 * D3 Axis used to render y (radius) axis.  This axis can be overriden with custom settings by capturing the 'measure' event.
+		 * @member {d3.axis}
+		 * @default d3.axisBottom
+		 * @example
+		 * viz.on('measure', function () { viz.yAxis().tickSize(10) }) //Sets each axis tick to 10 pixels
+		 */
+		'yAxis': d3.axisLeft(),
+		/**
+		 * Scale type used to measure and position radar vertex points in a radial pattern around 360 degress.  The chart will try and auto-determine the scale type based on
+		 * the value type being returned by the viz.y accessor.  String values will use a d3.scaleBand, date values will use a d3.scaleTime,
+		 * and numeric values will use a d3.scaleLinear. The scale, or scale properties can be overridden by capturing the
+		 * "measure" event and accessing/modifying the scale.
+		 * @member {d3.scale}
+		 * @default  undefined - set at runtime automatically
+		 * @example
+		 * viz.on('measure', function () { viz.xScale().range([0, 600]) }) //Sets max height of scale to 600;
+		 */
+		'xScale': "undefined",
+		/**
+		 * Label formatter for the y axis.  Can be customized to modify labels along axis.
+		 * @member {function}
+		 * @default function (d) { return d }
+		 * @example
+		 * //Sets each axis tick label to a currency format
+		 * viz.yTickFormat(function (d, i) { return '$' + d3.format('.2f')(d) })
+		 */
+		'yTickFormat': function (d) {
+			return d
+		},
+		/**
+		 * Label formatter for the x axis.  Can be customized to modify labels along axis.
+		 * @member {function}
+		 * @default function (d) { return d }
+		 * @example
+		 * //Sets each axis tick label to a currency format
+		 * viz.xTickFormat(function (d, i) { return '$' + d3.format('.2f')(d) })
+		 */
+		'xTickFormat': function (d) {
+			return d
+		},
+		/**
+		 * Curve shape for the Radar vertexes.   You can use any {@link 'https://github.com/d3/d3-shape#curves'|d3.curve} type
+		 * @member {Object}
+		 * @default d3.curveLinear
+		 * @example
+		 * //Sets a step curve type
+		 * viz.curve(d3.curveStep)
+		 */
+		'curve': d3.curveLinearClosed
 	};
 	
 	var styles = {
-		'label-color': "#000",
+		'background-opacity': 1,
 		'background-color-top': "#FFF",
 		'background-color-bottom': "#EEE",
+		'label-color': "#000",
 		'line-stroke': function (d, i) {
 			return d3.interpolateViridis(i/scope.data.length);
 		},
@@ -79,7 +272,69 @@ vizuly2.viz.RadarChart = function (parent) {
 		'x-axis-font-size': function (d,i) { return Math.max(11, Math.round(outerRadius / 22)) }
 	};
 	
-	var events = ['mouseover', 'mouseout','click', 'vertex_mouseover', 'vertex_mouseout']
+	/** @lends vizuly2.viz.RadarChart.events */
+	var events = [
+		/**
+		 * Fires when user moves the mouse over a radar series group.
+		 * @event vizuly2.viz.RadarChart.mouseover
+		 * @type {VizulyEvent}
+		 * @param e - DOM element that fired event
+		 * @param d - Datum associated with DOM element
+		 * @param i - Index of datum in display series
+		 * @param j -  The series index of the datum
+		 * @param this -  Vizuly Component that emitted event
+		 * @example  viz.on('mouseover', function (e, d, i) { ... });
+		 */
+		'mouseover',
+		/**
+		 * Fires when user moves the mouse off a radar series group.
+		 * @event vizuly2.viz.RadarChart.mouseout
+		 * @type {VizulyEvent}
+		 * @param e - DOM element that fired event
+		 * @param d - Datum associated with DOM element
+		 * @param i - Index of datum in display series
+		 * @param j -  The series index of the datum
+		 * @param this -  Vizuly Component that emitted event
+		 * @example  viz.on('mouseout', function (e, d, i) { ... });
+		 */
+		'mouseout',
+		/**
+		 * Fires when user clicks on a given radar series.
+		 * @event vizuly2.viz.RadarChart.click
+		 * @type {VizulyEvent}
+		 * @param e - DOM element that fired event
+		 * @param d - Datum associated with DOM element
+		 * @param i - Index of datum in display series
+		 * @param j -  The series index of the datum
+		 * @param this -  Vizuly Component that emitted event
+		 * @example  viz.on('click', function (e, d, i) { ... });
+		 */
+		'click',
+		/**
+		 * Fires when user moves mouse over a radar vertex.
+		 * @event vizuly2.viz.RadarChart.vertex_mouseover
+		 * @type {VizulyEvent}
+		 * @param e - DOM element that fired event
+		 * @param d - Datum associated with DOM element
+		 * @param i - Index of datum in display series
+		 * @param j -  The series index of the datum
+		 * @param this -  Vizuly Component that emitted event
+		 * @example  viz.on('vertex_mouseover', function (e, d, i) { ... });
+		 */
+		'vertex_mouseover',
+		/**
+		 * Fires when user moves mouse off a radar vertex.
+		 * @event vizuly2.viz.RadarChart.vertex_mouseout
+		 * @type {VizulyEvent}
+		 * @param e - DOM element that fired event
+		 * @param d - Datum associated with DOM element
+		 * @param i - Index of datum in display series
+		 * @param j -  The series index of the datum
+		 * @param this -  Vizuly Component that emitted event
+		 * @example  viz.on('vertex_mouseout', function (e, d, i) { ... });
+		 */
+		'vertex_mouseout'
+	]
 	
 	// This is the object that provides pseudo "protected" properties that the vizuly.viz function helps create
 	var scope = {};
@@ -125,8 +380,8 @@ vizuly2.viz.RadarChart = function (parent) {
 		pointHitArea = g.append("g").attr("class", "vz-point-areas");
 		
 		// Make sure we have a default tick format - as we need to use these for our layout
-		scope.yAxis.tickFormat(scope.yAxisTickFormat);
-		scope.xAxis.tickFormat(scope.xAxisTickFormat);
+		scope.yAxis.tickFormat(scope.yTickFormat);
+		scope.xAxis.tickFormat(scope.xTickFormat);
 		
 		// Tell everyone we are done initializing.
 		scope.dispatch.apply('initialized', viz);
@@ -210,10 +465,10 @@ vizuly2.viz.RadarChart = function (parent) {
 		innerRadius = 0;
 		
 		// Set our radius scale range
-		scope.radiusScale.range([innerRadius, outerRadius]);
+		scope.yScale.range([innerRadius, outerRadius]);
 		
 		// Set our radius scale domain based on the data values
-		scope.radiusScale.domain([d3.min(stackSeries, stackMin), d3.max(stackSeries, stackMax)]);
+		scope.yScale.domain([d3.min(stackSeries, stackMin), d3.max(stackSeries, stackMax)]);
 		
 		// Set our area path generator properties
 		area.curve(scope.curve)
@@ -221,10 +476,10 @@ vizuly2.viz.RadarChart = function (parent) {
 			 return scope.xScale(d.data.x);
 		 })
 		 .innerRadius(function (d, i) {
-			 return scope.radiusScale(d[0]);
+			 return scope.yScale(d[0]);
 		 })
 		 .outerRadius(function (d, i) {
-			 return scope.radiusScale(d[1]);
+			 return scope.yScale(d[1]);
 		 });
 		
 		// Set our line path generator properties
@@ -233,12 +488,12 @@ vizuly2.viz.RadarChart = function (parent) {
 			 return scope.xScale(d.data.x);
 		 })
 		 .radius(function (d, i) {
-			 return scope.radiusScale(d[1]);
+			 return scope.yScale(d[1]);
 		 });
 		
 		var tickCount = scope.xScale.domain().length;
 		
-		scope.yAxis.scale(scope.radiusScale);
+		scope.yAxis.scale(scope.yScale);
 		scope.yAxis.tickSize(outerRadius).ticks(4);
 		scope.xAxis.scale(scope.xScale).tickSize(outerRadius);
 		
@@ -297,6 +552,9 @@ vizuly2.viz.RadarChart = function (parent) {
 		 })
 		 .on("mouseout", function (d, i) {
 			 scope.dispatch.apply('mouseout', viz, [this, d, i]);
+		 })
+		 .on("click", function (d, i) {
+			 scope.dispatch.apply('click', viz, [this, d, i]);
 		 })
 		 .merge(seriesArea)
 		
@@ -361,11 +619,11 @@ vizuly2.viz.RadarChart = function (parent) {
 		
 		xTicks.append("text")
 		 .attr('class','vz-radar-x-axis-label')
-		 .attr('x',function (d,i) { return ((outerRadius + tipRadius) * scope.labelRadiusFactor) * Math.cos(scope.xScale(d) - Math.PI/2)})
-		 .attr('y', function (d,i) { return ((outerRadius + tipRadius) * scope.labelRadiusFactor) * Math.sin(scope.xScale(d) - Math.PI/2)})
+		 .attr('x',function (d,i) { return ((outerRadius + tipRadius) * scope.labelRadiusPercent) * Math.cos(scope.xScale(d) - Math.PI/2)})
+		 .attr('y', function (d,i) { return ((outerRadius + tipRadius) * scope.labelRadiusPercent) * Math.sin(scope.xScale(d) - Math.PI/2)})
 		 .attr('dy',function (d,i) { return (viz.getStyle('x-axis-font-size', arguments) * 1.2) + 'px'})
 		 .style('font-size',function (d,i) { return viz.getStyle('x-axis-font-size', arguments) + 'px'})
-		 .text(function (d,i) { return scope.xAxisTickFormat(d); })
+		 .text(function (d,i) { return scope.xTickFormat(d); })
 		 .style('text-anchor','middle')
 		 .call(wrap, outerRadius/4)
 		
@@ -390,7 +648,7 @@ vizuly2.viz.RadarChart = function (parent) {
 		 .attr("cx", 0)
 		 .attr("cy", 0)
 		 .attr("r", function (d) {
-			 return scope.radiusScale(d)
+			 return scope.yScale(d)
 		 })
 		 .style("fill", "none");
 		
@@ -405,7 +663,7 @@ vizuly2.viz.RadarChart = function (parent) {
 				 return scope.id + "_y_text_arc_" + j + "_" + i;
 			 })
 			 .attr("d", function () {
-				 return vizuly2.svg.text.textArcPath(scope.radiusScale(tick) * 1.02, 0)
+				 return vizuly2.svg.text.textArcPath(scope.yScale(tick) * 1.02, 0)
 			 });
 			// Attach our yAxis labels and refernece the path def above.
 			yAxisPlot.append("text")
@@ -418,7 +676,7 @@ vizuly2.viz.RadarChart = function (parent) {
 				 return "#" + scope.id + "_y_text_arc_" + j + "_" + i;
 			 })
 			 .text(function () {
-				 return scope.yAxisTickFormat(tick);
+				 return scope.yTickFormat(tick);
 			 })
 		});
 		
@@ -429,7 +687,7 @@ vizuly2.viz.RadarChart = function (parent) {
 	
 	// Used to translate from cartesian coordinates to polar coordinates.
 	function cartesianToPolar(x, y) {
-		var r = scope.radiusScale(x);
+		var r = scope.yScale(x);
 		var a = scope.xScale(y) - Math.PI / 2;
 		x = r * Math.cos(a) + size.width / 2;
 		y = r * Math.sin(a) + size.height / 2;
@@ -472,8 +730,6 @@ vizuly2.viz.RadarChart = function (parent) {
 	
 	/*****  STYLES *****/
 	
-	var styles_backgroundGradient;
-	
 	var stylesCallbacks = [
 		{on: "updated.styles", callback: applyStyles},
 		{on: "mouseover.styles", callback: styles_onMouseOver},
@@ -493,12 +749,13 @@ vizuly2.viz.RadarChart = function (parent) {
 		// Grab the d3 selection from the viz so we can operate on it.
 		var selection = scope.selection;
 		
-		styles_backgroundGradient = vizuly2.svg.gradient.blend(viz, viz.getStyle('background-color-bottom'), viz.getStyle('background-color-top'));
+		var styles_backgroundGradient = vizuly2.svg.gradient.blend(viz, viz.getStyle('background-color-bottom'), viz.getStyle('background-color-top'));
 		
 		// Update the background
 		selection.selectAll(".vz-background").style("fill", function () {
 			return "url(#" + styles_backgroundGradient.attr("id") + ")";
-		});
+		})
+		 .style('opacity',viz.getStyle('background-opacity'));
 		
 		// Hide the plot background
 		selection.selectAll(".vz-plot-background").style("opacity", 0);
@@ -635,7 +892,7 @@ vizuly2.viz.RadarChart = function (parent) {
 		 .attr("cx", 0)
 		 .attr("cy", 0)
 		 .attr("r", function () {
-			 return scope.radiusScale(datum[1])
+			 return scope.yScale(datum[1])
 		 })
 		 .style("stroke", viz.getStyle('x-axis-line-stroke'))
 		 .style("fill", "none")

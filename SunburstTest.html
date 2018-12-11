@@ -2,19 +2,27 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>vizuly2.- Sunburst</title>
+    <title>vizuly 2.0 - Sunburst</title>
 
     <!-- We use google fonts for many of the examples, but they are not necessary -->
     <link href='https://fonts.googleapis.com/css?family=Raleway:600,400,200' rel='stylesheet' type='text/css'>
 
     <!-- vizuly2.specific style sheets -->
-    <link rel="stylesheet" href="../lib/styles/vizuly.css">
+    <link rel="stylesheet" href="lib/styles/vizuly.css">
 
-    <script src="../lib/d3_v5.7.min.js"></script>
+    <script src="lib/d3_v5.7.min.js"></script>
 
-    <script src="../lib/vizuly2_core.min.js"></script>
-    <script src="../src/SunBurst.js"></script>
+    <script src="lib/vizuly2_core.min.js"></script>
+    <script src="src/SunBurst.js"></script>
     <script src="data/sunburst_data.js"></script>
+
+    <!-- DEMO CODE:START -->
+    <link rel="stylesheet" href="demo/scripts/cssmenu.css">
+    <script type="text/javascript" src="demo/scripts/jquery-2.1.1.min.js"></script>
+    <script src="demo/scripts/cssmenu.js"></script>
+    <script src="demo/SunBurstDemo.js"></script>
+    <!-- DEMO CODE: END -->
+
 
     <style>
         span.drill-label {
@@ -34,53 +42,36 @@
     </div>
 </div>
 
-<!-- DEMO CODE:START -->
-<link rel="stylesheet" href="demo/scripts/cssmenu.css">
-<script type="text/javascript" src="demo/scripts/jquery-2.1.1.min.js"></script>
-<script src="demo/scripts/cssmenu.js"></script>
-<script src="demo/SunBurstDemo.js"></script>
-<!-- DEMO CODE: END -->
-
 <script id="testscript">
 
     var d3 = vizuly2.d3;
 
-    console.log("fix drill up on sunbusrt")
+	var viz = vizuly2.viz.SunBurst("#viz_container");
 
-	// our radial components and an array to hold them
-	var viz = vizuly2.viz.Sunburst("#viz_container");
-
-	// stores the currently selected value field
 	var valueField = "Federal";
 	var valueFields = ["Federal", "State", "Local"];
 
-
-	var formatCurrency = function (d) {
-		if (isNaN(d)) d = 0;
-		return "$" + d3.format(",.2f")(d) + " Billion";
-	};
-
-    viz.data(data)                                                      // Expects hierarchical array of objects.
-        .width('100%')                                                     // Width of component
-        .height('100%')                                                    // Height of component
+    viz.data(data)
+        .width('100%')
+        .height('100%')
         .children(function (d) {
             return d.values
-        })                     // Denotes the property that holds child object array
+        })
         .key(function (d) {
             return d.id
-        })                              // Unique key
+        })
         .value(function (d) {
             return Number(d["agg_" + valueField])
         })
          .valueLabel(function (d) {
              return d3.format('$,.2f')(Number(d["agg_" + valueField])) + " Million"
          })
-        .label(function (d) {                                           // returns label for each node.
+        .label(function (d) {
             var ret = trimLabel(d.key || (d.Category));
             return (ret) ? ret : '';
         })
-        .on("mouseover", onMouseOver)                                    // mouseover callback - all viz components issue these events
-        .on("mouseout", onMouseOut)   // mouseout callback - all viz components issue these events
+        .on("mouseover", onMouseOver)
+        .on("mouseout", onMouseOut)
 
     viz.update();
 

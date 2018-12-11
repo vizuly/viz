@@ -8,12 +8,12 @@
     <link href='https://fonts.googleapis.com/css?family=Raleway:600,400,200' rel='stylesheet' type='text/css'>
 
     <!-- vizuly2.specific style sheets -->
-    <link rel="stylesheet" href="../lib/styles/vizuly.css">
+    <link rel="stylesheet" href="lib/styles/vizuly.css">
 
-    <script src="../lib/d3_v5.7.min.js"></script>
+    <script src="lib/d3_v5.7.min.js"></script>
 
-    <script src="../lib/vizuly2_core.min.js"></script>
-    <script src="../src/BarChart.js"></script>
+    <script src="lib/vizuly2_core.min.js"></script>
+    <script src="src/BarChart.js"></script>
     <script src="data/barchart_data.js"></script>
 
     <!-- DEMO CODE:START -->
@@ -29,7 +29,7 @@
 
 <!-- Our main content container-->
 <div class="container" style="width:100%">
-    <div id="viz_container" class="z-depth-3" style="width:50%; height:600px; border-radius:10px; overflow:hidden">
+    <div id="viz_container" class="z-depth-3" style="width:600px; height:600px; border-radius:10px; overflow:hidden">
     </div>
 </div>
 
@@ -62,9 +62,10 @@ Rotate labels (Coluimn chart)
      .y(function (d, i)  { return d.country; })
      .seriesLabel( function (d,i) { return d.category })
      .style('show-value-labels',false)
+     .updateOnResize(true)
      .on('mouseover', onMouseOver)
      .on('mouseout', onMouseOut)
-     .updateOnResize(true)
+
 
     viz.update();
 

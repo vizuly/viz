@@ -2,6 +2,7 @@
 var viz_container;
 
 var styles = {
+	'background-opacity': 0,
 	'label-color': "#0000FF",
 	'background-color-top': "#0000FF",
 	'background-color-bottom': "#0000FF",
@@ -104,7 +105,6 @@ var businessStyles =
 	 'y-axis-stroke': '#000',
 	 'x-axis-stroke': '#F000',
 	 'area-fill': function (d, i) {
-		 console.log(businessColors(i))
 		 return businessColors(i);
 	 },
 	 'line-stroke': function (d, i) {
@@ -166,10 +166,8 @@ function runDemo() {
 			'callback': changeCurve
 		}
 	]
-
 	
-		createDemoMenu(demoOptions, 600, 600, 'vizuly - Radar Chart', styles);
+	createDemoMenu(demoOptions, 600, 600, 'vizuly 2.0 - Radar Chart', styles);
 
-		changeSize('600,600');
 }
 

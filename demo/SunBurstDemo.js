@@ -2,6 +2,7 @@
 var viz_container;
 
 var styles = {
+	'background-opacity': 0,
 	'background-color-top': '#0000FF',
 	'background-color-bottom': '#0000FF',
 	'stroke': '#0000FF',
@@ -178,10 +179,7 @@ function runDemo() {
 		},
 	]
 	
-	createDemoMenu(demoOptions, 600, 600, 'vizuly - sunburst', styles);
-	
-	changeSize('600,600');
-
+	createDemoMenu(demoOptions, 600, 600, 'vizuly 2.0 - sunburst', styles);
 	
 }
 

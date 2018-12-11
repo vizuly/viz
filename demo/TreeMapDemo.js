@@ -1,4 +1,5 @@
 var styles = {
+	'background-opacity': 0,
 	'background-color-top': '#0000FF',
 	'background-color-bottom': '#0000FF',
 	'cell-corner-radius': 0,
@@ -145,8 +146,7 @@ function runDemo() {
 		}
 	]
 
-	 createDemoMenu(demoOptions, 600, 600, 'vizuly - TreeMap', styles);
+	 createDemoMenu(demoOptions, 600, 600, 'vizuly 2.0 - TreeMap', styles);
 
-		changeSize(600 + ',' + 600);
 }
 
