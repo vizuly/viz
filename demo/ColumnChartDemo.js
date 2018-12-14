@@ -79,6 +79,7 @@ var minimalStyles =
 	 'y-axis-label-color': '#444',
 	 'bar-fill': '#555',
 	 'bar-fill-over': '#000',
+	 'bar-stroke': '#333',
 	 'axis-stroke': '#777',
 	 'bar-radius': 0
  }

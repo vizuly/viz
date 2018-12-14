@@ -119,7 +119,7 @@ function createDemoMenu(options, w, h, title, styles) {
 	 .attr('id','currentStyle')
 	 .attr('class','styleCode');
 	
-	if (useInDocs == true) {
+	if (useInDocs == true || useInStore == true) {
 		d3.select(document.head)
 		 .append('link')
 		 .attr('rel','stylesheet')
@@ -147,24 +147,22 @@ function createDemoMenu(options, w, h, title, styles) {
 			 .attr('class','styleComment')
 			 .text('mouse over any style to see it in action')
 			
-			d3.select('#viz_container')
-			 .style('width',null)
+		//	d3.select('#viz_container')
+		//	 .style('width',null)
 			
 			d3.selectAll('.container')
 			 .style('position', 'absolute')
 			 .style('left', '260px')
 			 .style('right', '0px')
-			 .style('width', '600px')
-			 .style('height', '600px')
-			 .style('margin', '0px auto')
+			 .style('width',null)
 			
 			styleList.selectAll('.style').data(keys)
 			 .enter()
 			 .append('div')
 			 .attr('class', 'styleCode')
-			 .on('mouseover',function (d) { setStyle(d, styles[d])})
-			 .on('mouseout',function (d) { removeStyle(d)})
 			 .text(function (d) { return d })
+			 .on('mouseover', function (d,i) { setStyle(d) })
+			 .on('mouseout', function (d,i) { removeStyle(d) })
 		}
 		else {
 			var styleOption = {};
@@ -184,11 +182,12 @@ function createDemoMenu(options, w, h, title, styles) {
 	}
 	
 	options.forEach(function (option) {
-		
-		if (!(useInDocs && option.name == 'Display')) {
-		
-		var menuItem = menu.append('li').attr('class','active');
-		
+		if (useInDocs == true && option.name == 'Display') {
+			//skip
+		}
+		else {
+			var menuItem = menu.append('li').attr('class','active');
+			
 			var a = menuItem.append('a');
 			a.append('span').text(option.name);
 			a.append('br');
@@ -198,7 +197,6 @@ function createDemoMenu(options, w, h, title, styles) {
 			option.values.forEach(function (value) {
 				list.append('li').attr("class",function() { return (value.selected) ? 'selected' : null }).attr('item_value',value.value).append('a').text(value.label);
 			})
-			
 		}
 	})
 	
@@ -213,13 +211,14 @@ function createDemoMenu(options, w, h, title, styles) {
 		format: 'multitoggle'
 	});
 	
-	if (useInStore == true) {
+	if (useInDocs == true || useInStore == true) {
 		d3.selectAll('#vizuly-logo').remove();
 	}
 	
+	var styleMenu = d3.selectAll('#menu-StyleExplorer');
+	
 	if (useInDocs == false && styles) {
 		//Alter Style Explorer
-		var styleMenu = d3.selectAll('#menu-StyleExplorer');
 		d3.select(styleMenu.node().parentNode).style('width', '160px').attr('id','styleMenu');
 		
 		styleMenu.selectAll('li a')
@@ -229,6 +228,7 @@ function createDemoMenu(options, w, h, title, styles) {
 		styleMenu.selectAll('li')
 		 .style('height','25px')
 	}
+
 	
 	var currentStyle;
 	
@@ -236,6 +236,15 @@ function createDemoMenu(options, w, h, title, styles) {
 		if (d == "Choose a Style") return;
 		
 		viz.clearStyles();
+		
+		//Reset Theme Demo Menu
+		var themeMenu = d3.select("#menu-Theme")
+		
+		themeMenu
+		 .selectAll('li')
+		 .attr('class',function (d,i) { return (i == 0) ? 'selected' : null })
+		
+		$(themeMenu.node()).parent().find(".setting").text('Default');
 		
 		if (d == 'Clear Styles') {
 			viz.update();

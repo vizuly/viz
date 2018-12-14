@@ -29,7 +29,7 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-// @version 2.1.45
+// @version 2.1.85
 
 /**
  * @class
@@ -50,15 +50,20 @@ vizuly2.viz.WordCloud = function (parent) {
 		 */
 		'data': null,
 		/**
-		 * Width of component in either pixels (Number) or percentage of parent container (%)
-		 * @member {Number}
+		 * Width of component in either pixels (Number) or percentage of parent container (XX%)
+		 * @member {Number/String}
 		 * @default 600
+		 * @example
+		 * viz.width(600) or viz.width('100%');
 		 */
 		'width': 600,
 		/**
-		 * Height of component in either pixels (Number) or percentage of parent container (%)
-		 * @member {Number}
+		 * Height of component in either pixels (Number) or percentage of parent container (XX%)
+		 * @member {Number/String}
 		 * @default 600
+		 * @example
+		 * viz.height(600) or viz.height('100%');
+		 *
 		 */
 		'height': 600,
 		/**

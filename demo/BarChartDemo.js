@@ -83,6 +83,7 @@ var minimalStyles =
 	 'bar-fill': '#555',
 	 'bar-fill-over': '#000',
 	 'axis-stroke': '#777',
+	 'bar-stroke': '#333',
 	 'bar-radius': 0
  }
 

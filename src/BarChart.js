@@ -29,7 +29,7 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-// @version 2.1.45
+// @version 2.1.85
 
 /**
  * @class
@@ -71,15 +71,20 @@ vizuly2.viz.BarChart = function (parent) {
 		'data': null,
 		'layout': vizuly2.viz.layout.CLUSTERED,
 		/**
-		 * Width of component in either pixels (Number) or percentage of parent container (%)
-		 * @member {Number}
+		 * Width of component in either pixels (Number) or percentage of parent container (XX%)
+		 * @member {Number/String}
 		 * @default 600
+		 * @example
+		 * viz.width(600) or viz.width('100%');
 		 */
 		'width': 600,
 		/**
-		 * Height of component in either pixels (Number) or percentage of parent container (%)
-		 * @member {Number}
+		 * Height of component in either pixels (Number) or percentage of parent container (XX%)
+		 * @member {Number/String}
 		 * @default 600
+		 * @example
+		 * viz.height(600) or viz.height('100%');
+		 *
 		 */
 		'height': 600,
 		/**
@@ -105,6 +110,7 @@ vizuly2.viz.BarChart = function (parent) {
 		 * @default 'CLUSTERED'
 		 *
 		 */
+		'layout': vizuly2.viz.layout.CLUSTERED,
 		/**
 		 * The height of each bar in pixels.  The default value of `auto` will auto size bars based on padding and chart height.
 		 * @member {Number}
@@ -297,7 +303,10 @@ vizuly2.viz.BarChart = function (parent) {
 		'bar-fill-opacity': function (d, i) {
 			return (1 - ((i) / (scope.data.length + 1)));
 		},
-		'bar-fill-over': '#FFF',
+		'bar-fill-over': function (d, i, groupIndex) {
+			var color = viz.getStyle('bar-fill',arguments);
+			return d3.rgb(color).brighter()
+		},
 		'bar-fill-opacity-over': 1,
 		'bar-radius': 0,
 		'axis-font-weight': 400,
@@ -835,13 +844,13 @@ vizuly2.viz.BarChart = function (parent) {
 		//Making style and color changes to our bar for the <code>mouseover</code>.
 		d3.select(bar)
 		 .style('fill', function (d, i) {
-			 return viz.getStyle('bar-fill-over', arguments)
+			 return viz.getStyle('bar-fill-over', [d, i, groupIndex, bar])
 		 })
 		 .style('fill-opacity', function (d, i) {
-			 return viz.getStyle('bar-fill-opacity-over', arguments)
+			 return viz.getStyle('bar-fill-opacity-over', [d, i, groupIndex, bar])
 		 })
 		 .style('stroke', function (d, i) {
-			 return viz.getStyle('bar-stroke-over', arguments)
+			 return viz.getStyle('bar-stroke-over', [d, i, groupIndex, bar])
 		 })
 		
 		//Finding the correct axis label and highlighting it.
