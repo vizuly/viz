@@ -29,7 +29,7 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-// @version 2.1.85
+// @version 2.1.116
 
 /**
  * @class
@@ -186,7 +186,7 @@ vizuly2.viz.WordCloud = function (parent) {
 		
 		svg = scope.selection.append("svg").attr("id", scope.id).style("overflow", "visible").attr("class", "vizuly");
 		background = svg.append("rect").attr("class", "vz-background");
-		defs = vizuly2.core.util.getDefs(viz);
+		defs = vizuly2.util.getDefs(viz);
 		plot = svg.append('g')
 		
 		wordLayout.on('end', updateCloud);
@@ -202,7 +202,7 @@ vizuly2.viz.WordCloud = function (parent) {
 		viz.validate();
 		
 		// Get our size based on height, width, and margin
-		size = vizuly2.core.util.size(scope.margin, scope.width, scope.height, scope.parent);
+		size = vizuly2.util.size(scope.margin, scope.width, scope.height, scope.parent);
 		
 		var wordHash = {};
 		

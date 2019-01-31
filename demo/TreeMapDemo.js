@@ -32,7 +32,7 @@ var autumnStyles =
 	 'cell-fill': function (e, d, i) {
 		 var colors = ['#F57C00', '#FF9800', '#FFEB3B', '#ff0a0a', '#fa1c6e'];
 		 var color = colors[d.rootIndex % colors.length];
-		 var color1 = vizuly2.core.util.rgbToHex(d3.rgb(color).brighter(1));
+		 var color1 = vizuly2.util.rgbToHex(d3.rgb(color).brighter(1));
 		 return 'url(#' + vizuly2.svg.gradient.blend(viz, color1, color).attr('id') + ')';
 	 }
  }
@@ -53,7 +53,7 @@ var fireStyles =
 	 'cell-stroke': function (e, d, i) {
 		 var colors = ['#F57C00', '#FF9800', '#FFEB3B', '#f00a0a', '#C2185B'];
 		 var color = colors[d.rootIndex % colors.length];
-		 var color1 = vizuly2.core.util.rgbToHex(d3.rgb(color).brighter(1));
+		 var color1 = vizuly2.util.rgbToHex(d3.rgb(color).brighter(1));
 		 return color1;
 	 }
  }
@@ -68,7 +68,7 @@ var oceanStyles =
 	 },
 	 'cell-fill': function (e, d, i) {
 		 var color = '#FFF'
-		 var color1 = vizuly2.core.util.rgbToHex(d3.rgb('#039FDB').brighter(1));
+		 var color1 = vizuly2.util.rgbToHex(d3.rgb('#039FDB').brighter(1));
 		 return 'url(#' + vizuly2.svg.gradient.blend(viz, color, color1).attr('id') + ')';
 	 }
  }
@@ -82,7 +82,7 @@ var neonStyles =
 	 'cell-label-color': '#000',
 	 'cell-fill': function (e, d, i) {
 		 var color = '#E7F710';
-		 var color1 = vizuly2.core.util.rgbToHex(d3.rgb('#E7F710').darker(1));
+		 var color1 = vizuly2.util.rgbToHex(d3.rgb('#E7F710').darker(1));
 		 return 'url(#' + vizuly2.svg.gradient.blend(viz, color1, color).attr('id') + ')';
 	 }
  }

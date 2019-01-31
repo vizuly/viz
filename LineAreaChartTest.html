@@ -54,7 +54,7 @@
      .seriesLabel (function (d,i) { return d.name; })
      .on("mouseover", onMouseOver)
      .on("mouseout", onMouseOut)
-     .xTickFormat(vizuly2.core.util.format_YEAR_Mon_MonDay)
+     .xTickFormat(vizuly2.util.format_YEAR_Mon_MonDay)
      .yTickFormat(function (d) { return (Math.round(d / 1000000)) + "M"; });
 
     viz.update();

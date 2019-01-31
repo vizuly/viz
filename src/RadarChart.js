@@ -29,7 +29,7 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-// @version 2.1.85
+// @version 2.1.116
 
 /**
  * @class
@@ -380,7 +380,7 @@ vizuly2.viz.RadarChart = function (parent) {
 		
 		svg = scope.selection.append("svg").attr("id", scope.id).style("overflow", "visible").attr("class", "vizuly");
 		background = svg.append("rect").attr("class", "vz-background");
-		defs = vizuly2.core.util.getDefs(viz);
+		defs = vizuly2.util.getDefs(viz);
 		g = svg.append("g").attr("class", "vz-radar-chart");
 		xAxisPlot = g.append("g").attr("class", "vz-xAxis-plot");
 		yAxisPlot = g.append("g").attr("class", "vz-yAxis-plot");
@@ -404,7 +404,7 @@ vizuly2.viz.RadarChart = function (parent) {
 		viz.validate();
 		
 		// Get our size based on height, width, and margin
-		size = vizuly2.core.util.size(scope.margin, scope.width, scope.height, scope.parent);
+		size = vizuly2.util.size(scope.margin, scope.width, scope.height, scope.parent);
 		
 		// Prep data in format for stack
 		// This assumes all series share the same key value for the x-axis and are ordered accordingly.
@@ -426,7 +426,7 @@ vizuly2.viz.RadarChart = function (parent) {
 		}
 		
 		// The offset is used for the stack layout
-		var offset = vizuly2.core.util.stackOffsetBaseline;
+		var offset = vizuly2.util.stackOffsetBaseline;
 		var order = d3.stackOrderAscending;
 		
 		// The d3.stack handles all of the d.x and d.y measurements for various stack layouts - we will let it do its magic here
@@ -960,7 +960,7 @@ vizuly2.viz.RadarChart = function (parent) {
 		
 	}
 	
-	function dataTipRenderer(tip, e, d, i, x, y) {
+	function dataTipRenderer(tip, e, d, i, j, x, y) {
 		
 		var bounds = e.getBoundingClientRect();
 		var x1 = d3.event.pageX; - bounds.left;

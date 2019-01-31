@@ -8,6 +8,7 @@ var styles = {
 	'background-color-top': '#0000FF',
 	'background-color-bottom': '#0000FF',
 	'line-stroke': '#0000FF',
+	'line-stroke-width':  {'line-stroke-width': 3, 'line-stroke': '#0000FF'},
 	'line-over-stroke': {'line-over-stroke': '#FFFF00', 'line-stroke': '#FFFF00'},
 	'line-opacity': 1,
 	'area-fill': {'area-fill': '#0000FF', 'area-fill-opacity': 1},
@@ -93,7 +94,6 @@ var businessStyles =
 	 'label-color': '#000',
 	 'axis-stroke': '#000',
 	 'area-fill': function (d, i) {
-	 	console.log(businessColors(i))
 	 	 return businessColors(i);
 	 },
 	 'line-stroke': function (d, i) {

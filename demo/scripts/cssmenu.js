@@ -37,9 +37,13 @@
 
 			cssmenu.find('li ul li').on('click',function () {
 				if ( $(this).parent().attr('id').indexOf('menu-StyleExplorer') == 0) return;
-				var f=$(this).parent().attr("callback");
+				var options = d3.select(this.parentNode).datum();
 				var v = $(this).attr("item_value");
-				if (f) window[f].apply(window,[v]);
+				
+				if (options.callback) {
+					options.callback.apply(window,[v]);
+				}
+				
 				$(this).parent().find('li').removeClass("selected");
 				$(this).addClass("selected");
 				$(this).parent().parent().find(".setting").text($(this).text());
@@ -194,6 +198,7 @@ function createDemoMenu(options, w, h, title, styles) {
 			a.append('span').attr('class','setting');
 			
 			var list = menuItem.append('ul').attr('id','menu-' + String(option.name).replace(/ /g,'')).attr('class','options').attr('callback',option.callback.name);
+			list.datum(option);
 			option.values.forEach(function (value) {
 				list.append('li').attr("class",function() { return (value.selected) ? 'selected' : null }).attr('item_value',value.value).append('a').text(value.label);
 			})

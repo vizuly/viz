@@ -29,7 +29,7 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-// @version 2.1.85
+// @version 2.1.116
 
 /**
  * @class
@@ -195,14 +195,14 @@ vizuly2.viz.TreeMap = function (parent) {
 		'cell-fill': function (e, d, i) {
 			var colors = ['#bd0026', '#fecc5c', '#fd8d3c', '#f03b20', '#B02D5D', '#9B2C67', '#982B9A', '#692DA7', '#5725AA', '#4823AF', '#d7b5d8', '#dd1c77', '#5A0C7A', '#5A0C7A'];
 			var color = colors[d.rootIndex % colors.length];
-			var color1 = vizuly2.core.util.rgbToHex(d3.rgb(color));
-			var color2 = vizuly2.core.util.rgbToHex(d3.rgb(color).darker(1));
+			var color1 = vizuly2.util.rgbToHex(d3.rgb(color));
+			var color2 = vizuly2.util.rgbToHex(d3.rgb(color).darker(1));
 			return 'url(#' + vizuly2.svg.gradient.blend(viz, color2, color1).attr('id') + ')';
 		},
 		'cell-stroke': 'none',
 		'cell-stroke-width': 1,
 		'cell-stroke-opacity':1,
-		'cell-fill-opacity': .75,
+		'cell-fill-opacity': .8,
 		'header-font-size': 20,
 		'header-label-color': function (d,i) {
 			var colors = ['#bd0026', '#fecc5c', '#fd8d3c', '#f03b20', '#B02D5D', '#9B2C67', '#982B9A', '#692DA7', '#5725AA', '#4823AF', '#d7b5d8', '#dd1c77', '#5A0C7A', '#5A0C7A'];
@@ -268,7 +268,9 @@ vizuly2.viz.TreeMap = function (parent) {
 	
 	var treemap = d3.treemap();
 	
-	var root, rootAncestors;
+	var root, node, rootAncestors;
+	
+	var dataIsDirty = true;
 	
 	var drillPath = [];
 	
@@ -277,46 +279,62 @@ vizuly2.viz.TreeMap = function (parent) {
 	// sizing and margin layout.  The all are referenced as d3.selections.
 	function initialize() {
 		
-		
 		svg = scope.selection.append("svg").attr("id", scope.id).style("overflow", "visible").attr("class", "vizuly");
 		background = svg.append("rect").attr("class", "vz-background");
-		defs = vizuly2.core.util.getDefs(viz);
+		defs = vizuly2.util.getDefs(viz);
 		header = svg.append('g').attr('class','vz-treemap-header');
 		plot = svg.append('g').attr('class','vz-treemap-plot');
-	
+		
+		viz.on('data_change',function() { dataIsDirty = true })
 		
 		scope.dispatch.apply('initialized', viz);
 	}
 	
 	
 	// The measure function performs any measurement or layout calcuations prior to making any updates to the SVG elements
-	function measure(treeData) {
+	function measure(d) {
 		
 		// Call our validate routine and make sure all component properties have been set
 		viz.validate();
 		
 		// Get our size based on height, width, and margin
-		size = vizuly2.core.util.size(scope.margin, scope.width, scope.height, scope.parent);
+		size = vizuly2.util.size(scope.margin, scope.width, scope.height, scope.parent);
 		
 		rootAncestors = [];
 		scope.children(scope.data).forEach(function (d) {
 			rootAncestors.push(scope.key(d));
 		})
 		
-		root = d3.hierarchy(treeData, scope.children)
-		 .eachBefore(function(d) {
-		 	d.id = (d.parent ? d.parent.id + "_" : "") + vizuly2.core.util.createCSSKey(scope.key(d.data));
-		 	if (d.depth > 0) {
-		 		d.rootAncestor = d.parent.rootAncestor ? d.parent.rootAncestor : scope.key(d.data);
-		 		d.rootIndex = rootAncestors.indexOf(d.rootAncestor);
-		  }
-		 })
-		 .sum(scope.value)
-		 .sort(function(a, b) { return b.height - a.height || b.value - a.value; });
+		if (dataIsDirty == true) {
+			root = d3.hierarchy(scope.data, scope.children)
+			 .eachBefore(function(d) {
+			 	 d.parentId = d.parent ? vizuly2.util.createCSSKey(scope.key(d.parent.data)) : 'none'
+				 d.id = vizuly2.util.createCSSKey(scope.key(d.data));
+				 
+				 //console.log("id = " + d.id)
+				 if (d.depth == 1) {
+					 d.rootAncestor = scope.key(d.data);
+					 d.rootIndex = rootAncestors.indexOf(d.rootAncestor);
+				 }
+			 })
+			 .sum(scope.value)
+			 .sort(function(a, b) { return b.height - a.height || b.value - a.value; });
+			
+			root.children.forEach(function (d) {
+				setRootIndex(d, d.rootAncestor, d.rootIndex)
+			})
+		}
 		
-		if (treeData === scope.data) drillPath = [root.data];
+		node = d;
+		
+		if (!node) {
+			node = root;
+		}
 		
 		headerHeight = viz.getStyle('header-font-size') + viz.getStyle('cell-padding-top', [{'depth': 1}]);
+		
+		//clear all values
+		resetTreeMapProps(node, 0);
 		
 		treemap
 		 .tile(d3.treemapResquarify)
@@ -325,7 +343,16 @@ vizuly2.viz.TreeMap = function (parent) {
 		 .paddingInner(viz.style('cell-padding'))
 		 .paddingTop(viz.style('cell-padding-top'))
 		
-		treemap(root);
+		treemap(node);
+		
+		drillPath = [];
+		var dn = node;
+		while(dn.parent) {
+			drillPath.push(dn);
+			dn = dn.parent;
+		}
+		drillPath.push(root)
+		drillPath.reverse();
 		
 		scope.size = size;
 		
@@ -334,15 +361,39 @@ vizuly2.viz.TreeMap = function (parent) {
 		
 	}
 	
+	function setRootIndex(child, rootAncestor, rootIndex) {
+		child.rootAncestor = rootAncestor;
+		child.rootIndex = rootIndex;
+		if (child.children) {
+			child.children.forEach(function (d, i) {
+				setRootIndex(d, rootAncestor, rootIndex)
+			})
+		}
+	}
+	
+	function resetTreeMapProps(node, depth) {
+		delete node.x0;
+		delete node.x1;
+		delete node.y0;
+		delete node.y1;
+		delete node._squarify;
+		delete node.height;
+		node.depth = depth;
+		
+		if (node.children) {
+			node.children.forEach(function (d) {
+				resetTreeMapProps(d, node.depth + 1)
+			})
+		}
+	}
+	
 	// The update function is the primary function that is called when we want to render the visualiation based on
 	// all of its set properties.  A developer can change propertys of the components and it will not show on the screen
 	// until the update function is called
-	function update(data) {
-		
-		var treeData = (data) ? data : scope.data;
+	function update(d) {
 		
 		// Call measure each time before we update to make sure all our our layout properties are set correctly
-		measure(treeData);
+		measure(d);
 		
 		// Layout all of our primary SVG d3.elements.
 		svg.attr('width', size.measuredWidth).attr('height', size.measuredHeight);
@@ -352,117 +403,141 @@ vizuly2.viz.TreeMap = function (parent) {
 		
 		var cellOffset = 5;
 		
-		//var cell = plot.selectAll('.vz-treemap-cell-group')
-		// .data(root.leaves(), function (d, i) { return d.id });
+		var groups = plot.selectAll('.vz-treemap-group').data(node.children, function (d) {
+			return d.id
+		});
 		
-		//Find out Max depth
-		var maxDepth = d3.max(root.descendants(),function (d) { return d.depth });
+		groups.exit().remove();
+		groups = groups.enter()
+		 .append('g')
+		 .attr('class', function (d) { return 'vz-treemap-group group-id_' + d.id })
+		 .merge(groups);
 		
-		var depthToShow = (maxDepth > 1) ? 2 : 1;
-		
-		var renderData = root.descendants().filter(function (d) {
-			return (d.depth == depthToShow)
-	  })
-		
-		var cell = plot.selectAll('.vz-treemap-cell-group')
-		 .data(renderData, function (d, i) { return d.id });
-		
-		cell.exit().remove();
-		
-	  var cellEnter = cell.enter().append('g')
-		 .attr('class', function (d) { return 'vz-treemap-cell-group group_' + d.id.split('_')[1] })
-		 .attr('transform', function(d) {return 'translate(' + d.x0 + ',' + d.y0 + ')'; })
-	   .on('mouseover',function (d,i) { scope.dispatch.apply('mouseover',viz, [this, d, i])})
-	   .on('mouseout',function (d,i) { scope.dispatch.apply('mouseout',viz, [this, d, i])})
-	   .style('cursor',function (d) { return d.children ? 'pointer' : 'not-allowed'})
-		
-		cellEnter.append('rect')
-		 .attr('class','vz-treemap-cell-rect')
-		 .attr('id', function(d) { return d.id; })
-		 .on('click',function (d,i) { scope.dispatch.apply('click',viz, [this, d, i])})
-		
-		cell = cellEnter.merge(cell);
-	 
-		cell.each(function (d,i) {
-			var g = d3.select(this);
+		groups.each(function (datum, datumIndex) {
+			var group = d3.select(this);
 			
-			g.selectAll('text').remove();
+			var renderData = datum.children ? datum.children : [datum];
 			
-			g.selectAll('.vz-treemap-cell-rect').datum(d)
-			 .attr('width', function (d) {
-				 return d.x1 - d.x0;
-			 })
-			 .attr('height', function (d) {
-				 return d.y1 - d.y0;
-			 })
-			
-			var padding = viz.getStyle('cell-padding-inner', [this, d, i]);
-			
-			var fontSize = viz.getStyle('cell-font-size', [this, d, i]);
-			var w = d.x1-d.x0;
-			var h = d.y1-d.y0;
-			
-			if ((scope.label(d.data).length * fontSize)/(w) < h/fontSize  && h > fontSize*2 + padding) {
+				var cell = group.selectAll('.vz-treemap-cell')
+				 .data(renderData, function (d, i) {
+					 return d.id
+				 });
 				
-			//	if ((scope.label(d.data).split(/\s+/).length * fontSize) < h) {
+				cell.exit().remove();
 				
-				var label = g.append('text')
-				 .datum(d)
-				 .attr('class','vz-treemap-cell-label')
-				 .attr('y',fontSize)
-				 .attr('x',0)
-				 .attr('dy', function (d, i) {
-					 var ret = (viz.getStyle('cell-font-size', [this, d, i]) * 1.2) + 'px'
-					 return ret
+				var cellEnter = cell.enter().append('g')
+				 .attr('class', function (d) {
+					 //		 return 'vz-treemap-cell-group group_' + d.id })
+					 return 'vz-treemap-cell parent-id_' + d.parentId + ' id_' + d.id
 				 })
-				 .style('opacity', function (d, i) {
-					 return viz.getStyle('cell-label-opacity', [this, d, i])
+				 .on('mouseover', function (d, i) {
+					 scope.dispatch.apply('mouseover', viz, [this, d, i])
 				 })
-				 .style('font-size', function (d, i) {
-					 return fontSize + 'px'
+				 .on('mouseout', function (d, i) {
+					 scope.dispatch.apply('mouseout', viz, [this, d, i])
 				 })
-				 .text(function (d) {
-					 return scope.label(d.data)
+				 .style('cursor', function (d) {
+					 return d.children ? 'pointer' : 'not-allowed'
 				 })
-				 .call(wrap, d.x1 - d.x0 - padding * 2)
 				
-			}
-			
-		})
-		
-		cell
-		 .transition().duration(scope.duration)
-		 .attr('transform', function(d) { return 'translate(' + d.x0 + ',' + d.y0 + ')'; });
-		
-		root.children.forEach(function (d,i) {
-			var group = plot.select('.group_' + d.id.split('_')[1])
-			group.selectAll('.vz-group-label').remove();
-			
-			if (d.children) {
-				var labelText = scope.groupLabel(d.depth > 1 ? d.parent : d)
+				cellEnter.append('rect')
+				 .attr('class', 'vz-treemap-cell-rect')
+				 .attr('id', function (d) {
+					 return d.id;
+				 })
+				 .on('click', function (d, i) {
+					 scope.dispatch.apply('click', viz, [this, d, i])
+				 })
+				
+				cell = cellEnter.merge(cell);
+				
+				cell.each(function (d, i) {
+					var g = d3.select(this);
+					
+					g.attr('transform', function (d) {
+						 return 'translate(' + d.x0 + ',' + d.y0 + ')';
+					 })
+					
+					g.selectAll('text').remove();
+					
+					g.selectAll('.vz-treemap-cell-rect').datum(d)
+					 .attr('width', function (d) {
+						 return d.x1 - d.x0;
+					 })
+					 .attr('height', function (d) {
+						 return d.y1 - d.y0;
+					 })
+					
+					var padding = viz.getStyle('cell-padding-inner', [this, d, i]);
+					
+					var fontSize = viz.getStyle('cell-font-size', [this, d, i]);
+					var w = d.x1 - d.x0;
+					var h = d.y1 - d.y0;
+					
+					if ((scope.label(d.data).length * fontSize) / (w) < h / fontSize && h > fontSize * 2 + padding) {
+						
+						var label = g.append('text')
+						 .datum(d)
+						 .attr('class', 'vz-treemap-cell-label')
+						 .attr('y', fontSize)
+						 .attr('x', 0)
+						 .attr('dy', function (d, i) {
+							 var ret = (viz.getStyle('cell-font-size', [this, d, i]) * 1.2) + 'px'
+							 return ret
+						 })
+						 .style('opacity', function (d, i) {
+							 return viz.getStyle('cell-label-opacity', [this, d, i])
+						 })
+						 .style('font-size', function (d, i) {
+							 return fontSize + 'px'
+						 })
+						 .text(function (d) {
+							 return scope.label(d.data)
+						 })
+						 .call(wrap, d.x1 - d.x0 - padding * 2)
+						
+					}
+					
+				})
+				
+				cell
+				 .transition().duration(scope.duration)
+				 .attr('transform', function (d) {
+					 return 'translate(' + d.x0 + ',' + d.y0 + ')';
+				 });
+				
+			// Add group labels
+			if (datum.children) {
+				var labelText = scope.groupLabel(datum)
+				var firstChild = datum.children[0];
+				group.selectAll('.vz-group-label').remove();
 				
 				var label = group.append('text')
 				 .datum(d)
-				 .attr('class','vz-group-label')
-				 .attr('transform','translate(0,-5)')
-				 .style('cursor','pointer')
-				 .style('font-size',function (d,i) { return viz.getStyle('cell-font-size',[this, d, i]) + 'px'})
+				 .attr('class', 'vz-group-label')
+				 .attr('transform', 'translate(' + firstChild.x0 + ',' + (firstChild.y0 - 5) + ')')
+				 .style('cursor', 'pointer')
+				 .style('font-size', function (d, i) {
+					 return viz.getStyle('cell-font-size', [this, datum, datumIndex]) + 'px'
+				 })
 				 .text(labelText)
-				 .on('click',function (d,i) { scope.dispatch.apply('click',viz, [this, d, i])})
+				 .on('click', function (d, i) {
+					 scope.dispatch.apply('click', viz, [this, datum, datumIndex])
+				 })
+				
 				
 				if (label.node()) {
-					var labelWidthRatio = (d.x1-d.x0)/label.node().getComputedTextLength()
+					var labelWidthRatio = (datum.x1 - datum.x0) / label.node().getComputedTextLength()
 					if (labelWidthRatio < 1) {
-						label.text(labelText.substr(0, Math.round(labelText.length * labelWidthRatio)-3) + '...');
+						label.text(labelText.substr(0, Math.round(labelText.length * labelWidthRatio) - 3) + '...');
 					}
 				}
 			}
+			
 		})
 		
 		updateDrillPath();
-		
 		scope.dispatch.apply('updated', viz);
-		
 	}
 	
 	function wrap(selection, width) {
@@ -498,17 +573,10 @@ vizuly2.viz.TreeMap = function (parent) {
 			}
 			//text.selectAll('tspan').attr("y",y)
 		})
-	};
+	}
 
 	function updateDrillPath() {
 		header.selectAll('.vz-drill-label').remove();
-		
-		/*
-		var rootLabel = header.append('text')
-		 .datum(scope.data)
-		 .attr('font-size',function (d,i) { return viz.getStyle('header-font-size',arguments) + 'px'})
-		 .text(scope.label(scope.data));
-		*/
 		
 		var xOffset = 0; // rootLabel.node().getBoundingClientRect().width + viz.getStyle('header-font-size',arguments)/2;
 		
@@ -517,7 +585,7 @@ vizuly2.viz.TreeMap = function (parent) {
 		drillLabels.enter()
 		 .append('text')
 		 .attr('class','vz-drill-label')
-		 .text(function (d,i) { return (i > 0 ? ' > ' : '') + scope.label(d)})
+		 .text(function (d,i) { return (i > 0 ? ' > ' : '') + scope.label(d.data)})
 		 .attr('font-size',function (d,i) { return viz.getStyle('header-font-size',arguments) + 'px'})
 		 .attr('x',function (d,i) {
 		 	  var x = xOffset;
@@ -633,18 +701,18 @@ vizuly2.viz.TreeMap = function (parent) {
 	function styles_onClick(e,d,i) {
 		if (!d.children) { return; }
 		
-		if (drillPath.indexOf(d.parent.data) < 0) {
-			drillPath.push(d.parent.data);
-		}
-		if (drillPath.indexOf(d) < 0) {
-			drillPath.push(d.data);
-		}
-		update(d.data);
+	//	if (drillPath.indexOf(d.parent.data) < 0) {
+	//		drillPath.push(d.parent);
+	//	}
+	//	if (drillPath.indexOf(d) < 0) {
+	//		drillPath.push(d);
+	//	}
+		update(d);
 		
 	}
 	
 	function drillPath_onClick(d) {
-		drillPath.splice(drillPath.indexOf(d)+1,drillPath.length - drillPath.indexOf(d) - 1);
+		//drillPath.splice(drillPath.indexOf(d)+1,drillPath.length - drillPath.indexOf(d) - 1);
 		update(d);
 	}
 	
@@ -655,7 +723,7 @@ vizuly2.viz.TreeMap = function (parent) {
 			return getCellParent(d.parent)
 	}
 	
-	function dataTipRenderer(tip, e, d, i, x, y) {
+	function dataTipRenderer(tip, e, d, i, j, x, y) {
 		
 		var html = '<div class="vz-tip-header1">HEADER1</div>' +
 		 '<div class="vz-tip-header-rule"></div>' +

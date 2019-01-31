@@ -29,7 +29,7 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-// @version 2.1.85
+// @version 2.1.116
 
 /**
  * @class
@@ -307,7 +307,7 @@ vizuly2.viz.ScatterPlot = function (parent) {
 		
 		svg = scope.selection.append("svg").attr("id", scope.id).style("overflow", "visible").attr("class", "vizuly");
 		background = svg.append("rect").attr("class", "vz-background");
-		defs = vizuly2.core.util.getDefs(viz);
+		defs = vizuly2.util.getDefs(viz);
 		g = svg.append("g").attr("class", "vz-scatter-viz");
 		bottomAxis = g.append("g").attr("class", "vz-bottom-axis").attr("clip-path", "url(#" + scope.id + "_xClipPath)").append("g");
 		leftAxis = g.append("g").attr("class", "vz-left-axis");
@@ -326,19 +326,19 @@ vizuly2.viz.ScatterPlot = function (parent) {
 		viz.validate();
 		
 		// Get our size based on height, width, and margin
-		size = vizuly2.core.util.size(scope.margin, scope.width, scope.height, scope.parent);
+		size = vizuly2.util.size(scope.margin, scope.width, scope.height, scope.parent);
 		
 		// If our scales have not been defined yet, then we will default them based on the data values.
 		if (scope.xScale == "undefined") {
-			scope.xScale = vizuly2.core.util.getTypedScale(scope.x(scope.data[0]));
+			scope.xScale = vizuly2.util.getTypedScale(scope.x(scope.data[0]));
 		}
 		
 		if (scope.yScale == "undefined") {
-			scope.yScale = vizuly2.core.util.getTypedScale(scope.y(scope.data[0]));
+			scope.yScale = vizuly2.util.getTypedScale(scope.y(scope.data[0]));
 		}
 		
 		if (scope.rScale == "undefined") {
-			scope.rScale = vizuly2.core.util.getTypedScale(scope.r(scope.data[0]));
+			scope.rScale = vizuly2.util.getTypedScale(scope.r(scope.data[0]));
 		}
 		
 		// Set the domain values for the scale
@@ -356,7 +356,7 @@ vizuly2.viz.ScatterPlot = function (parent) {
 		
 		// Default our x and y axis
 		scope.xAxis.scale(scope.xScale).tickFormat(scope.xTickFormat).tickSize(viz.getStyle('axis-font-size')/2)
-		scope.yAxis.scale(scope.yScale).tickFormat(scope.yTickFormat).tickSize(-vizuly2.core.util.size(scope.margin, size.measuredWidth, size.measuredHeight).width).ticks(5)
+		scope.yAxis.scale(scope.yScale).tickFormat(scope.yTickFormat).tickSize(-vizuly2.util.size(scope.margin, size.measuredWidth, size.measuredHeight).width).ticks(5)
 		
 		scope.size = size;
 		
@@ -623,7 +623,7 @@ vizuly2.viz.ScatterPlot = function (parent) {
 		//	 .style("opacity",1)
 	}
 	
-	function dataTipRenderer(tip, e, d, i, x, y) {
+	function dataTipRenderer(tip, e, d, i, j, x, y) {
 		tip.style('text-align', 'center').append('div').text(scope.y(d));
 		return [x-50, y-80];
 	}

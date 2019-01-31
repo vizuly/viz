@@ -29,7 +29,7 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-// @version 2.1.85
+// @version 2.1.116
 
 /**
  * @class
@@ -206,7 +206,7 @@ vizuly2.viz.SunBurst = function (parent) {
 		'label-color': function (d,i) {
 			var colors = ['#bd0026', '#fecc5c', '#fd8d3c', '#f03b20', '#B02D5D', '#9B2C67', '#982B9A', '#692DA7', '#5725AA', '#4823AF', '#d7b5d8', '#dd1c77', '#5A0C7A', '#5A0C7A']
 			var c = d3.rgb(colors[(d.data.rootIndex ? d.data.rootIndex : 0) % colors.length]);
-			return vizuly2.core.util.colorBrightness(c) > 128 ? '#333' : '#DDD';
+			return vizuly2.util.colorBrightness(c) > 128 ? '#333' : '#DDD';
 		},
 		'label-font-size': function (d,i) {
 			return Math.round(radius/maxDepth) * .2;
@@ -310,7 +310,7 @@ vizuly2.viz.SunBurst = function (parent) {
 		
 		scope.selection.style('position','relative')
 		svg = scope.selection.append("svg").attr("id", scope.id).style("overflow", "visible").attr("class", "vizuly");
-		defs = vizuly2.core.util.getDefs(viz);
+		defs = vizuly2.util.getDefs(viz);
 		background = svg.append("rect").attr("class", "vz-background");
 		g = svg.append("g").attr("class", "vz-sunburst");
 		plot = g.append("g").attr("class", "vz-sunburst-plot");
@@ -337,7 +337,7 @@ vizuly2.viz.SunBurst = function (parent) {
 		viz.validate();
 		
 		// Get our size based on height, width, and margin
-		size = vizuly2.core.util.size(scope.margin, scope.width, scope.height, scope.parent);
+		size = vizuly2.util.size(scope.margin, scope.width, scope.height, scope.parent);
 		
 		headerHeight = viz.getStyle('header-font-size') * 2;
 		
@@ -409,7 +409,7 @@ vizuly2.viz.SunBurst = function (parent) {
 		
 		paths
 		 .transition()
-		 .call(function (transition) { vizuly2.core.util.transitionOnEnd(transition, updateLabels)})
+		 .call(function (transition) { vizuly2.util.transitionOnEnd(transition, updateLabels)})
 		 .duration(scope.duration)
 		 .tween("scale", function (d) {
 			 var xd = d3.interpolate([0, 10], [0, 1]),
@@ -494,7 +494,7 @@ vizuly2.viz.SunBurst = function (parent) {
 		d.rootKey = key;
 		d.rootIndex = index;
 		d._originalValue = scope.value(d);
-		d.cssKey = vizuly2.core.util.createCSSKey(scope.key(d));
+		d.cssKey = vizuly2.util.createCSSKey(scope.key(d));
 		if (scope.children(d)) {
 			scope.children(d).forEach(function (child) {
 				setRootKey(child, key, index);
@@ -511,7 +511,7 @@ vizuly2.viz.SunBurst = function (parent) {
 		
 		plot.transition()
 		 .call(function(transition) {
-		 	vizuly2.core.util.transitionOnEnd(transition, updateLabels)
+		 	vizuly2.util.transitionOnEnd(transition, updateLabels)
 		 })
 		 .duration(750)
 		 .tween("scale", function () {
@@ -649,7 +649,7 @@ vizuly2.viz.SunBurst = function (parent) {
 		
 	}
 	
-	function dataTipRenderer(tip, e, d, i, x, y) {
+	function dataTipRenderer(tip, e, d, i, j, x, y) {
 		
 		var bounds = e.getBoundingClientRect();
 		var x1 = d3.event.pageX; - bounds.left;

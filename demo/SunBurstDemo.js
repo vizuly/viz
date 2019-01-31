@@ -21,7 +21,7 @@ var iceStyles = {
 	'label-color': function (d,i) {
 		var colors = ['#e8f5fb', '#B9D7E3', '#77c2e9', '#1c99db', '#1882ba', '#115c83', '#0d4563']
 		var c = d3.rgb(colors[(d.data.rootIndex ? d.data.rootIndex : 0) % colors.length]);
-		return vizuly2.core.util.colorBrightness(c) > 128 ? '#333' : '#DDD';
+		return vizuly2.util.colorBrightness(c) > 128 ? '#333' : '#DDD';
 	},
 	'stroke': function (d, i) {
 		var colors = ['#e8f5fb', '#B9D7E3', '#77c2e9', '#1c99db', '#1882ba', '#115c83', '#0d4563']
@@ -46,7 +46,7 @@ var roseStyles = {
 	'label-color': function (d,i) {
 		var colors = ['#e8f5fb', '#B9D7E3', '#77c2e9', '#1c99db', '#1882ba', '#115c83', '#0d4563']
 		var c = d3.rgb(colors[(d.data.rootIndex ? d.data.rootIndex : 0) % colors.length]);
-		return vizuly2.core.util.colorBrightness(c) > 128 ? '#333' : '#DDD';
+		return vizuly2.util.colorBrightness(c) > 128 ? '#333' : '#DDD';
 	},
 	'stroke': function (d, i) {
 		var colors = ['#faeaf1', '#efb6cf', '#e382ad', '#d02f77', '#b12865', '#7d1c47', '#5e1536']
@@ -72,7 +72,7 @@ var umberStyles = {
 	'label-color': function (d,i) {
 		var colors = ['#feeeec', '#fac2bc', '#f6968c', '#f0503f', '#cc4426', '#903026', '#6c241c']
 		var c = d3.rgb(colors[(d.data.rootIndex ? d.data.rootIndex : 0) % colors.length]);
-		return vizuly2.core.util.colorBrightness(c) > 128 ? '#333' : '#DDD';
+		return vizuly2.util.colorBrightness(c) > 128 ? '#333' : '#DDD';
 	},
 	'stroke': function (d, i) {
 		var colors = ['#feeeec', '#fac2bc', '#f6968c', '#f0503f', '#cc4426', '#903026', '#6c241c']
@@ -98,7 +98,7 @@ var evergreenStyles = {
 	'label-color': function (d,i) {
 		var colors = ['#f1f9ee', '#cfeac5', '#adda9b', '#77c258', '#65a54b', '#477435', '#365728']
 		var c = d3.rgb(colors[(d.data.rootIndex ? d.data.rootIndex : 0) % colors.length]);
-		return vizuly2.core.util.colorBrightness(c) > 128 ? '#333' : '#DDD';
+		return vizuly2.util.colorBrightness(c) > 128 ? '#333' : '#DDD';
 	},
 	'stroke': function (d, i) {
 		if (d == viz.data()) return "#FFF";

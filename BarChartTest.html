@@ -2,6 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=.5">
     <title>Vizuly 2.0 - Bar Chart</title>
 
     <!-- We use google fonts for many of the examples, but they are not necessary -->
@@ -63,9 +64,6 @@ Rotate labels (Coluimn chart)
      .seriesLabel( function (d,i) { return d.category })
      .style('show-value-labels',false)
      .updateOnResize(true)
-     .on('mouseover', onMouseOver)
-     .on('mouseout', onMouseOut)
-
 
     viz.update();
 

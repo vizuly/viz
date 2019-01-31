@@ -29,7 +29,7 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-// @version 2.1.85
+// @version 2.1.116
 
 /**
  * @class
@@ -406,7 +406,7 @@ vizuly2.viz.BarChart = function (parent) {
 	function initialize() {
 		
 		svg = scope.selection.append('svg').attr('id', scope.id).style('overflow', 'visible').attr('class', 'vizuly');
-		defs = vizuly2.core.util.getDefs(viz);
+		defs = vizuly2.util.getDefs(viz);
 		background = svg.append('rect').attr('class', 'vz-background')
 		g = svg.append('g').attr('class', 'vz-bar-viz');
 		bottomAxis = g.append('g').attr('class', 'vz-bottom-axis');
@@ -425,7 +425,7 @@ vizuly2.viz.BarChart = function (parent) {
 		viz.validate();
 		
 		// Get our size based on height, width, and margin
-		size = vizuly2.core.util.size(scope.margin, scope.width, scope.height, scope.parent);
+		size = vizuly2.util.size(scope.margin, scope.width, scope.height, scope.parent);
 		
 		//If we have fixed bar width then we will override the width of the component
 		if (scope.barWidth != 'auto') {
@@ -451,7 +451,7 @@ vizuly2.viz.BarChart = function (parent) {
 		
 		// If we don't have a defined x-scale then determine one
 		if (scope.yScale == 'undefined') {
-			scope.yScale = vizuly2.core.util.getTypedScale(viz.y()(scope.data[0][0]));
+			scope.yScale = vizuly2.util.getTypedScale(viz.y()(scope.data[0][0]));
 		}
 		
 		// Set our domains for the yScale (categories)
@@ -491,7 +491,7 @@ vizuly2.viz.BarChart = function (parent) {
 			stackSeries.push(row);
 		}
 		
-		var offset = (scope.layout == vizuly2.viz.layout.STACKED) ? d3.stackOffsetNone : vizuly2.core.util.stackOffsetBaseline;
+		var offset = (scope.layout == vizuly2.viz.layout.STACKED) ? d3.stackOffsetNone : vizuly2.util.stackOffsetBaseline;
 		
 		// The d3.stack handles all of the d.x and d.y measurements for various stack layouts - we will let it do its magic here
 		stack = d3.stack()

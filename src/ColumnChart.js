@@ -28,7 +28,7 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-// @version 2.1.85
+// @version 2.1.116
 
 /**
  * The ColumnChart renders multiple series of data in a nested array
@@ -73,13 +73,6 @@ vizuly2.viz.ColumnChart = function (parent) {
 		 */
 		'data': null,
 		/**
-		 * Determines layout of Bar Chart.  Can use either 'CLUSTERED' or 'STACKED'
-		 * @member {String}
-		 * @default 'CLUSTERED'
-		 *
-		 */
-		'layout': vizuly2.viz.layout.CLUSTERED,
-		/**
 		 * Width of component in either pixels (Number) or percentage of parent container (XX%)
 		 * @member {Number/String}
 		 * @default 600
@@ -113,6 +106,13 @@ vizuly2.viz.ColumnChart = function (parent) {
 		 * @default  500
 		 */
 		'duration': 500,
+		/**
+		 * Determines layout of Bar Chart.  Can use either 'CLUSTERED' or 'STACKED'
+		 * @member {String}
+		 * @default 'CLUSTERED'
+		 *
+		 */
+		'layout': vizuly2.viz.layout.CLUSTERED,
 		/**
 		 * The width of each bar in pixels.  The default value of `auto` will auto size bars based on padding and chart height.
 		 * @member {Number}
@@ -409,7 +409,7 @@ vizuly2.viz.ColumnChart = function (parent) {
 	function initialize () {
 		
 		svg = scope.selection.append('svg').attr('id', scope.id).style('overflow', 'visible').attr('class', 'vizuly');
-		defs = vizuly2.core.util.getDefs(viz);
+		defs = vizuly2.util.getDefs(viz);
 		background = svg.append('rect').attr('class', 'vz-background');
 		g = svg.append('g').attr('class', 'vz-column-viz');
 		bottomAxis = g.append('g').attr('class', 'vz-bottom-axis');
@@ -428,7 +428,7 @@ vizuly2.viz.ColumnChart = function (parent) {
 		viz.validate();
 		
 		// Get our size based on height, width, and margin
-		size = vizuly2.core.util.size(scope.margin, scope.width, scope.height, scope.parent);
+		size = vizuly2.util.size(scope.margin, scope.width, scope.height, scope.parent);
 		
 		//If we have fixed bar width then we will override the width of the component
 		if (scope.barWidth != 'auto') {
@@ -455,7 +455,7 @@ vizuly2.viz.ColumnChart = function (parent) {
 		
 		// If we don't have a defined x-scale then determine one
 		if (scope.xScale == 'undefined') {
-			scope.xScale = vizuly2.core.util.getTypedScale(viz.x()(scope.data[0][0]));
+			scope.xScale = vizuly2.util.getTypedScale(viz.x()(scope.data[0][0]));
 		}
 		
 		// Set our domains for the yScale (categories)
@@ -494,7 +494,7 @@ vizuly2.viz.ColumnChart = function (parent) {
 			stackSeries.push(row);
 		}
 		
-		var offset = (scope.layout == vizuly2.viz.layout.STACKED) ? d3.stackOffsetNone : vizuly2.core.util.stackOffsetBaseline;
+		var offset = (scope.layout == vizuly2.viz.layout.STACKED) ? d3.stackOffsetNone : vizuly2.util.stackOffsetBaseline;
 		
 		// The d3.stack handles all of the d.x and d.y measurements for various stack layouts - we will let it do its magic here
 		stack = d3.stack()
@@ -910,7 +910,7 @@ vizuly2.viz.ColumnChart = function (parent) {
 		
 	}
 	
-	function dataTipRenderer(tip, e, d, i, x, y) {
+	function dataTipRenderer(tip, e, d, i, j, x, y) {
 		
 		var html = '<div class="vz-tip-header1">HEADER1</div>' +
 		 '<div class="vz-tip-header-rule"></div>' +

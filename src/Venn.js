@@ -29,7 +29,7 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-// @version 2.1.85
+// @version 2.1.116
 
 /**
  * @class
@@ -260,7 +260,7 @@ vizuly2.viz.Venn = function (parent) {
 		background = svg.append("rect").attr("class", "vz-background");
 		plot = svg.append('g').attr("class","vz-plot");
 		labels = svg.append('g').attr("class","vz-labels");
-		defs = vizuly2.core.util.getDefs(viz);
+		defs = vizuly2.util.getDefs(viz);
 		
 		scope.dispatch.apply('initialized', viz);
 	}
@@ -273,7 +273,7 @@ vizuly2.viz.Venn = function (parent) {
 		viz.validate();
 		
 		// Get our size based on height, width, and margin
-		size = vizuly2.core.util.size(scope.margin, scope.width, scope.height, scope.parent);
+		size = vizuly2.util.size(scope.margin, scope.width, scope.height, scope.parent);
 		
 		plots = [];
 		
@@ -526,7 +526,7 @@ vizuly2.viz.Venn = function (parent) {
 		viz.removeDataTip();
 	}
 	
-	function dataTipRenderer(tip, e, d, i, x, y) {
+	function dataTipRenderer(tip, e, d, i, j, x, y) {
 		
 		var bounds = e.getBoundingClientRect();
 		var x1 = x + bounds.width/2;
@@ -2093,9 +2093,9 @@ vizuly2.viz.Venn = function (parent) {
 // http://engineering.findthebest.com/wrapping-axis-labels-in-d3-js/
 // this seems to be one of those things that should be easy but isn't
 		util.wrapText = function(text, circles, labeller, lineHeight) {
-			data = text.datum(),
-			 width = circles[data.sets[0]].radius || 50,
-			 label = labeller(data) || '';
+			var data = text.datum(),
+			    width = circles[data.sets[0]].radius || 50,
+			   label = labeller(data) || '';
 			
 			var words = label.split(/\s+/).reverse(),
 			 maxLines = 3,

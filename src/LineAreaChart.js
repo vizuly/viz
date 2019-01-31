@@ -29,7 +29,7 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-// @version 2.1.85
+// @version 2.1.116
 
 /**
  * @class
@@ -250,12 +250,14 @@ vizuly2.viz.LineAreaChart = function (parent) {
 			var colors = [ '#fecc5c', '#fd8d3c', '#f03b20', '#B02D5D', '#9B2C67', '#982B9A', '#692DA7', '#5725AA', '#4823AF', '#d7b5d8', '#dd1c77', '#5A0C7A', '#5A0C7A', '#bd0026'];
 			return colors[i % colors.length]
 		},
+		'line-stroke-width': function () { return size.height / 450 },
 		'line-stroke-over': function (d, i) {
 			return d3.color(viz.getStyle('line-stroke',arguments)).brighter();
 		},
 		'line-opacity': function (d, i) {
 			return (scope.layout === vizuly2.viz.layout.STREAM) ? .3 : .6;
 		},
+		'line-stroke-cap': 'round',
 		'area-fill': function (d, i) {
 			var colors = [ '#fecc5c', '#fd8d3c', '#f03b20', '#B02D5D', '#9B2C67', '#982B9A', '#692DA7', '#5725AA', '#4823AF', '#d7b5d8', '#dd1c77', '#5A0C7A', '#5A0C7A', '#bd0026'];
 			return colors[i % colors.length]
@@ -339,7 +341,7 @@ vizuly2.viz.LineAreaChart = function (parent) {
 		 * @param this -  Vizuly Component that emitted event
 		 * @example  viz.on('zoom', function (e, d, i) { ... });
 		 */
-	  'zoom',
+		'zoom',
 		/**
 		 * Fires when zoom operation starts.
 		 * @event vizuly2.viz.LineAreaChart.zoomstart
@@ -395,7 +397,7 @@ vizuly2.viz.LineAreaChart = function (parent) {
 		
 		svg = scope.selection.append('svg').attr('id', scope.id).style('overflow', 'visible').attr('class', 'vizuly');
 		background = svg.append('rect').attr('class', 'vz-background');
-		defs = vizuly2.core.util.getDefs(viz);
+		defs = vizuly2.util.getDefs(viz);
 		plotClipPath = defs.append('clipPath').attr('id', scope.id + '_plotClipPath').append('rect');
 		xClipPath = defs.append('clipPath').attr('id', scope.id + '_xClipPath').append('rect');
 		g = svg.append('g').attr('class', 'vz-linearea-viz');
@@ -416,11 +418,11 @@ vizuly2.viz.LineAreaChart = function (parent) {
 		viz.validate();
 		
 		// Get our size based on height, width, and margin
-		size = vizuly2.core.util.size(scope.margin, scope.width, scope.height, scope.parent);
+		size = vizuly2.util.size(scope.margin, scope.width, scope.height, scope.parent);
 		
 		// If we don't have a defined x-scale then determine one
 		if (scope.xScale == 'undefined') {
-			scope.xScale = vizuly2.core.util.getTypedScale(viz.x()(scope.data[0][0]));
+			scope.xScale = vizuly2.util.getTypedScale(viz.x()(scope.data[0][0]));
 		}
 		
 		// Prep data in format for stack
@@ -432,18 +434,26 @@ vizuly2.viz.LineAreaChart = function (parent) {
 			stackKeys.push('series' + i);
 		})
 		
-		for (var columnIndex = 0; columnIndex < scope.data[0].length; columnIndex++) {
-			var row = {};
-			row.x = scope.x(scope.data[0][columnIndex])
-			scope.data.forEach(function (series, i) {
-				row['series' + i] = scope.y(series[columnIndex]);
+		var columnHash = {};
+		
+		scope.data.forEach(function (series, j) {
+			series.forEach(function (d, i) {
+				var x = vizuly2.util.cleanString(scope.x(d, j));
+				if (!columnHash[x]) {
+					columnHash[x] = {}
+				}
+				columnHash[x]['series' + j] = scope.y(d, j);
 			})
-			stackSeries.push(row);
-		}
+		})
+		
+		var columns = [];
+		Object.keys(columnHash).forEach(function (key) {
+			columns.push(columnHash[key])
+		})
 		
 		
 		// The offset is used for the stack layout
-		var offset = (scope.layout == vizuly2.viz.layout.STACKED) ? d3.stackOffsetNone : (scope.layout == vizuly2.viz.layout.STREAM) ? d3.stackOffsetWiggle : vizuly2.core.util.stackOffsetBaseline;
+		var offset = (scope.layout == vizuly2.viz.layout.STACKED) ? d3.stackOffsetNone : (scope.layout == vizuly2.viz.layout.STREAM) ? d3.stackOffsetWiggle : vizuly2.util.stackOffsetBaseline;
 		var order = (scope.layout == vizuly2.viz.layout.STREAM) ? d3.stackOrderInsideOut : d3.stackOrderDescending;
 		
 		// The d3.stack handles all of the d.x and d.y measurements for various stack layouts - we will let it do its magic here
@@ -452,8 +462,15 @@ vizuly2.viz.LineAreaChart = function (parent) {
 		 .order(order)
 		 .offset(offset);
 		
-		// Apply the stack magic to our data - note this is a destructive operation and assumes certain properties can be mutated (x, x0, y, y0)
-		stackSeries = stack(stackSeries);
+		stackSeries = stack(columns);
+		
+		stackSeries.forEach(function (stack, j) {
+			var series = scope.data[j];
+			stack.forEach(function (d, i) {
+				d.data = series[i];
+				d.seriesIndex = j;
+			})
+		})
 		
 		// Set our yScale domain values
 		scope.yScale.domain([d3.min(stackSeries, stackMin), d3.max(stackSeries, stackMax)]);
@@ -480,11 +497,12 @@ vizuly2.viz.LineAreaChart = function (parent) {
 		
 		// Set our accessors so the d3.area can generate our area path data
 		area.curve(scope.curve)
-		 .x(function (d) {
-			 return scope.xScale(d.data.x);
+		 .defined(function(d) { return (d.data) ? d : null; })
+		 .x(function (d, i) {
+			 return scope.xScale(scope.x(d.data, i));
 		 })
 		 .y0(function (d) {
-			 return scope.yScale(d[0]);
+			 return (d[0] === 0) ? scope.yScale(scope.yScale.domain()[0]) : scope.yScale(d[0]);
 		 })
 		 .y1(function (d) {
 			 return scope.yScale(d[1]);
@@ -492,8 +510,9 @@ vizuly2.viz.LineAreaChart = function (parent) {
 		
 		// Set our accessors so the d3.line can generate our line path data
 		line.curve(scope.curve)
-		 .x(function (d) {
-			 return scope.xScale(d.data.x);
+		 .defined(function(d) { return (d.data) ? d : null; })
+		 .x(function (d, i) {
+			 return scope.xScale(scope.x(d.data, i));
 		 })
 		 .y(function (d, i) {
 			 return scope.yScale(d[1]);
@@ -503,8 +522,8 @@ vizuly2.viz.LineAreaChart = function (parent) {
 		scope.xAxis.scale(scope.xScale);
 		scope.yAxis.scale(scope.yScale);
 		
-		scope.xAxis.tickFormat(scope.xTickFormat).tickSize(-vizuly2.core.util.size(scope.margin, size.measuredWidth, size.measuredHeight).height);
-		scope.yAxis.tickFormat(scope.yTickFormat).tickSize(-vizuly2.core.util.size(scope.margin, size.measuredWidth, size.measuredHeight).width).ticks(5);
+		scope.xAxis.tickFormat(scope.xTickFormat).tickSize(-vizuly2.util.size(scope.margin, size.measuredWidth, size.measuredHeight).height);
+		scope.yAxis.tickFormat(scope.yTickFormat).tickSize(-vizuly2.util.size(scope.margin, size.measuredWidth, size.measuredHeight).width).ticks(5);
 		
 		
 		// Take an educated guess about how big to make our hit area radius based on height/width of viz.
@@ -529,7 +548,7 @@ vizuly2.viz.LineAreaChart = function (parent) {
 	
 	function stackMin(layer) {
 		return d3.min(layer, function (d) {
-			return d[0];
+			return (scope.layout == vizuly2.viz.layout.STREAM) ? d[0] : d[1];
 		});
 	}
 	
@@ -562,7 +581,7 @@ vizuly2.viz.LineAreaChart = function (parent) {
 		seriesArea
 		 .transition()
 		 .duration(scope.duration)
-		 .attr('d', area)
+		 .attr('d', area);
 		
 		
 		var seriesLine = series.selectAll('.vz-line').data(stackSeries);
@@ -585,10 +604,10 @@ vizuly2.viz.LineAreaChart = function (parent) {
 		stackSeries.forEach(function (series, j) {
 			
 			// Here are our svg.g elements
-			var points = pointHitArea.selectAll('vz-tip').data(series).enter()
+			var points = pointHitArea.selectAll('vz-tip').data(series.filter(function (d) { return d.data })).enter()
 			 .append('g').attr('class', 'vz-tip')
 			 .attr('transform', function (d, i) {
-				 return 'translate(' + scope.xScale(d.data.x) + ',' + scope.yScale(d[1]) + ')'
+				 return 'translate(' + scope.xScale(scope.x(d.data, i)) + ',' + scope.yScale(d[1]) + ')'
 			 })
 			 .on('mouseover', function (d, i) {
 				 scope.dispatch.apply('mouseover', viz, [this, scope.data[j][i], i, j]);
@@ -599,8 +618,8 @@ vizuly2.viz.LineAreaChart = function (parent) {
 			 .on('mouseout', function (d, i) {
 				 scope.dispatch.apply('mouseout', viz, [this, scope.data[j][i], i, j]);
 			 })
-			 .on('mousedown', function (d, i) {
-				 scope.dispatch.apply('mousedown', viz, [this, scope.data[j][i], i, j]);
+			 .on('click', function (d, i) {
+				 scope.dispatch.apply('click', viz, [this, scope.data[j][i], i, j]);
 			 });
 			
 			// Here our our points for each one
@@ -683,7 +702,7 @@ vizuly2.viz.LineAreaChart = function (parent) {
 		
 		// See if we have zoomed out of bounds, if so constrain the panning
 		var t = d3.event.transform;
-		tx = t.x, ty = t.y;
+		var tx = t.x, ty = t.y;
 		
 		tx = Math.min(tx, 0);
 		tx = Math.max(tx, size.width - size.width * t.k);
@@ -698,12 +717,12 @@ vizuly2.viz.LineAreaChart = function (parent) {
 		
 		bottomAxis.call(scope.xAxis.scale(rescaleX));
 		
-		area.x(function (d) {
-			return rescaleX(d.data.x);
+		area.x(function (d, i) {
+			return rescaleX(scope.x(d.data,i));
 		})
 		
-		line.x(function (d) {
-			return rescaleX(d.data.x);
+		line.x(function (d, i) {
+			return rescaleX(scope.x(d.data, i));
 		})
 		
 		// Update our paths based on the zoom scale and translate
@@ -722,7 +741,7 @@ vizuly2.viz.LineAreaChart = function (parent) {
 		pointHitArea.selectAll('.vz-tip')
 		 .attr('transform', function (d) {
 			 //console.log(d.data.x)
-			 return 'translate(' + rescaleX(d.data.x) + ',' + scope.yScale(d[1]) + ')'
+			 return 'translate(' + rescaleX(scope.x(d.data, d.seriesIndex)) + ',' + scope.yScale(d[1], d.seriesIndex) + ')'
 		 })
 		
 		applyAxisStyles();
@@ -801,8 +820,8 @@ vizuly2.viz.LineAreaChart = function (parent) {
 		
 		// Update the background
 		selection.selectAll('.vz-background').style('fill', function () {
-			return 'url(#' + styles_backgroundGradient.attr('id') + ')';
-		})
+			 return 'url(#' + styles_backgroundGradient.attr('id') + ')';
+		 })
 		 .style('opacity',viz.getStyle('background-opacity'));
 		
 		// Hide the plot background
@@ -819,11 +838,14 @@ vizuly2.viz.LineAreaChart = function (parent) {
 		
 		// Style the line paths
 		selection.selectAll('.vz-line')
-		 .style('stroke-width', function () {
-			 return h / 450
-		 })
 		 .style('stroke', function (d, i) {
 			 return viz.getStyle('line-stroke', arguments);
+		 })
+		 .style('stroke-width', function (d, i) {
+			 return viz.getStyle('line-stroke-width', arguments);
+		 })
+		 .style('stroke-linecap', function (d, i) {
+			 return viz.getStyle('line-stroke-cap', arguments);
 		 })
 		 .style('opacity', function (d, i) {
 			 return viz.getStyle('line-opacity', arguments);
@@ -906,7 +928,7 @@ vizuly2.viz.LineAreaChart = function (parent) {
 		g.append('circle')
 		 .attr('class', 'vz-point-tip').attr('r', 4).style('fill', '#000').style('stroke', '#FFF').style('stroke-width', 2).style('pointer-events', 'none');
 		
-		viz.showDataTip(e, d, i)
+		viz.showDataTip(e, d, i, j)
 	}
 	
 	// Fires on each mouse out
@@ -931,7 +953,7 @@ vizuly2.viz.LineAreaChart = function (parent) {
 		viz.removeDataTip();
 	}
 	
-	function dataTipRenderer(tip, e, d, i, x, y) {
+	function dataTipRenderer(tip, e, d, i, j, x, y) {
 		
 		var html = '<div class="vz-tip-header1">HEADER1</div>' +
 		 '<div class="vz-tip-header-rule"></div>' +
@@ -939,8 +961,8 @@ vizuly2.viz.LineAreaChart = function (parent) {
 		 '<div class="vz-tip-header-rule"></div>' +
 		 '<div class="vz-tip-header3" style="font-size:12px;"> HEADER3 </div>';
 		
-		var h1 = d3.timeFormat('%B %d, %Y')(scope.x(d));
-		var h2 = scope.yTickFormat(scope.y(d));
+		var h1 = d3.timeFormat('%B %d, %Y')(scope.x(d, i));
+		var h2 = scope.yTickFormat(scope.y(d, i));
 		var h3 = scope.seriesLabel(d);
 		
 		html = html.replace("HEADER1", h1);
