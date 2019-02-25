@@ -48,21 +48,18 @@ Rotate labels (Coluimn chart)
 
 <script id="testscript">
 
-    console.log("version = " + d3.version)
-
-	// our radial components and an array to hold them
 	var viz = vizuly2.viz.BarChart("#viz_container");
-
-    var countries = ['USA', 'USSR', 'GB', 'GER', 'FR', 'ITL', 'SWE', 'CHINA', 'RU', 'E. GER' ]
 
     viz
      .data(data)
+     .width(500)
+     .onChange('width',function (newValue, oldValue) { console.log('old width = ' + oldValue + ' new width = ' + newValue);})
      .width('100%')
      .height('100%')
      .x(function (d, i)  { return Number(d.value); })
      .y(function (d, i)  { return d.country; })
      .seriesLabel( function (d,i) { return d.category })
-     .style('show-value-labels',false)
+     .dataTipRenderer(false)
      .updateOnResize(true)
 
     viz.update();

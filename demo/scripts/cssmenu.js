@@ -266,7 +266,10 @@ function createDemoMenu(options, w, h, title, styles) {
 		var value;
 		currentStyle = d;
 		
-		if (styles[d] === Object(styles[d])) {
+		if (Array.isArray(styles[d])) {
+			viz.style(d,styles[d]);
+		}
+		else if (styles[d] === Object(styles[d])) {
 			Object.keys(styles[d]).forEach(function (key) {
 				if(!value) value = styles[d][key];
 				viz.style(key, styles[d][key])
@@ -308,6 +311,9 @@ function createDemoMenu(options, w, h, title, styles) {
 	function encodeStyleValue(value) {
 		if (typeof value == 'string') {
 			return "'" + value + "'";
+		}
+		else if (Array.isArray(value)) {
+			return "[" + value.toString() + "]";
 		}
 		else {
 			return value;

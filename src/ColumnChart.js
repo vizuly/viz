@@ -28,7 +28,7 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-// @version 2.1.116
+// @version 2.1.145
 
 /**
  * The ColumnChart renders multiple series of data in a nested array
@@ -249,11 +249,12 @@ vizuly2.viz.ColumnChart = function (parent) {
 		 * // e - svg rect of the bar being moused over
 		 * // d - datum
 		 * // i - datum index
+		 * // j - group index (optional)
 		 * // x - suggested x position of data tip
 		 * // y - suggested y position of data tip
 		 * // return {Array} [x, y] - x and y coordinates placing data tip.
 		 *
-		 *function dataTipRenderer(tip, e, d, i, x, y) {
+		 *function dataTipRenderer(tip, e, d, i, j, x, y) {
 		 *	 var html = '<div class="vz-tip-header1">HEADER1</div>' +
 		 *	 '<div class="vz-tip-header-rule"></div>' +
 		 *	 '<div class="vz-tip-header2"> HEADER2 </div>' +
@@ -503,8 +504,7 @@ vizuly2.viz.ColumnChart = function (parent) {
 			 return scope.y(datum);
 		 })
 		 .keys(stackKeys)
-		 .offset(offset)
-		 .order(d3.stackOrderAscending);
+		 .offset(offset);
 		
 		// Apply the stack magic to our data - note this is a destructive operation and assumes certain properties can be mutated (x, x0, y, y0)
 		stackSeries = stack(stackSeries);
@@ -691,7 +691,10 @@ vizuly2.viz.ColumnChart = function (parent) {
 		
 	}
 	
-	// This is our public update call that all viz components implement
+	/**
+	 *  Triggers the render pipeline process to refresh the component on the screen.
+	 *  @method vizuly2.viz.ColumnChart.update
+	 */
 	viz.update = function () {
 		update();
 		return viz;

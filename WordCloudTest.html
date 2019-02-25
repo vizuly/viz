@@ -6,6 +6,7 @@
 
     <!-- We use google fonts for many of the examples, but they are not necessary -->
     <link href='https://fonts.googleapis.com/css?family=Raleway:600,400,200' rel='stylesheet' type='text/css'>
+    <link href="https://fonts.googleapis.com/css?family=Anton:400" rel="stylesheet"  type='text/css'>
 
     <!-- vizuly2.specific style sheets -->
     <link rel="stylesheet" href="lib/styles/vizuly.css">
@@ -27,7 +28,7 @@
 
 </head>
 
-<body>
+<body onload="start()">
 
 <!-- Our main content container-->
 <div class="container" style="width:100%;">
@@ -37,19 +38,25 @@
 
 <script id="testscript">
 
-  var viz = vizuly2.viz.WordCloud("#viz_container");
+    var viz = vizuly2.viz.WordCloud("#viz_container");
 
     viz
-       .data(data.text)
-       .width('100%')
-       .height('100%')
-       .on('mouseover', onMouseOver)
-       .on('mouseout', onMouseOut)
-       .on('click', onClick)
+     .data(data.goodWillHunting)
+     .width('100%')
+     .height('100%')
+     .fontSizeMax(function () { return 60 })
+     .style('font-family', 'Anton')
+     .on('mouseover', onMouseOver)
+     .on('mouseout', onMouseOut)
+     .on('click', onClick)
+     .update();
 
-    viz.update();
+    function start() {
 
-    if (runDemo) runDemo();
+    	//Easy way to ensure font has loaded correctly by rendering 2x
+        viz.update();
+        if (runDemo) runDemo();
+    }
 
 	function onMouseOver(e, d, i) {
 		console.log('onMouseOver ' + d.key)

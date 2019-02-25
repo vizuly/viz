@@ -29,7 +29,7 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-// @version 2.1.116
+// @version 2.1.145
 
 /**
  * @class
@@ -193,11 +193,12 @@ vizuly2.viz.ScatterPlot = function (parent) {
 		 * // e - svg rect of the bar being moused over
 		 * // d - datum
 		 * // i - datum index
+		 * // j - group index (optional)
 		 * // x - suggested x position of data tip
 		 * // y - suggested y position of data tip
 		 * // return {Array} [x, y] - x and y coordinates placing data tip.
 		 *
-		 *function dataTipRenderer(tip, e, d, i, x, y) {
+		 *function dataTipRenderer(tip, e, d, i, j, x, y) {
 		 *     tip.style('text-align', 'center').append('div').text(scope.y(d));
 		 *     return [x-50, y-80];
 		 *}
@@ -462,7 +463,10 @@ vizuly2.viz.ScatterPlot = function (parent) {
 		}
 	}
 	
-	// This is our public update call that all viz components implement
+	/**
+	 *  Triggers the render pipeline process to refresh the component on the screen.
+	 *  @method vizuly2.viz.ScatterPlot.update
+	 */
 	viz.update = function () {
 		update();
 		return viz;
@@ -624,9 +628,30 @@ vizuly2.viz.ScatterPlot = function (parent) {
 	}
 	
 	function dataTipRenderer(tip, e, d, i, j, x, y) {
-		tip.style('text-align', 'center').append('div').text(scope.y(d));
-		return [x-50, y-80];
+		
+		var html = '<div class="vz-tip-header1">HEADER1</div>' +
+		 '<div class="vz-tip-header-rule"></div>' +
+		 '<div class="vz-tip-header2"> HEADER2 </div>' +
+		 '<div class="vz-tip-header-rule"></div>' +
+		 '<div class="vz-tip-header3" style="font-size:12px;"> HEADER3 </div>' +
+		 '<div class="vz-tip-header3" style="margin-top:5px"> HEADER4 </div>';
+		
+		var h1 = d3.timeFormat('%b %d, 20%y')(d.exp_dat);
+		var h2 = d.can_nam;
+		var h3 = String(d.pur).substr(0,40);
+		var h4 = '$' + d3.format(',')(d.exp_amo);
+		
+		html = html.replace("HEADER1", h1);
+		html = html.replace("HEADER2", h2);
+		html = html.replace("HEADER3", h3);
+		html = html.replace("HEADER4", h4);
+		
+		tip.style('height','120px').html(html);
+		
+		return [x-70, y-140];
+		
 	}
+
 	
 	return viz;
 	

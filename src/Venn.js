@@ -29,7 +29,7 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-// @version 2.1.116
+// @version 2.1.145
 
 /**
  * @class
@@ -139,11 +139,12 @@ vizuly2.viz.Venn = function (parent) {
 		 * // e - svg rect of the bar being moused over
 		 * // d - datum
 		 * // i - datum index
+		 * // j - group index (optional)
 		 * // x - suggested x position of data tip
 		 * // y - suggested y position of data tip
 		 * // return {Array} [x, y] - x and y coordinates placing data tip.
 		 *
-		 *function dataTipRenderer(tip, e, d, i, x, y) {
+		 *function dataTipRenderer(tip, e, d, i, j, x, y) {
 		 *  var bounds = e.getBoundingClientRect();
 		 *  var x1 = x + bounds.width/2;
 		 *  var y1 = y;
@@ -450,7 +451,10 @@ vizuly2.viz.Venn = function (parent) {
 		return true;
 	}
 	
-	// This is our public update call that all vizuly2.viz's implement
+	/**
+	 *  Triggers the render pipeline process to refresh the component on the screen.
+	 *  @method vizuly2.viz.Venn.update
+	 */
 	viz.update = function () {
 		update();
 		return viz;

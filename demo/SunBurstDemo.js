@@ -8,6 +8,7 @@ var styles = {
 	'stroke': '#0000FF',
 	'stroke-opacity': 0.25,
 	'fill': '#0000FF',
+	'fill-opacity': 0.5,
 	'fill-over': {'fill-over': '#FFFF00', 'fill': '#FFFF00'},
 	'label-color': '#0000FF',
 	'label-font-size': 16,
@@ -92,6 +93,17 @@ var umberStyles = {
 	}
 }
 
+var oceanStyles = {
+	'background-color-top': '#001C4C',
+	'background-color-bottom': '#1476CD',
+	'label-color': '#000',
+	'stroke': '#FFF',
+	'stroke-opacity': 0.7,
+	'fill': '#FFF',
+	'fill-over': '#1476CD',
+	'fill-opacity': function (d, i) { return d.depth/4 }
+}
+
 
 var evergreenStyles = {
 	'background-color-bottom': '#f1f9ee',
@@ -164,6 +176,7 @@ function runDemo() {
 				{'label': 'Ice', 'value': 'iceStyles'},
 				{'label': 'Rose', 'value': 'roseStyles'},
 				{'label': 'Umber', 'value': 'umberStyles'},
+				{'label': 'Ocean', 'value': 'oceanStyles'},
 				{'label': 'Evergreen', 'value': 'evergreenStyles'}
 			],
 			'callback': changeStyles

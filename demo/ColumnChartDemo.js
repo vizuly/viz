@@ -40,6 +40,7 @@ var blueStyles =
 	 'x-axis-label-color': '#FFF',
 	 'y-axis-label-color': '#FFF',
 	 'bar-fill': '#02C3FF',
+	 'bar-stroke': '#039FDB',
 	 'axis-stroke': '#FFF',
 	 'bar-radius': 0
  }
@@ -52,6 +53,7 @@ var pinkStyles =
 	 'x-axis-label-color': '#FFF',
 	 'y-axis-label-color': '#FFF',
 	 'bar-fill': '#ff83de',
+	 'bar-stroke': '#C12780',
 	 'axis-stroke': '#FFF',
 	 'bar-radius': 0
  }
@@ -120,7 +122,7 @@ function runDemo() {
 		{
 			'name': 'Display',
 			'values': [
-				{'label': '1200px - 800px', 'value': '1200,800'},
+				{'label': '1000px - 1000px', 'value': '1000,1000'},
 				{'label': '800px - 800px', 'value': '800,800'},
 				{'label': '375px - 667px', 'value': '375,667'},
 				{'label': '320px - 568px', 'value': '320,568'}

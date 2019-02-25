@@ -13,6 +13,10 @@ var styles = {
 	'cell-stroke': '#0000FF',
 	'cell-stroke-width': {'cell-stroke-width': 2, 'cell-stroke': '#0000FF'},
 	'cell-stroke-opacity': {'cell-stroke-opacity': 1, 'cell-stroke': '#0000FF'},
+	'cell-fill-over': {'cell-fill-over': '#FF0', 'cell-fill': '#FF0'},
+	'cell-stroke-over': {'cell-stroke-over': '#FF0', 'cell-stroke': '#FF0'},
+	'cell-stroke-opacity-over': {'cell-stroke-opacity-over': 1, 'cell-stroke': '#FF0', 'cell-stroke-opacity': 1},
+	'cell-fill-opacity-over': {'cell-fill-opacity-over': 1, 'cell-fill': '#FF0', 'cell-fill-opacity' : 1},
 	'cell-fill-opacity': .25,
 	'header-font-size': 12,
 	'header-label-color': '#0000FF',
@@ -60,16 +64,15 @@ var fireStyles =
 
 var oceanStyles =
  {
-	 'background-color-top': '#039FDB',
-	 'background-color-bottom': '#021F51',
+	 'background-color-top': '#021F51',
+	 'background-color-bottom': '#039FDB',
 	 'group-label-color': '#FFF',
 	 'header-label-color': function (d, i) {
 		 return '#FFF';
 	 },
 	 'cell-fill': function (e, d, i) {
 		 var color = '#FFF'
-		 var color1 = vizuly2.util.rgbToHex(d3.rgb('#039FDB').brighter(1));
-		 return 'url(#' + vizuly2.svg.gradient.blend(viz, color, color1).attr('id') + ')';
+		 return 'url(#' + vizuly2.svg.gradient.fade(viz, color, 'vertical', [.9, .4]).attr('id') + ')';
 	 }
  }
 

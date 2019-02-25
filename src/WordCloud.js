@@ -29,7 +29,7 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-// @version 2.1.116
+// @version 2.1.145
 
 /**
  * @class
@@ -113,11 +113,12 @@ vizuly2.viz.WordCloud = function (parent) {
 		'background-opacity': 1,
 		'background-color-top': '#FFF',
 		'background-color-bottom': '#DDD',
-		'label-color': function (d,i) {
+		'label-fill': function (d,i) {
 			var colors = ['#1f77b4', '#aec7e8', '#ff7f0e', '#ffbb78', '#2ca02c', '#98df8a', '#d62728', '#ff9896', '#9467bd', '#c5b0d5', '#8c564b', '#c49c94', '#e377c2', '#f7b6d2', '#7f7f7f', '#c7c7c7', '#bcbd22', '#dbdb8d', '#17becf', '#9edae5'];
 			return colors[i % colors.length]
 		},
-		'font-family': 'Impact'
+		'label-fill-opacity': 1,
+		'font-family': 'Anton'
 	}
 	
 	/** @lends vizuly2.viz.WordCloud.events */
@@ -285,7 +286,10 @@ vizuly2.viz.WordCloud = function (parent) {
 		scope.dispatch.apply('updated', viz);
 	}
 	
-	// This is our public update call that all vizuly2.viz's implement
+	/**
+	 *  Triggers the render pipeline process to refresh the component on the screen.
+	 * @method vizuly2.viz.WordCloud.update
+	 */
 	viz.update = function () {
 		update();
 		return viz;
@@ -317,7 +321,8 @@ vizuly2.viz.WordCloud = function (parent) {
 		 .style('opacity',viz.getStyle('background-opacity'));
 		
 		plot.selectAll('.vz-wordcloud-word')
-		 .style('fill',function (d,i) { return viz.getStyle('label-color', arguments) })
+		 .style('fill',function (d,i) { return viz.getStyle('label-fill', arguments) })
+		 .style('fill-opacity',function (d,i) { return viz.getStyle('label-fill-opacity', arguments) })
 		 .style("font-size", function(d) { return fontScale(d.value) + "px"; })
 		 .style("font-family", function (d,i) { return viz.getStyle('font-family', arguments); })
 		

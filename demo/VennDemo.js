@@ -48,6 +48,13 @@ var umberStyles = {
 	}
 }
 
+var oceanStyles = {
+	'background-color-top': '#1476CD',
+	'background-color-bottom': '#001C4C',
+	'fill-color': '#FFF',
+	'stroke-color': '#FFF'
+}
+
 
 var evergreenStyles = {
 	'background-color-bottom': '#f1f9ee',
@@ -97,6 +104,7 @@ function runDemo() {
 				{'label': 'Ice', 'value': 'iceStyles'},
 				{'label': 'Rose', 'value': 'roseStyles'},
 				{'label': 'Umber', 'value': 'umberStyles'},
+				{'label': 'Ocean', 'value': 'oceanStyles'},
 				{'label': 'Evergreen', 'value': 'evergreenStyles'}
 			],
 			'callback': changeStyles

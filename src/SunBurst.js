@@ -29,7 +29,7 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-// @version 2.1.116
+// @version 2.1.145
 
 /**
  * @class
@@ -151,11 +151,12 @@ vizuly2.viz.SunBurst = function (parent) {
 		 * // e - svg rect of the bar being moused over
 		 * // d - datum
 		 * // i - datum index
+		 * // j - group index (optional)
 		 * // x - suggested x position of data tip
 		 * // y - suggested y position of data tip
 		 * // return {Array} [x, y] - x and y coordinates placing data tip.
 		 *
-		 *function dataTipRenderer(tip, e, d, i, x, y) {
+		 *function dataTipRenderer(tip, e, d, i, j, x, y) {
 		 *	  var html = '<div class="vz-tip-header1">HEADER1</div>' +
 		 *		var bounds = e.getBoundingClientRect();
 		 *		var x1 = d3.event.pageX; - bounds.left;
@@ -203,6 +204,7 @@ vizuly2.viz.SunBurst = function (parent) {
 			var c = d3.rgb(colors[(d.data.rootIndex ? d.data.rootIndex : 0) % colors.length]);
 			return c.brighter((d.depth) / maxDepth)
 		},
+		'fill-opacity': 1,
 		'label-color': function (d,i) {
 			var colors = ['#bd0026', '#fecc5c', '#fd8d3c', '#f03b20', '#B02D5D', '#9B2C67', '#982B9A', '#692DA7', '#5725AA', '#4823AF', '#d7b5d8', '#dd1c77', '#5A0C7A', '#5A0C7A']
 			var c = d3.rgb(colors[(d.data.rootIndex ? d.data.rootIndex : 0) % colors.length]);
@@ -563,9 +565,12 @@ vizuly2.viz.SunBurst = function (parent) {
 		}
 	
 	}
-
 	
-	// This is our public update call that all viz components implement
+	
+	/**
+	 *  Triggers the render pipeline process to refresh the component on the screen.
+	 *  @method vizuly2.viz.SunBurst.update
+	 */
 	viz.update = function () {
 		update();
 		return viz;
@@ -617,7 +622,7 @@ vizuly2.viz.SunBurst = function (parent) {
 			 return viz.getStyle('fill', arguments);
 		 })
 		 .style('fill-opacity', function (d,i) {
-			 return (!d.data.cssKey) ? 0.01 : null;
+			 return (!d.data.cssKey) ? 0.01 : viz.getStyle('fill-opacity', arguments);
 		 })
 		 .style("stroke", function (d, i) {
 			 return viz.getStyle('stroke', arguments);

@@ -29,7 +29,7 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-// @version 2.1.116
+// @version 2.1.145
 
 /**
  * @class
@@ -247,11 +247,12 @@ vizuly2.viz.BarChart = function (parent) {
 		 * // e - svg rect of the bar being moused over
 		 * // d - datum
 		 * // i - datum index
+		 * // j - group index (optional)
 		 * // x - suggested x position of data tip
 		 * // y - suggested y position of data tip
 		 * // return {Array} [x, y] - x and y coordinates placing data tip.
 		 *
-		 *function dataTipRenderer(tip, e, d, i, x, y) {
+		 *function dataTipRenderer(tip, e, d, i, j, x, y) {
 		 *	 var html = '<div class="vz-tip-header1">HEADER1</div>' +
 		 *	 '<div class="vz-tip-header-rule"></div>' +
 		 *	 '<div class="vz-tip-header2"> HEADER2 </div>' +
@@ -281,7 +282,7 @@ vizuly2.viz.BarChart = function (parent) {
 		'background-color-bottom': '#DDD',
 		'value-label-color': '#444',
 		'value-label-font-size': function () {
-			return Math.max(8, Math.round(size.width / 85))
+			return Math.max(10, Math.round(size.width / 85))
 		},
 		'value-label-font-weight': 400,
 		'value-label-show': false,
@@ -300,7 +301,7 @@ vizuly2.viz.BarChart = function (parent) {
 			var axisColors = ['#bd0026', '#fecc5c', '#fd8d3c', '#f03b20', '#B02D5D', '#9B2C67', '#982B9A', '#692DA7', '#5725AA', '#4823AF', '#d7b5d8', '#dd1c77', '#5A0C7A', '#5A0C7A'];
 			return axisColors[groupIndex % axisColors.length]
 		},
-		'bar-fill-opacity': function (d, i) {
+		'bar-fill-opacity': function (d, i, groupIndex) {
 			return (1 - ((i) / (scope.data.length + 1)));
 		},
 		'bar-fill-over': function (d, i, groupIndex) {
@@ -500,8 +501,7 @@ vizuly2.viz.BarChart = function (parent) {
 			 return scope.x(datum);
 		 })
 		 .keys(stackKeys)
-		 .offset(offset)
-		 .order(d3.stackOrderAscending);
+		 .offset(offset);
 		
 		// Apply the stack magic to our data - note this is a destructive operation and assumes certain properties can be mutated (x, x0, y, y0)
 		stackSeries = stack(stackSeries);
@@ -689,7 +689,10 @@ vizuly2.viz.BarChart = function (parent) {
 		
 	}
 	
-	// This is our public update call that all vizuly2.viz's implement
+	/**
+	 *  Triggers the render pipeline process to refresh the component on the screen.
+	 *  @method vizuly2.viz.BarChart.update
+	 */
 	viz.update = function () {
 		update();
 		return viz;
@@ -909,7 +912,7 @@ vizuly2.viz.BarChart = function (parent) {
 		
 	}
 	
-	function dataTipRenderer(tip, e, d, i, x, y) {
+	function dataTipRenderer(tip, e, d, i, j, x, y) {
 		var html = '<div class="vz-tip-header1">HEADER1</div>' +
 		 '<div class="vz-tip-header-rule"></div>' +
 		 '<div class="vz-tip-header2"> HEADER2 </div>' +
