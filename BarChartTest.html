@@ -2,8 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=.5">
-    <title>Vizuly 2.0 - Bar Chart</title>
+     <title>Vizuly 2.0 - Bar Chart</title>
 
     <!-- We use google fonts for many of the examples, but they are not necessary -->
     <link href='https://fonts.googleapis.com/css?family=Raleway:600,400,200' rel='stylesheet' type='text/css'>
@@ -52,14 +51,11 @@ Rotate labels (Coluimn chart)
 
     viz
      .data(data)
-     .width(500)
-     .onChange('width',function (newValue, oldValue) { console.log('old width = ' + oldValue + ' new width = ' + newValue);})
      .width('100%')
      .height('100%')
      .x(function (d, i)  { return Number(d.value); })
      .y(function (d, i)  { return d.country; })
      .seriesLabel( function (d,i) { return d.category })
-     .dataTipRenderer(false)
      .updateOnResize(true)
 
     viz.update();

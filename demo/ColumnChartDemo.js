@@ -112,7 +112,8 @@ function changeSeries(val) {
 
 
 function changeLayout(val) {
-	viz.layout(val).update();
+	var layout = val.split('_')[0]
+	viz.layout(layout).style('value-label-show', val.split('_').length > 1).update();
 }
 
 
@@ -153,7 +154,9 @@ function runDemo() {
 			'name': 'Layout',
 			'values': [
 				{'label': 'Clustered', 'value': 'CLUSTERED', 'selected': true},
-				{'label': 'Stacked', 'value': 'STACKED'}
+				{'label': 'Stacked', 'value': 'STACKED'},
+				{'label': 'Clustered Labels', 'value': 'CLUSTERED_LABELS'},
+				{'label': 'Stacked Labels', 'value': 'STACKED_LABELS'}
 			],
 			'callback': changeLayout
 		}

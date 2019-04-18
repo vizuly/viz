@@ -28,7 +28,7 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-// @version 2.1.145
+// @version 2.1.159
 
 /**
  * The ColumnChart renders multiple series of data in a nested array
@@ -495,7 +495,7 @@ vizuly2.viz.ColumnChart = function (parent) {
 			stackSeries.push(row);
 		}
 		
-		var offset = (scope.layout == vizuly2.viz.layout.STACKED) ? d3.stackOffsetNone : vizuly2.util.stackOffsetBaseline;
+		var offset = (scope.layout == vizuly2.viz.layout.STACKED) ? d3.stackOffsetDiverging : vizuly2.util.stackOffsetBaseline;
 		
 		// The d3.stack handles all of the d.x and d.y measurements for various stack layouts - we will let it do its magic here
 		stack = d3.stack()
@@ -510,11 +510,10 @@ vizuly2.viz.ColumnChart = function (parent) {
 		stackSeries = stack(stackSeries);
 		
 		// We set our xScale domain based on whether we have a stacked or clustered layout
-		scope.yScale.domain([0, d3.max(stackSeries, function (series) {
-			return d3.max(series, function (d) {
-				return d[1];
-			})
-		})]);
+		scope.yScale.domain([
+			Math.min(0, d3.min(stackSeries, function (series) { return d3.min(series, function (d) { return (scope.layout == vizuly2.viz.layout.STACKED && stackSeries.length > 1) ? d[0] : d[1]; })})),
+			d3.max(stackSeries, function (series) { return d3.max(series, function (d) { return d[1]; })})
+		]);
 		
 		// Set our ranges for each scale
 		scope.yScale.range([size.height, 0]);
@@ -565,6 +564,7 @@ vizuly2.viz.ColumnChart = function (parent) {
 		var val = 0;
 		if (String(padding).toLowerCase() == 'auto') {
 			val = Math.round((size.width-(w * scope.data[0].length))/scope.data[0].length);
+			if (scope.layout == vizuly2.viz.layout.STACKED) val = val * 3;
 		}
 		else if(typeof padding == 'string' && padding.substr(padding.length-1) == '%') {
 			var r = Math.min(Number(padding.substr(0,padding.length-1)),100)/100;
@@ -630,7 +630,7 @@ vizuly2.viz.ColumnChart = function (parent) {
 			 })
 			 .merge(bars);
 			
-			bars.attr('width', barWidth).attr('height',0).attr('y', size.height);
+			bars.attr('width', barWidth).attr('height',0).attr('y', scope.yScale(0));
 			
 			bars.transition().duration(scope.duration)
 			 .attr('x', function (d, i) {
@@ -638,10 +638,10 @@ vizuly2.viz.ColumnChart = function (parent) {
 			 })
 			 .attr('width', barWidth)
 			 .attr('height', function (d, i) {
-				 return (scope.layout == vizuly2.viz.layout.STACKED) ? scope.yScale(d[0]) - scope.yScale(d[1]) : size.height - scope.yScale(d[1])
+				 return (scope.layout == vizuly2.viz.layout.STACKED) ?  Math.abs(scope.yScale(d[1]) - scope.yScale(d[0])) : Math.abs(scope.yScale(d[1]) - scope.yScale(d[0]))
 			 })
 			 .attr('y', function (d, i) {
-				 return scope.yScale(d[1]);
+				 return (scope.layout == vizuly2.viz.layout.STACKED) ? scope.yScale(Math.max(d[0], d[1]))  : scope.yScale(Math.max(0, d[1]))
 			 });
 			
 			var labels = d3.select(this).selectAll('.vz-bar-label').data(stackSeries.map(function (series, i) {
@@ -665,12 +665,12 @@ vizuly2.viz.ColumnChart = function (parent) {
 			 .attr('x', function (d, i) {
 				 var datum = d.data['series' + i].data;
 				 var fs = viz.getStyle('value-label-font-size',[datum, i, scope.xScale.domain().indexOf(scope.x(datum)), this]);
-				 return (scope.layout == vizuly2.viz.layout.STACKED) ?  fs/2 + barWidth:  i * (barWidth + barPadding) + (barWidth/2);
+				 return (scope.layout == vizuly2.viz.layout.STACKED) ?  groupWidth/2:  i * (barWidth + barPadding) + (barWidth/2);
 			 })
 			 .attr('y', function (d, i) {
 				 var datum = d.data['series' + i].data;
 				 var fs = viz.getStyle('value-label-font-size',[datum, i, scope.xScale.domain().indexOf(scope.x(datum)), this]);
-				 return (scope.layout == vizuly2.viz.layout.STACKED) ? scope.yScale(d[1] - fs/2) : scope.yScale(d[1]) - fs/2;
+				 return scope.yScale(d[1]) - fs/2;
 			 })
 			
 			group.attr('transform', function (d, i) {
@@ -770,7 +770,7 @@ vizuly2.viz.ColumnChart = function (parent) {
 					return viz.getStyle('value-label-show', [datum, i, scope.xScale.domain().indexOf(scope.x(datum)), this]) ? 'block' : 'none'
 				})
 				.style('text-anchor', function (d,i) {
-					return (scope.layout == vizuly2.viz.layout.STACKED) ? 'start' : 'middle';
+					return 'middle';
 				})
 				.style('font-weight', function (d, i) {
 					var datum = d.data['series' + i].data;
@@ -784,11 +784,12 @@ vizuly2.viz.ColumnChart = function (parent) {
 					var datum = d.data['series' + i].data;
 					return viz.getStyle('value-label-font-size', [datum, i, scope.xScale.domain().indexOf(scope.x(datum)), this]) + 'px'
 				})
-				.style('dy', function (d, i) {
+				.attr('dy', function (d, i) {
 					var datum = d.data['series' + i].data;
-					return (scope.layout == vizuly2.viz.layout.STACKED) ? 0 : -viz.getStyle('value-label-font-size', [datum, i, scope.xScale.domain().indexOf(scope.x(datum)), this]) / 2
+					var fontSize = viz.getStyle('value-label-font-size', [datum, i, scope.xScale.domain().indexOf(scope.x(datum)),this]);
+					return (scope.layout == vizuly2.viz.layout.STACKED) ? 0 : viz.getStyle('value-label-font-size', [datum, i, scope.yScale.domain().indexOf(scope.y(datum)), this]) / 2 + (scope.y(datum) < 0 ? fontSize : -fontSize/2)
 				})
-				.style('dx', function (d, i) {
+				.attr('dx', function (d, i) {
 					var datum = d.data['series' + i].data;
 					return (scope.layout == vizuly2.viz.layout.STACKED) ? viz.getStyle('value-label-font-size', [datum, i, scope.xScale.domain().indexOf(scope.x(datum)), this]) / 4 : 0
 				})

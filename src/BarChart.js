@@ -29,7 +29,7 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-// @version 2.1.145
+// @version 2.1.159
 
 /**
  * @class
@@ -274,7 +274,7 @@ vizuly2.viz.BarChart = function (parent) {
 		 */
 		'dataTipRenderer': dataTipRenderer
 	};
-
+	
 	
 	var styles = {
 		'background-opacity': 1,
@@ -492,7 +492,7 @@ vizuly2.viz.BarChart = function (parent) {
 			stackSeries.push(row);
 		}
 		
-		var offset = (scope.layout == vizuly2.viz.layout.STACKED) ? d3.stackOffsetNone : vizuly2.util.stackOffsetBaseline;
+		var offset = (scope.layout == vizuly2.viz.layout.STACKED) ? d3.stackOffsetDiverging : vizuly2.util.stackOffsetBaseline;
 		
 		// The d3.stack handles all of the d.x and d.y measurements for various stack layouts - we will let it do its magic here
 		stack = d3.stack()
@@ -507,11 +507,10 @@ vizuly2.viz.BarChart = function (parent) {
 		stackSeries = stack(stackSeries);
 		
 		// We set our xScale domain based on whether we have a stacked or clustered layout
-		scope.xScale.domain([0, d3.max(stackSeries, function (series) {
-			return d3.max(series, function (d) {
-				return d[1];
-			})
-		})]);
+		scope.xScale.domain([
+			Math.min(0, d3.min(stackSeries, function (series) { return d3.min(series, function (d) { return (scope.layout == vizuly2.viz.layout.STACKED && stackSeries.length > 1) ? d[0] : d[1]; })})),
+			d3.max(stackSeries, function (series) { return d3.max(series, function (d) { return d[1]; })})
+		]);
 		
 		// Set our ranges for each scale
 		seriesOffset = 0;
@@ -563,6 +562,7 @@ vizuly2.viz.BarChart = function (parent) {
 		var val = 0;
 		if (String(padding).toLowerCase() == 'auto') {
 			val = Math.round((size.height-(w * scope.data[0].length))/scope.data[0].length);
+			if (scope.layout == vizuly2.viz.layout.STACKED) val = val * 3;
 		}
 		else if(typeof padding == 'string' && padding.substr(padding.length-1) == '%') {
 			var r = Math.min(Number(padding.substr(0,padding.length-1)),100)/100;
@@ -615,7 +615,7 @@ vizuly2.viz.BarChart = function (parent) {
 			 .attr('y', function (d, i) {
 				 return i * (barWidth + barPadding);
 			 })
-			 .attr('width', 0).attr('x', 0)
+			 .attr('width', 0).attr('x', scope.xScale(0))
 			 .on('mouseover', function (d, i) {
 				 scope.dispatch.apply('mouseover', viz, [this, d.data['series' + i].data, i, index])
 			 })
@@ -630,7 +630,7 @@ vizuly2.viz.BarChart = function (parent) {
 			 })
 			 .merge(bars);
 			
-			bars.attr('height', barWidth).attr('width', 0).attr('x', 0);
+			bars.attr('height', barWidth).attr('width', 0).attr('x', scope.xScale(0));
 			
 			bars.transition().duration(scope.duration)
 			 .attr('y', function (d, i) {
@@ -638,10 +638,10 @@ vizuly2.viz.BarChart = function (parent) {
 			 })
 			 .attr('height', barWidth)
 			 .attr('width', function (d, i) {
-				 return (scope.layout == vizuly2.viz.layout.STACKED) ? scope.xScale(d[1]) - scope.xScale(d[0]) : scope.xScale(d[1])
+				 return (scope.layout == vizuly2.viz.layout.STACKED) ?  Math.abs(scope.xScale(d[1]) - scope.xScale(d[0])) : Math.abs(scope.xScale(d[1]) - scope.xScale(d[0]))
 			 })
 			 .attr('x', function (d, i) {
-				 return (scope.layout == vizuly2.viz.layout.STACKED) ? scope.xScale(d[0]) : 0;
+				 return (scope.layout == vizuly2.viz.layout.STACKED) ? scope.xScale(Math.min(d[0], d[1])) : scope.xScale(Math.min(0, d[1]));
 			 });
 			
 			var labels = d3.select(this).selectAll('.vz-bar-label').data(stackSeries.map(function (series, i) {
@@ -663,6 +663,10 @@ vizuly2.viz.BarChart = function (parent) {
 			labels.attr('x', 0);
 			
 			labels.transition().duration(scope.duration)
+			 .style('text-anchor', function (d,i) {
+				 var datum = d.data['series' + i].data;
+			 	return (scope.x(datum) < 0) ? 'end' : 'start';
+			 })
 			 .attr('y', function (d, i) {
 				 var datum = d.data['series' + i].data;
 				 var fs = viz.getStyle('value-label-font-size', [datum, i, scope.xScale.domain().indexOf(scope.x(datum)), this]);
@@ -728,8 +732,8 @@ vizuly2.viz.BarChart = function (parent) {
 		
 		// Update the background
 		selection.selectAll('.vz-background').style('fill', function () {
-			return 'url(#' + styles_backgroundGradient.attr('id') + ')';
-			})
+			 return 'url(#' + styles_backgroundGradient.attr('id') + ')';
+		 })
 		 .style('opacity',viz.getStyle('background-opacity'));
 		
 		
@@ -769,7 +773,6 @@ vizuly2.viz.BarChart = function (parent) {
 					var datum = d.data['series' + i].data;
 					return viz.getStyle('value-label-show', [datum, i, scope.xScale.domain().indexOf(scope.x(datum)), this]) ? 'block' : 'none'
 				})
-				.style('text-anchor', 'start')
 				.style('font-weight', function (d, i) {
 					var datum = d.data['series' + i].data;
 					return viz.getStyle('value-label-font-weight', [datum, i, scope.xScale.domain().indexOf(scope.x(datum)), this])
@@ -784,7 +787,7 @@ vizuly2.viz.BarChart = function (parent) {
 				})
 				.attr('dx', function (d, i) {
 					var datum = d.data['series' + i].data;
-					return (scope.layout == vizuly2.viz.layout.STACKED) ? 0 : viz.getStyle('value-label-font-size', [datum, i, scope.xScale.domain().indexOf(scope.x(datum)), this]) / 2
+					return (scope.layout == vizuly2.viz.layout.STACKED) ? 0 : viz.getStyle('value-label-font-size', [datum, i, scope.xScale.domain().indexOf(scope.x(datum)), this]) / 2 * (scope.x(datum) > 0 ? 1 : -1)
 				})
 		 });
 		
