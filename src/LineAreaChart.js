@@ -498,7 +498,7 @@ vizuly2.viz.LineAreaChart = function (parent) {
 		
 		// Set our accessors so the d3.area can generate our area path data
 		area.curve(scope.curve)
-		 .defined(function(d) { return (d.data) ? d : null; })
+		 .defined(function(d, i) { return (scope.y(d.data) != null) })
 		 .x(function (d, i) {
 			 return scope.xScale(scope.x(d.data, i));
 		 })
@@ -511,7 +511,7 @@ vizuly2.viz.LineAreaChart = function (parent) {
 		
 		// Set our accessors so the d3.line can generate our line path data
 		line.curve(scope.curve)
-		 .defined(function(d) { return (d.data) ? d : null; })
+		 .defined(function(d, i) { return (scope.y(d.data) != null) })
 		 .x(function (d, i) {
 			 return scope.xScale(scope.x(d.data, i));
 		 })
