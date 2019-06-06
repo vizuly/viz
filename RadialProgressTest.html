@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Vizuly 2.0 - Radial Progress</title>
+
+    <!-- We use google fonts for many of the examples, but they are not necessary -->
+    <link href='https://fonts.googleapis.com/css?family=Raleway:600,400,200' rel='stylesheet' type='text/css'>
+
+    <!-- vizuly2.specific style sheets -->
+    <link rel="stylesheet" href="lib/styles/vizuly.css">
+
+    <script src="lib/d3_v5.7.min.js"></script>
+
+    <script src="lib/vizuly2_core.min.js"></script>
+    <script src="src/RadialProgress.js"></script>
+
+    <!-- DEMO CODE:START -->
+    <link rel="stylesheet" href="demo/scripts/cssmenu.css">
+    <script type="text/javascript" src="demo/scripts/jquery-2.1.1.min.js"></script>
+    <script src="demo/scripts/cssmenu.js"></script>
+    <script src="demo/RadialProgressDemo.js"></script>
+    <!-- DEMO CODE: END -->
+
+</head>
+
+<body>
+
+<!-- Our main content container-->
+<div class="container" style="width:100%;">
+    <div id="viz_container" class="z-depth-3"
+         style="width:600px; height:600px; border-radius:10px; overflow:hidden; margin:0px auto;"></div>
+</div>
+
+<script id="testscript">
+
+	var viz = vizuly2.viz.RadialProgress("#viz_container");
+
+	viz.data(80)
+	 .height('100%')
+	 .width('100%')
+     .radius('35%')
+	 .min(0)
+	 .max(120)
+	 .capRadius(1)
+	 .arcThickness(.12)
+	 .valueLabel(function (d, i) {  return d3.format(".0f")(d); })
+     .topLabel(function (d, i) { return 'COMPLETED'; })
+     .bottomLabel(function (d, i) { return d3.format('.2f')(d/120 * 100) + '%'; })
+	 .on("mouseover", onMouseOver)
+	 .on("mouseout", onMouseOut)
+	 .on("click", onClick);
+
+	viz.update();
+
+
+	function onMouseOver(viz, d, i) {
+		console.log("onMouseOver()")
+		//We can capture mouse over events and respond to them
+	}
+
+	function onMouseOut(viz, d, i) {
+		console.log("onMouseOut()")
+		//We can capture mouse out events and respond to them
+	}
+
+	function onClick(viz, d, i) {
+		console.log("onClick()")
+		//We can capture click events and respond to them
+	}
+
+	if (runDemo) runDemo();
+
+
+</script>
+
+</body>
+
+</html>
