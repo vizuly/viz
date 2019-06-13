@@ -4,7 +4,7 @@ These files comprise the open source (MIT) Vizuly data visaulization components.
 
 The core framework files can be found here:
 
-[viz](https://github.com/vizuly/core)
+[core](https://github.com/vizuly/core)
 
 All vizuly documentation can be located here:
 
