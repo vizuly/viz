@@ -1,6 +1,6 @@
 # Vizuly Viz Components
 
-These files comprise the open source (MIT) Vizuly data visaulization components. 
+These files comprise the open source Vizuly data visaulization components. 
 
 The core framework files can be found here:
 
