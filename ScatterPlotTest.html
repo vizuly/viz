@@ -39,23 +39,23 @@
 	var viz = vizuly2.viz.ScatterPlot("#viz_container");
 
 	data.forEach(function (d) {
-      d.exp_dat = new Date(d.exp_dat);
-    })
+		d.exp_dat = new Date(d.exp_dat);
+	})
 
-    viz.data(data)
-     .width('100%')
-     .height('100%')
-     .y(function (d, i) { return Number(d.exp_amo); })
-     .x(function (d, i) { return d.exp_dat; })
-     .r(function (d, i) { return Number(d.exp_amo); })
-     .rScale(d3.scalePow().exponent(.3))
-     .yScale(d3.scalePow().exponent(.5))
-     .xTickFormat(function (d) { return d3.timeFormat('%-m/%y')(d)})
-     .yTickFormat(function (d) { return '$' + d3.format(',')(Math.round(d/1000000)) + 'M'});
+	viz.data(data)
+	 .width('100%')
+	 .height('100%')
+	 .y(function (d, i) { return Number(d.exp_amo); })
+	 .x(function (d, i) { return d.exp_dat; })
+	 .r(function (d, i) { return Number(d.exp_amo); })
+	 .rScale(d3.scalePow().exponent(.3))
+	 .yScale(d3.scalePow().exponent(.5))
+	 .xTickFormat(function (d) { return d3.timeFormat('%-m/%y')(d)})
+	 .yTickFormat(function (d) { return '$' + d3.format(',')(Math.round(d/1000000)) + 'M'});
 
-    viz.update();
+	viz.update();
 
-    if (runDemo) runDemo();
+	if (runDemo) runDemo();
 
 
 </script>

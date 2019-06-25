@@ -219,7 +219,7 @@ vizuly2.viz.RadialProgress = function (parent) {
 		 * @example  viz.on('tween', function (i) { ... });
 		 */
 		'tween'
-	 ]
+	]
 	
 	var scope = {};
 	scope.initialize = initialize;

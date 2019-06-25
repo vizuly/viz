@@ -273,7 +273,7 @@ vizuly2.viz.ScatterPlot = function (parent) {
 		 * @example  viz.on('click', function (e, d, i) { ... });
 		 */
 		'click'
-	 ]
+	]
 	
 	// This is the object that provides pseudo "protected" properties that the vizuly.viz function helps create
 	var scope = {};
@@ -485,8 +485,8 @@ vizuly2.viz.ScatterPlot = function (parent) {
 		
 		// Update the background
 		selection.selectAll(".vz-background").style("fill", function () {
-			return "url(#" + styles_backgroundGradient.attr("id") + ")";
-		})
+			 return "url(#" + styles_backgroundGradient.attr("id") + ")";
+		 })
 		 .style('opacity',viz.getStyle('background-opacity'));
 		
 		// Update the scatter plots
@@ -563,7 +563,7 @@ vizuly2.viz.ScatterPlot = function (parent) {
 		selection.selectAll('.vz-bottom-axis').attr('font-family', null)
 		selection.selectAll('.vz-left-axis path.domain').style('display', 'none');
 		selection.selectAll('.vz-bottom-axis path.domain').style('display', 'none');
-	//	selection.selectAll('.vz-bottom-axis line').style('display', 'none');
+		//	selection.selectAll('.vz-bottom-axis line').style('display', 'none');
 		
 		
 		scope.dispatch.apply('styled', viz);
@@ -643,7 +643,7 @@ vizuly2.viz.ScatterPlot = function (parent) {
 		return [x-70, y-140];
 		
 	}
-
+	
 	
 	return viz;
 	

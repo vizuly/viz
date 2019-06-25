@@ -308,8 +308,8 @@ vizuly2.viz.WordCloud = function (parent) {
 		
 		// Update the background
 		selection.selectAll(".vz-background").style("fill", function () {
-			return "url(#" + styles_backgroundGradient.attr("id") + ")";
-		})
+			 return "url(#" + styles_backgroundGradient.attr("id") + ")";
+		 })
 		 .style('opacity',viz.getStyle('background-opacity'));
 		
 		plot.selectAll('.vz-wordcloud-word')
@@ -339,7 +339,7 @@ vizuly2.viz.WordCloud = function (parent) {
 	function restoreElements() {
 		plot.selectAll('.vz-wordcloud-word').transition('fade').style('opacity',1)
 	}
-
+	
 	
 	// Returns our viz component
 	return viz;

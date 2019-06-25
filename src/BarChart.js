@@ -657,7 +657,7 @@ vizuly2.viz.BarChart = function (parent) {
 			labels.transition().duration(scope.duration)
 			 .style('text-anchor', function (d,i) {
 				 var datum = d.data['series' + i].data;
-			 	return (scope.x(datum) < 0) ? 'end' : 'start';
+				 return (scope.x(datum) < 0) ? 'end' : 'start';
 			 })
 			 .attr('y', function (d, i) {
 				 var datum = d.data['series' + i].data;

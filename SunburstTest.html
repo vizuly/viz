@@ -45,38 +45,38 @@
 
 <script id="testscript">
 
-    var d3 = vizuly2.d3;
+	var d3 = vizuly2.d3;
 
 	var viz = vizuly2.viz.SunBurst("#viz_container");
 
 	var valueField = "Federal";
 	var valueFields = ["Federal", "State", "Local"];
 
-    viz.data(data)
-        .width('100%')
-        .height('100%')
-        .children(function (d) {
-            return d.values
-        })
-        .key(function (d) {
-            return d.id
-        })
-        .value(function (d) {
-            return Number(d["agg_" + valueField])
-        })
-         .valueLabel(function (d) {
-             return d3.format('$,.2f')(Number(d["agg_" + valueField])) + " Million"
-         })
-        .label(function (d) {
-            var ret = trimLabel(d.key || (d.Category));
-            return (ret) ? ret : '';
-        })
-        .on("mouseover", onMouseOver)
-        .on("mouseout", onMouseOut)
+	viz.data(data)
+	 .width('100%')
+	 .height('100%')
+	 .children(function (d) {
+		 return d.values
+	 })
+	 .key(function (d) {
+		 return d.id
+	 })
+	 .value(function (d) {
+		 return Number(d["agg_" + valueField])
+	 })
+	 .valueLabel(function (d) {
+		 return d3.format('$,.2f')(Number(d["agg_" + valueField])) + " Million"
+	 })
+	 .label(function (d) {
+		 var ret = trimLabel(d.key || (d.Category));
+		 return (ret) ? ret : '';
+	 })
+	 .on("mouseover", onMouseOver)
+	 .on("mouseout", onMouseOut)
 
-    viz.update();
+	viz.update();
 
-    if (runDemo) runDemo();
+	if (runDemo) runDemo();
 
 	function trimLabel(label) {
 		return (String(label).length > 20) ? String(label).substr(0, 17) + "..." : label;
@@ -87,7 +87,7 @@
 	}
 
 	function onMouseOut(e, d, i) {
-       console.log("onMouseOver " + d.key);
+		console.log("onMouseOver " + d.key);
 	}
 
 

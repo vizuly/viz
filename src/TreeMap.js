@@ -53,7 +53,7 @@ vizuly2.viz.TreeMap = function (parent) {
 		 *        "Level4": "Special Benefits",
 		 *        "Federal": "0.38",
 		 *         ...
-		*/
+		 */
 		'data': null,
 		/**
 		 * Width of component in either pixels (Number) or percentage of parent container (XX%)
@@ -309,7 +309,7 @@ vizuly2.viz.TreeMap = function (parent) {
 		if (dataIsDirty == true) {
 			root = d3.hierarchy(scope.data, scope.children)
 			 .eachBefore(function(d) {
-			 	 d.parentId = d.parent ? vizuly2.util.createCSSKey(scope.key(d.parent.data)) : 'none'
+				 d.parentId = d.parent ? vizuly2.util.createCSSKey(scope.key(d.parent.data)) : 'none'
 				 d.id = vizuly2.util.createCSSKey(scope.key(d.data));
 				 
 				 //console.log("id = " + d.id)
@@ -419,94 +419,94 @@ vizuly2.viz.TreeMap = function (parent) {
 			
 			var renderData = datum.children ? datum.children : [datum];
 			
-				var cell = group.selectAll('.vz-treemap-cell')
-				 .data(renderData, function (d, i) {
-					 return d.id
-				 });
+			var cell = group.selectAll('.vz-treemap-cell')
+			 .data(renderData, function (d, i) {
+				 return d.id
+			 });
+			
+			cell.exit().remove();
+			
+			var cellEnter = cell.enter().append('g')
+			 .attr('class', function (d) {
+				 //		 return 'vz-treemap-cell-group group_' + d.id })
+				 return 'vz-treemap-cell parent-id_' + d.parentId + ' id_' + d.id
+			 })
+			 .on('mouseover', function (d, i) {
+				 scope.dispatch.apply('mouseover', viz, [this, d, i])
+			 })
+			 .on('mouseout', function (d, i) {
+				 scope.dispatch.apply('mouseout', viz, [this, d, i])
+			 })
+			 .style('cursor', function (d) {
+				 return d.children ? 'pointer' : 'not-allowed'
+			 })
+			
+			cellEnter.append('rect')
+			 .attr('class', 'vz-treemap-cell-rect')
+			 .attr('id', function (d) {
+				 return d.id;
+			 })
+			 .on('click', function (d, i) {
+				 scope.dispatch.apply('click', viz, [this, d, i])
+			 })
+			
+			cell = cellEnter.merge(cell);
+			
+			cell.each(function (d, i) {
+				var g = d3.select(this);
 				
-				cell.exit().remove();
-				
-				var cellEnter = cell.enter().append('g')
-				 .attr('class', function (d) {
-					 //		 return 'vz-treemap-cell-group group_' + d.id })
-					 return 'vz-treemap-cell parent-id_' + d.parentId + ' id_' + d.id
-				 })
-				 .on('mouseover', function (d, i) {
-					 scope.dispatch.apply('mouseover', viz, [this, d, i])
-				 })
-				 .on('mouseout', function (d, i) {
-					 scope.dispatch.apply('mouseout', viz, [this, d, i])
-				 })
-				 .style('cursor', function (d) {
-					 return d.children ? 'pointer' : 'not-allowed'
-				 })
-				
-				cellEnter.append('rect')
-				 .attr('class', 'vz-treemap-cell-rect')
-				 .attr('id', function (d) {
-					 return d.id;
-				 })
-				 .on('click', function (d, i) {
-					 scope.dispatch.apply('click', viz, [this, d, i])
-				 })
-				
-				cell = cellEnter.merge(cell);
-				
-				cell.each(function (d, i) {
-					var g = d3.select(this);
-					
-					g.attr('transform', function (d) {
-						 return 'translate(' + d.x0 + ',' + d.y0 + ')';
-					 })
-					
-					g.selectAll('text').remove();
-					
-					g.selectAll('.vz-treemap-cell-rect').datum(d)
-					 .attr('width', function (d) {
-						 return d.x1 - d.x0;
-					 })
-					 .attr('height', function (d) {
-						 return d.y1 - d.y0;
-					 })
-					
-					var padding = viz.getStyle('cell-padding-inner', [this, d, i]);
-					
-					var fontSize = viz.getStyle('cell-font-size', [this, d, i]);
-					var w = d.x1 - d.x0;
-					var h = d.y1 - d.y0;
-					
-					if ((scope.label(d.data).length * fontSize) / (w) < h / fontSize && h > fontSize * 2 + padding) {
-						
-						var label = g.append('text')
-						 .datum(d)
-						 .attr('class', 'vz-treemap-cell-label')
-						 .attr('y', fontSize)
-						 .attr('x', 0)
-						 .attr('dy', function (d, i) {
-							 var ret = (viz.getStyle('cell-font-size', [this, d, i]) * 1.2) + 'px'
-							 return ret
-						 })
-						 .style('opacity', function (d, i) {
-							 return viz.getStyle('cell-label-opacity', [this, d, i])
-						 })
-						 .style('font-size', function (d, i) {
-							 return fontSize + 'px'
-						 })
-						 .text(function (d) {
-							 return scope.label(d.data)
-						 })
-						 .call(wrap, d.x1 - d.x0 - padding * 2)
-						
-					}
-					
+				g.attr('transform', function (d) {
+					return 'translate(' + d.x0 + ',' + d.y0 + ')';
 				})
 				
-				cell
-				 .transition().duration(scope.duration)
-				 .attr('transform', function (d) {
-					 return 'translate(' + d.x0 + ',' + d.y0 + ')';
-				 });
+				g.selectAll('text').remove();
 				
+				g.selectAll('.vz-treemap-cell-rect').datum(d)
+				 .attr('width', function (d) {
+					 return d.x1 - d.x0;
+				 })
+				 .attr('height', function (d) {
+					 return d.y1 - d.y0;
+				 })
+				
+				var padding = viz.getStyle('cell-padding-inner', [this, d, i]);
+				
+				var fontSize = viz.getStyle('cell-font-size', [this, d, i]);
+				var w = d.x1 - d.x0;
+				var h = d.y1 - d.y0;
+				
+				if ((scope.label(d.data).length * fontSize) / (w) < h / fontSize && h > fontSize * 2 + padding) {
+					
+					var label = g.append('text')
+					 .datum(d)
+					 .attr('class', 'vz-treemap-cell-label')
+					 .attr('y', fontSize)
+					 .attr('x', 0)
+					 .attr('dy', function (d, i) {
+						 var ret = (viz.getStyle('cell-font-size', [this, d, i]) * 1.2) + 'px'
+						 return ret
+					 })
+					 .style('opacity', function (d, i) {
+						 return viz.getStyle('cell-label-opacity', [this, d, i])
+					 })
+					 .style('font-size', function (d, i) {
+						 return fontSize + 'px'
+					 })
+					 .text(function (d) {
+						 return scope.label(d.data)
+					 })
+					 .call(wrap, d.x1 - d.x0 - padding * 2)
+					
+				}
+				
+			})
+			
+			cell
+			 .transition().duration(scope.duration)
+			 .attr('transform', function (d) {
+				 return 'translate(' + d.x0 + ',' + d.y0 + ')';
+			 });
+			
 			// Add group labels
 			if (datum.children) {
 				var labelText = scope.groupLabel(datum)
@@ -575,7 +575,7 @@ vizuly2.viz.TreeMap = function (parent) {
 			//text.selectAll('tspan').attr("y",y)
 		})
 	}
-
+	
 	function updateDrillPath() {
 		header.selectAll('.vz-drill-label').remove();
 		
@@ -589,13 +589,13 @@ vizuly2.viz.TreeMap = function (parent) {
 		 .text(function (d,i) { return (i > 0 ? ' > ' : '') + scope.label(d.data)})
 		 .attr('font-size',function (d,i) { return viz.getStyle('header-font-size',arguments) + 'px'})
 		 .attr('x',function (d,i) {
-		 	  var x = xOffset;
-		 	  xOffset = xOffset + this.getComputedTextLength() + viz.getStyle('header-font-size',arguments)/2;
-		 	  return x
+			 var x = xOffset;
+			 xOffset = xOffset + this.getComputedTextLength() + viz.getStyle('header-font-size',arguments)/2;
+			 return x
 		 })
 		
 		//Apply after we use select above so it doesn't get collected.
-	//	rootLabel.attr('class','vz-drill-label')
+		//	rootLabel.attr('class','vz-drill-label')
 		
 		var headerWidthRatio = size.width/header.node().getBoundingClientRect().width;
 		
@@ -649,8 +649,8 @@ vizuly2.viz.TreeMap = function (parent) {
 		
 		// Update the background
 		selection.selectAll(".vz-background").style("fill", function () {
-			return "url(#" + styles_backgroundGradient.attr("id") + ")";
-		})
+			 return "url(#" + styles_backgroundGradient.attr("id") + ")";
+		 })
 		 .style('opacity',viz.getStyle('background-opacity'));
 		
 		plot.selectAll('.vz-treemap-cell-rect')
@@ -665,8 +665,8 @@ vizuly2.viz.TreeMap = function (parent) {
 		
 		plot.selectAll('.vz-treemap-cell-label')
 		 .attr('transform', function (d,i) {
-		 	  var padding =  viz.getStyle('cell-padding-inner', [this, d, i]);
-		 	  return 'translate(' + padding + ',' + padding + ')'
+			 var padding =  viz.getStyle('cell-padding-inner', [this, d, i]);
+			 return 'translate(' + padding + ',' + padding + ')'
 		 })
 		 .style('fill',function (d,i) { return viz.getStyle('cell-label-color', [this, d, i])})
 		 .style('pointer-events','none')
@@ -724,12 +724,12 @@ vizuly2.viz.TreeMap = function (parent) {
 	function styles_onClick(e,d,i) {
 		if (!d.children) { return; }
 		
-	//	if (drillPath.indexOf(d.parent.data) < 0) {
-	//		drillPath.push(d.parent);
-	//	}
-	//	if (drillPath.indexOf(d) < 0) {
-	//		drillPath.push(d);
-	//	}
+		//	if (drillPath.indexOf(d.parent.data) < 0) {
+		//		drillPath.push(d.parent);
+		//	}
+		//	if (drillPath.indexOf(d) < 0) {
+		//		drillPath.push(d);
+		//	}
 		update(d);
 		
 	}

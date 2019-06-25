@@ -217,7 +217,7 @@ vizuly2.viz.Venn = function (parent) {
 		 * @example  viz.on('click', function (e, d, i) { ... });
 		 */
 		'click'
-	 ]
+	]
 	
 	// This is the object that provides pseudo "protected" properties that the vizuly.viz function helps create
 	var scope = {};
@@ -281,7 +281,7 @@ vizuly2.viz.Venn = function (parent) {
 			o.sets = [];
 			o.key = scope.key(d);
 			o.label = scope.label(d);
-		  scope.sets(d).forEach(function (set) {
+			scope.sets(d).forEach(function (set) {
 				o.sets.push(setKeys.indexOf(set))
 			})
 			plots.push(o);
@@ -472,8 +472,8 @@ vizuly2.viz.Venn = function (parent) {
 		
 		// Update the background
 		selection.selectAll(".vz-background").style("fill", function () {
-			return "url(#" + styles_backgroundGradient.attr("id") + ")";
-		})
+			 return "url(#" + styles_backgroundGradient.attr("id") + ")";
+		 })
 		 .style('opacity',viz.getStyle('background-opacity'));
 		
 		
@@ -545,7 +545,7 @@ vizuly2.viz.Venn = function (parent) {
 				if (h1.length > 0) h1 = h1 + '<br><br>';
 				h1 = h1 + set.label;
 			})
-
+			
 		}
 		
 		html = html.replace("HEADER1", h1);
@@ -2089,8 +2089,8 @@ vizuly2.viz.Venn = function (parent) {
 // this seems to be one of those things that should be easy but isn't
 		util.wrapText = function(text, circles, labeller, lineHeight) {
 			var data = text.datum(),
-			    width = circles[data.sets[0]].radius || 50,
-			   label = labeller(data) || '';
+			 width = circles[data.sets[0]].radius || 50,
+			 label = labeller(data) || '';
 			
 			var words = label.split(/\s+/).reverse(),
 			 maxLines = 3,

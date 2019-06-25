@@ -38,31 +38,31 @@
 
 	var viz = vizuly2.viz.TreeMap("#viz_container");
 
-    viz
-     .width('100%')
-     .height('100%')
-     .data({key: 'Overall', values: data})
-     .children(function (d) {
-         return d.values
-     })
-     .value(function (d) {
-        return Number(d.Total)
-     })
-     .valueFormatter(function (d) {
-        return d3.format('$,.2f')(d) + ' Billion'
-     })
-     .key(function (d) {
-         return (d.key) ? d.key : d.Category
-     })
-     .label(function (d) {
-        return String((d.key) ? d.key : d.Category).toUpperCase()
-     })
-     .groupLabel(function (d) {
-       return String((d.data.key) ? d.data.key : d.data.Category).toUpperCase() + ' ' + d3.format('$,.0f')(d.value) + ' Billion'
-     })
-     .update();
+	viz
+	 .width('100%')
+	 .height('100%')
+	 .data({key: 'Overall', values: data})
+	 .children(function (d) {
+		 return d.values
+	 })
+	 .value(function (d) {
+		 return Number(d.Total)
+	 })
+	 .valueFormatter(function (d) {
+		 return d3.format('$,.2f')(d) + ' Billion'
+	 })
+	 .key(function (d) {
+		 return (d.key) ? d.key : d.Category
+	 })
+	 .label(function (d) {
+		 return String((d.key) ? d.key : d.Category).toUpperCase()
+	 })
+	 .groupLabel(function (d) {
+		 return String((d.data.key) ? d.data.key : d.data.Category).toUpperCase() + ' ' + d3.format('$,.0f')(d.value) + ' Billion'
+	 })
+	 .update();
 
-    if (runDemo) runDemo();
+	if (runDemo) runDemo();
 
 </script>
 

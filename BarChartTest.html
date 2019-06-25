@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-     <title>Vizuly 2.0 - Bar Chart</title>
+    <title>Vizuly 2.0 - Bar Chart</title>
 
     <!-- We use google fonts for many of the examples, but they are not necessary -->
     <link href='https://fonts.googleapis.com/css?family=Raleway:600,400,200' rel='stylesheet' type='text/css'>
@@ -49,26 +49,26 @@ Rotate labels (Coluimn chart)
 
 	var viz = vizuly2.viz.BarChart("#viz_container");
 
-    viz
-     .data(data)
-     .width('100%')
-     .height('100%')
-     .x(function (d, i)  { return Number(d.value); })
-     .y(function (d, i)  { return d.country; })
-     .seriesLabel( function (d,i) { return d.category })
-     .updateOnResize(true)
+	viz
+	 .data(data)
+	 .width('100%')
+	 .height('100%')
+	 .x(function (d, i)  { return Number(d.value); })
+	 .y(function (d, i)  { return d.country; })
+	 .seriesLabel( function (d,i) { return d.category })
+	 .updateOnResize(true)
 
-    viz.update();
+	viz.update();
 
- //   if (runDemo) runDemo();
+	//   if (runDemo) runDemo();
 
 	function onMouseOver(e, d, i, j) {
-        console.log('onMouseOver ' + d.country + ' series = ' + i + ' index = ' + j)
-    }
+		console.log('onMouseOver ' + d.country + ' series = ' + i + ' index = ' + j)
+	}
 
-    function onMouseOut(e, d, i, j) {
-	    console.log('onMouseOut ' + d.country + ' series = ' + i + ' index = ' + j)
-    }
+	function onMouseOut(e, d, i, j) {
+		console.log('onMouseOut ' + d.country + ' series = ' + i + ' index = ' + j)
+	}
 
 </script>
 

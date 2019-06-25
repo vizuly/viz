@@ -248,7 +248,7 @@ vizuly2.viz.SunBurst = function (parent) {
 		 * @example  viz.on('click', function (e, d, i) { ... });
 		 */
 		'click'
-	 ];
+	];
 	
 	// This is the object that provides pseudo "protected" properties that the vizuly.viz function helps create
 	var scope = {};
@@ -322,7 +322,7 @@ vizuly2.viz.SunBurst = function (parent) {
 		// Tell everyone we are done initializing
 		scope.dispatch.apply('initialized', viz);
 	}
-
+	
 	
 	// The measure function performs any measurement or layout calcuations prior to making any updates to the SVG elements
 	function measure() {
@@ -421,7 +421,7 @@ vizuly2.viz.SunBurst = function (parent) {
 		 });
 		
 		drillUp.attr('transform','translate(' + (size.left + radius - 12) + ',' + (size.top + radius - 12) + ')')
-			.style('opacity',0);
+		 .style('opacity',0);
 		
 		updateHeaderLabel(scope.data)
 		
@@ -505,7 +505,7 @@ vizuly2.viz.SunBurst = function (parent) {
 		
 		plot.transition()
 		 .call(function(transition) {
-		 	vizuly2.util.transitionOnEnd(transition, updateLabels)
+			 vizuly2.util.transitionOnEnd(transition, updateLabels)
 		 })
 		 .duration(750)
 		 .tween("scale", function () {
@@ -523,7 +523,7 @@ vizuly2.viz.SunBurst = function (parent) {
 				 return arc(d);
 			 };
 		 })
-
+		
 		updateHeaderLabel(d);
 		applyStyles();
 		scope.dispatch.apply('click', viz, [this, d.data, i, d])
@@ -555,7 +555,7 @@ vizuly2.viz.SunBurst = function (parent) {
 		if (d.parent) {
 			createKeyPath(d.parent);
 		}
-	
+		
 	}
 	
 	
@@ -604,8 +604,8 @@ vizuly2.viz.SunBurst = function (parent) {
 		
 		// Update the background
 		scope.selection.selectAll(".vz-background").style("fill", function () {
-			return "url(#" + styles_backgroundGradient.attr("id") + ")";
-		})
+			 return "url(#" + styles_backgroundGradient.attr("id") + ")";
+		 })
 		 .style('opacity',viz.getStyle('background-opacity'));
 		
 		
@@ -626,15 +626,15 @@ vizuly2.viz.SunBurst = function (parent) {
 		plot.selectAll(".vz-sunburst-label")
 		 .filter(function (d) { return d.depth == 0})
 		 .style('display', 'none')
-
+		
 		header
 		 .style('font-size',function (d,i) { return viz.getStyle('header-font-size',arguments) + 'px'})
 		 .style('padding',function (d,i) { return viz.getStyle('header-font-size',arguments)/2 + 'px'});
 		
 		header.selectAll('.vz-sunburst-header-label')
 		 .style('font-weight',function (d,i, nodeList) {
-			return (nodeList.length-1 == i) ? 'bold' : 'normal';
-		})
+			 return (nodeList.length-1 == i) ? 'bold' : 'normal';
+		 })
 		 .style('cursor',function (d,i, nodeList) {
 			 return (nodeList.length-1 != i) ? 'pointer' : 'auto';
 		 })

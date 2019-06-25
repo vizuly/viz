@@ -39,37 +39,37 @@
 
 <script id="testscript">
 
-    var viz = vizuly2.viz.WordCloud("#viz_container");
+	var viz = vizuly2.viz.WordCloud("#viz_container");
 
-    viz
-     .data(data.goodWillHunting)
-     .width('100%')
-     .height('100%')
-     .fontSizeMax(function () { return 60 })
-     .style('font-family', 'Anton')
-     .on('mouseover', onMouseOver)
-     .on('mouseout', onMouseOut)
-     .on('click', onClick)
-     .update();
+	viz
+	 .data(data.goodWillHunting)
+	 .width('100%')
+	 .height('100%')
+	 .fontSizeMax(function () { return 60 })
+	 .style('font-family', 'Anton')
+	 .on('mouseover', onMouseOver)
+	 .on('mouseout', onMouseOut)
+	 .on('click', onClick)
+	 .update();
 
-    function start() {
+	function start() {
 
-    	//Easy way to ensure font has loaded correctly by rendering 2x
-        viz.update();
-        if (runDemo) runDemo();
-    }
+		//Easy way to ensure font has loaded correctly by rendering 2x
+		viz.update();
+		if (runDemo) runDemo();
+	}
 
 	function onMouseOver(e, d, i) {
 		console.log('onMouseOver ' + d.key)
-    }
+	}
 
-    function onMouseOut(e, d, i) {
-	    console.log('onMouseOut ' + d.key)
-    }
+	function onMouseOut(e, d, i) {
+		console.log('onMouseOut ' + d.key)
+	}
 
-    function onClick(e, d, i) {
-	    console.log('onClick ' + d.key)
-    }
+	function onClick(e, d, i) {
+		console.log('onClick ' + d.key)
+	}
 
 
 </script>

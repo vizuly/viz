@@ -38,23 +38,23 @@
 
 	var viz = vizuly2.viz.Venn("#viz_container");
 
-    var totalSize = d3.sum(data, function (d) { return d.size; })
+	var totalSize = d3.sum(data, function (d) { return d.size; })
 
-    viz
-     .data(data)
-     .width(600)
-     .height(600)
-     .value(function (d) {
-         return d.size
-     })
-     .label(function (d) {
-         if (!d.label) return '';
-         return d.label + ' ' + (Math.round((d.size / totalSize) * 100)) + '%';
-     })
+	viz
+	 .data(data)
+	 .width(600)
+	 .height(600)
+	 .value(function (d) {
+		 return d.size
+	 })
+	 .label(function (d) {
+		 if (!d.label) return '';
+		 return d.label + ' ' + (Math.round((d.size / totalSize) * 100)) + '%';
+	 })
 
-    viz.update();
+	viz.update();
 
-    if (runDemo) runDemo();
+	if (runDemo) runDemo();
 
 </script>
 

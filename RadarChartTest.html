@@ -39,16 +39,16 @@
 
 	var viz = vizuly2.viz.RadarChart("#viz_container");
 
-    viz.data(data)
-     .width(600).height(600)
-     .x(function (d,i) { return String(d.axis).toUpperCase() })
-     .y(function (d,i) { return d.value })
-     .seriesLabel(function (d) { return d.category })
-     .yTickFormat(function (d) { return d3.format('.0f')(d*100) + '%'})
+	viz.data(data)
+	 .width(600).height(600)
+	 .x(function (d,i) { return String(d.axis).toUpperCase() })
+	 .y(function (d,i) { return d.value })
+	 .seriesLabel(function (d) { return d.category })
+	 .yTickFormat(function (d) { return d3.format('.0f')(d*100) + '%'})
 
-    viz.update();
+	viz.update();
 
-    if (runDemo) runDemo();
+	if (runDemo) runDemo();
 
 </script>
 

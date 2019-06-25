@@ -759,8 +759,8 @@ vizuly2.viz.RadarChart = function (parent) {
 		
 		// Update the background
 		selection.selectAll(".vz-background").style("fill", function () {
-			return "url(#" + styles_backgroundGradient.attr("id") + ")";
-		})
+			 return "url(#" + styles_backgroundGradient.attr("id") + ")";
+		 })
 		 .style('opacity',viz.getStyle('background-opacity'));
 		
 		// Hide the plot background
@@ -849,9 +849,9 @@ vizuly2.viz.RadarChart = function (parent) {
 		 .style("fill-opacity", function (datum, index) {
 			 return (i == index) ? viz.getStyle('area-fill-opacity-over', arguments) : .2
 		 })
-		.style("stroke-opacity", function (datum, index) {
-			return (i == index) ? viz.getStyle('area-fill-opacity-over', arguments) : .2
-		});
+		 .style("stroke-opacity", function (datum, index) {
+			 return (i == index) ? viz.getStyle('area-fill-opacity-over', arguments) : .2
+		 });
 		
 		pointHitArea.selectAll('.vz-point-tip').remove();
 		
@@ -879,7 +879,7 @@ vizuly2.viz.RadarChart = function (parent) {
 	
 	// This runs on every mouse over
 	function styles_vertexOnMouseOver(e, d, i, j) {
-
+		
 		var selection = scope.selection;
 		
 		var datum = stackSeries[j][i];
@@ -943,7 +943,7 @@ vizuly2.viz.RadarChart = function (parent) {
 		
 		// Remove the data tip
 		selection.selectAll(".vz-point-tip").remove();
-
+		
 		xAxisPlot.selectAll('.vz-radar-x-axis-label')
 		 .transition()
 		 .style('font-size',(viz.getStyle('x-axis-font-size')) + 'px')
@@ -971,9 +971,9 @@ vizuly2.viz.RadarChart = function (parent) {
 		var h1, h2, h3;
 		
 		if (d3.select(e).attr('class') == 'vz-radar-area') {
-		  h1=' ';
-		  h3=' ';
-		  h2 = scope.seriesLabel(scope.data[i][0]);
+			h1=' ';
+			h3=' ';
+			h2 = scope.seriesLabel(scope.data[i][0]);
 			tip.style('height','50px')
 		}
 		else {
@@ -986,8 +986,8 @@ vizuly2.viz.RadarChart = function (parent) {
 		html = html.replace("HEADER1", h1);
 		html = html.replace("HEADER2", h2);
 		html = html.replace("HEADER3", h3);
-	
-	  tip.html(html);
+		
+		tip.html(html);
 		
 		if (d3.select(e).attr('class') == 'vz-radar-area') {
 			tip.selectAll('.vz-tip-header2')
