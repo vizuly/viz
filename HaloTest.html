@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Vizuly 2.0 - Halo Chart</title>
+    <link href='https://fonts.googleapis.com/css?family=Roboto|Raleway:600,400,200' rel='stylesheet' type='text/css'>
+
+    <link rel="stylesheet" href="lib/styles/vizuly.css">
+
+    <script src="lib/d3_v5.7.min.js"></script>
+
+    <script src="lib/vizuly2_core.min.js"></script>
+    <script src="src/Halo.js"></script>
+    <script src="data/halo_data.js"></script>
+
+
+    <!-- DEMO CODE:START -->
+    <link rel="stylesheet" href="demo/scripts/cssmenu.css">
+    <script type="text/javascript" src="demo/scripts/jquery-2.1.1.min.js"></script>
+    <script src="demo/scripts/cssmenu.js"></script>
+    <script src="demo/HaloDemo.js"></script>
+    <!-- DEMO CODE: END -->
+
+</head>
+
+<body>
+
+<!-- Our main content container-->
+<div class="container" style="width:100%;">
+    <div id="viz_container" class="z-depth-3" style="width:600px; height:600px; border-radius:10px; overflow:hidden; position:relative">
+
+    </div>
+</div>
+<div style="position:absolute; bottom:10px; right:10px; font-size:10px; color:#777"><span>v.</span> 2.1.220 - @date</div>
+
+
+<script id="testscript">
+
+	var viz = vizuly2.viz.Halo("#viz_container");
+
+	var renderData = data.house;
+
+	viz.data(renderData)
+	 .width('100%').height('100%')
+	 .haloKey(function (d) { return d.CMTE_ID; })
+	 .haloLabel( function (d) { return d.CMTE_NM; })
+	 .nodeKey(function (d) { return d.CAND_ID; })
+	 .nodeLabel(function (d) { return d.CAND_NAME; })
+	 .nodeGroupKey(function (d) { return d.PTY; })
+	 .nodeGroupLabel(function (d) { return (d.PTY == 'DEM') ? 'DEMOCRAT' : (d.PTY == 'REP') ? 'REPUBLICAN' : 'INDEPENDENT'; })
+	 .value(function (d) { return Number(d.TRANSACTION_AMT); })
+	 .valueFormatter(function (d) { return '$' + d3.format(',.0f')(d) })
+	 .on("nodeover", node_onMouseOver)
+	 .on("arcover", arc_onMouseOver)
+	 .on("linkover", link_onMouseOver)
+	 .on("nodeclick", node_onClick);
+
+	viz.update();
+
+	if (runDemo) runDemo();
+
+	// An example of how you could respond to a node click event
+	function node_onClick(e, d, i) {
+		console.log("You have just clicked on " + d.values[0].CAND_NAME);
+	}
+
+	// For each mouse over on the node we want to create a datatip that shows information about the candidate
+	// and any assoicated PACs that have contributed to the candidate.
+	function node_onMouseOver(e, d, i) {
+		console.log('node_onMouseOver ' + d.values[0].CAND_NAME);
+	}
+
+	// For each PAC we want to create a datatip that shows the total of all contributions by that PAC
+	function arc_onMouseOver(e, d, i) {
+		console.log('arc_onMouseOver ' + d.data.values[0].CMTE_NM);
+	}
+
+	// When the user rolls over a link we want to create a lable for the PAC and a data tip for the candidate that the
+	// contribution went to.
+	function link_onMouseOver(e, d, i) {
+		console.log('link_onMouseOver ' + d.data.TRANSACTION_AMT + ' from ' + d.data.CMTE_NM + ' to ' + d.data.CAND_NAME);
+	}
+
+
+</script>
+
+</body>
+
+
+</html>

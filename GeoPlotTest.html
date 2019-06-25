@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Vizuly 2.0 - Geo Plot</title>
+
+    <!-- We use google fonts for many of the examples, but they are not necessary -->
+    <link href='https://fonts.googleapis.com/css?family=Raleway:600,400,200' rel='stylesheet' type='text/css'>
+
+    <!-- vizuly2.specific style sheets -->
+    <link rel="stylesheet" href="lib/styles/vizuly.css">
+
+    <script src="lib/d3_v5.7.min.js"></script>
+
+    <script src="lib/vizuly2_core.min.js"></script>
+    <script src="src/GeoPlot.js"></script>
+    <script src="data/geoplot_data.js"></script>
+
+    <!-- DEMO CODE:START -->
+    <link rel="stylesheet" href="demo/scripts/cssmenu.css">
+    <script type="text/javascript" src="demo/scripts/jquery-2.1.1.min.js"></script>
+    <script src="demo/scripts/cssmenu.js"></script>
+    <script src="demo/GeoPlotDemo.js"></script>
+    <!-- DEMO CODE: END -->
+
+</head>
+
+<body>
+
+<!-- Our main content container-->
+<div class="container" style="width:100%;">
+    <div id="viz_container" class="z-depth-3" style="width:600px; height:600px; border-radius:10px; overflow:hidden">
+    </div>
+</div>
+<div style="position:absolute; bottom:10px; right:10px; font-size:10px; color:#777"><span>v.</span> 2.1.220 - @date</div>
+
+
+<script id="testscript">
+
+	//Get a reference to D3`
+
+	// our radial components and an array to hold them
+	var viz = vizuly2.viz.GeoPlot("#viz_container");
+
+
+	viz.data(data.filter(function (d) { return d.year === 2014}))
+	 .width('100%')
+	 .height('100%')     //initial component display size
+	 .plotValue(function (d) {
+		 return Number(d.murders)
+	 })
+	 .plotLabel(function (d) {
+		 return d.city
+	 })
+	 .sourceCoordinates(function (d) {
+		 return [Number(d.long), Number(d.lat)];
+	 })
+	 .targetCoordinates(function (d) {
+		 return [Number(d.long), Number(d.lat)];
+	 })
+	 .plotShape(viz.SHAPE_CIRCLE)
+	 .scale(1)
+	 .rotation([98.00000000000001, -30])
+	 .on('click', onClick)
+	 .update();
+
+	if (runDemo) runDemo();
+
+
+	function cleanString(s) {
+		s = String(s).replace(',', '_');
+		s = s.replace(/[\s+,'+,\.,\(,\),\']/g, '');
+		s = s.toUpperCase();
+		return s;
+	}
+
+
+
+	function onClick(e, d, i) {
+		console.log(d.CTYNAME)
+	}
+
+
+</script>
+
+</body>
+
+</html>

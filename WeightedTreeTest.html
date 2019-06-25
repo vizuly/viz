@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Vizuly 2.0 - Weighted Tree</title>
+
+    <!-- We use google fonts for many of the examples, but they are not necessary -->
+    <link href='https://fonts.googleapis.com/css?family=Roboto|Raleway:600,400,200' rel='stylesheet' type='text/css'>
+
+    <!-- vizuly2.specific style sheets -->
+    <link rel="stylesheet" href="lib/styles/vizuly.css">
+
+    <script src="lib/d3_v5.7.min.js"></script>
+
+    <script src="lib/vizuly2_core.min.js"></script>
+    <script src="src/WeightedTree.js"></script>
+    <script src="data/weightedtree_data.js"></script>
+
+
+    <!-- DEMO CODE:START -->
+    <link rel="stylesheet" href="demo/scripts/cssmenu.css">
+    <script type="text/javascript" src="demo/scripts/jquery-2.1.1.min.js"></script>
+    <script src="demo/scripts/cssmenu.js"></script>
+    <script src="demo/WeightedTreeDemo.js"></script>
+    <!-- DEMO CODE: END -->
+
+</head>
+
+<body>
+
+<!-- Our main content container-->
+<div class="container" style="width:100% ">
+    <div id="viz_container" class="z-depth-3" style="width:600px; height:600px;">
+    </div>
+</div>
+<div style="position:absolute; bottom:10px; left:10px; font-size:10px; color:#777"><span>v.</span> 2.1.220 - @date</div>
+
+<script id="testscript">
+
+	// Our visualization component.
+	var viz = vizuly2.viz.WeightedTree("#viz_container");
+
+	viz.data({key: 'Overall', values: data})
+	 .width('100%')
+	 .height('100%')
+	 .children(function (d) { return d.values })
+	 .key(function (d) { return d.key || d.Category; })
+	 .value(function (d) {
+		 var ret = Number(d.Federal)
+		 return isNaN(ret) ? 0 : ret;
+	 })
+	 .valueFormatter(formatValue)
+	 .label(function (d) { return trimLabel(d.key || (d.Category)) })
+	 .dataTipLabel(function (d) { return d.key || d.Category })
+	 .useZoomToNode(true)
+	 .useZoom(true)
+	 .on("mouseover", onMouseOver)
+	 .on("mouseout", onMouseOut)
+	 .on("click", onClick)
+
+
+	viz.update();
+
+	if (runDemo) runDemo();
+
+
+	// Used to format data tip values
+	function formatValue (d) {
+		if (isNaN(d)) d = 0;
+		return "$" + d3.format(",.2f")(d) + " Billion";
+	};
+
+	// Used to trim node labels so they are not too long.
+	function trimLabel(label) {
+		return (String(label).length > 20) ? String(label).substr(0, 17) + "..." : label;
+	}
+
+	function onMouseOver(e, d, i) {
+		console.log("onMouseOver " + d.data.key);
+	}
+
+	function onMouseOut(e, d, i) {
+		console.log("onMouseOut " + d.data.key)
+	}
+
+	//We can capture click events and respond to them
+	function onClick(g, d, i) {
+		console.log('onClick ' + d.data.key)
+	}
+
+</script>
+
+</body>
+
+</html>

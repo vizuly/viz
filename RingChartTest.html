@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Vizuly 2.0 - RingChart</title>
+
+    <!-- We use google fonts for many of the examples, but they are not necessary -->
+    <link href='https://fonts.googleapis.com/css?family=Roboto:600,400,200' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Raleway:600,400,200' rel='stylesheet' type='text/css'>
+
+    <!-- vizuly2.specific style sheets -->
+    <link rel="stylesheet" href="lib/styles/vizuly.css">
+
+    <script src="lib/d3_v5.7.min.js"></script>
+
+    <script src="lib/vizuly2_core.min.js"></script>
+    <script src="src/RingChart.js"></script>
+    <script src="data/ringchart_data.js"></script>
+
+
+    <!-- DEMO CODE:START -->
+    <link rel="stylesheet" href="demo/scripts/cssmenu.css">
+    <script type="text/javascript" src="demo/scripts/jquery-2.1.1.min.js"></script>
+    <script src="demo/scripts/cssmenu.js"></script>
+    <script src="demo/RingChartDemo.js"></script>
+    <!-- DEMO CODE: END -->
+
+
+
+</head>
+
+<body>
+<!-- Our main content container-->
+<div class="container" style="width:100%;">
+    <div id="viz_container" class="z-depth-3" style="width:600px; height:600px; border-radius:10px; overflow:hidden;">
+    </div>
+</div>
+<div style="position:absolute; bottom:10px; right:10px; font-size:10px; color:#777"><span>v.</span> 2.1.220 - @date</div>
+
+<script id="testscript">
+
+	var viz = vizuly2.viz.RingChart("#viz_container");
+
+	function createSeries(data) {
+
+		var laTemps = [];
+		var pollution = data.pollution;
+		var calfire = data.calfire;
+		var drought = data.drought;
+
+		data.temps.forEach(function (d, i) {
+			if (i % 7  == 0) {
+				d.Date = new Date(d.Date);
+				laTemps.push(d);
+			}
+		})
+
+		pollution.forEach(function (d) {
+			d.Date = new Date(d.Date);
+		})
+
+		calfire.forEach(function (d) {
+			d.StartDate = new Date(d.StartDate);
+			d.EndDate = new Date(d.EndDate);
+		})
+
+		drought.forEach(function (d) {
+			d.Date = new Date(d.ValidEnd);
+		})
+
+
+		var tempSeries = {
+			'data' : laTemps,
+			'label' :  'Temps',
+			'x' :  function (d, i) { return d.Date; },
+			'y' :  function (d) { return [d.TempMax] },
+			'plotType' :  'BAR_STACKED',
+			'valueRange' :   function (series) { return [d3.min(series.data, function (d, i) { return d3.sum(series.y(d, i))}),d3.max(series.data, function (d, i) { return d3.sum(series.y(d, i))})] },
+			'plotRatio' :  .35,
+			'dataTipLabels' :  function (d, datum, index) {
+				return [
+					'Low: ' + d3.format(',')(Math.round(datum.TempMin)) + '°F',
+					'High: ' + d3.format(',')(Math.round(datum.TempMax)) + '°F',
+					d3.timeFormat('%b %d, %Y')(datum.Date)
+				]
+			}
+		};
+
+		var pollutionSeries = {
+			'data' :  pollution,
+			'label' :  'Pollution',
+			'x' :  function (d, i) { return d.Date; },
+			'y' :  function (d) { return d.AQI; },
+			'plotType' :  'LINE_AREA',
+			'plotRatio' :  .2,
+			'dataTipLabels' :  function (d, datum, i) {
+				return ['Particulate: ' + d3.format(',.2f')(datum.PM2_5), 'Air Quality Index: ' + d3.format(',.2f')(datum.AQI), d3.timeFormat('%b %Y')(datum.Date)]
+			}
+		};
+
+		var droughtSeries = {
+			'data' :  drought,
+			'label' :  'Drought',
+			'x' :  function (d, i) { return d.Date; },
+			'y' :  function (d) { return [d.D0, d.D1, d.D2, d.D3, d.D4]; },
+			'plotType' :  'BAR_STACKED',
+			'valueRange' :  function (series) {
+				return [0, d3.max(series.data, function (d, i) {
+					return d3.sum(series.y(d, i))
+				})]
+			},
+			'plotRatio' :  .25,
+			'dataTipLabels' :  function (d, datum, index) {
+				return ['No Drought: ' + d3.format(',')(Math.round(datum.None)) + ' Acres',
+					'<div style="text-align:left, width:120px, margin:0px auto">' +
+					'L0: ' + d3.format(',')(Math.round(datum.D0)) + ' Acres <br>' +
+					'L1: ' + d3.format(',')(Math.round(datum.D1)) + ' Acres <br>' +
+					'L2: ' + d3.format(',')(Math.round(datum.D2)) + ' Acres <br>' +
+					'L3: ' + d3.format(',')(Math.round(datum.D3)) + ' Acres <br>' +
+					'L4: ' + d3.format(',')(Math.round(datum.D4)) + ' Acres <br>' +
+					'</div>',
+					d3.timeFormat('%b %Y')(datum.Date)]
+			}
+		};
+
+		var fireSeries = {
+			'data' :  calfire.filter(function (d) { return d.Acres > 1000 }),
+			'label' :  'Fires',
+			'x' :  function (d, i) { return d.StartDate; },
+			'y' :  function (d) { return d.Acres; },
+			'valueRange' :  function (series) {
+				return [0, d3.max(series.data, function (d, i) {
+					return d.Acres
+				})]
+			},
+			'plotType' :  'SCATTER',
+			'plotRatio' :  .21,
+			'scale' :  d3.scalePow().exponent(.5),
+			'dataTipLabels' :  function (d, datum, index) {
+				return [datum.Name + ' Fire', d3.format(',')(datum.Acres) + ' Acres Burned', d3.timeFormat('%b %Y')(datum.StartDate)]
+			}
+		}
+
+		return [tempSeries, pollutionSeries, droughtSeries, fireSeries];
+
+
+	}
+
+
+	var series = createSeries(data);
+
+	viz.series(series)
+	 .margin({top: '10%', left: "10%", right: "10%", bottom: "10%"})
+	 .width('100%')
+	 .height('100%')
+	 .outerRadius('48%')
+	 .innerRadius('25%')
+	 .xTickCount(24)
+	 .gutterAngle(28)
+	 .dateRange(function () { return [new Date("01/01/2000" + ""), new Date("09/01/2018")] })
+	 .style('gutter-fill','#AAA')
+	 .style('gutter-fill-opacity',.15)
+	 .style('series-label-color','#000')
+	 .on('styled',function (d) {
+		 viz.selection().selectAll('.x-axis-label').style('font-family','Roboto')
+	 })
+
+	viz.update();
+
+	if (runDemo) runDemo();
+
+
+</script>
+
+</body>
+
+</html>
