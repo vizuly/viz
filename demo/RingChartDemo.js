@@ -327,10 +327,9 @@ function changeTheme(val) {
 	})
 	
 	var series = this[val].series;
-	
-	series.forEach(function (series) {
-		var vizSeries = viz.series()[series.index];
-		vizSeries.styles = series.styles;
+
+	viz.series().forEach(function (vizSeries, i) {
+		vizSeries.styles = series[i].styles;
 	})
 	
 	var styles = this[val].styles;
