@@ -1,7 +1,7 @@
 /*
  Copyright (c) 2016, BrightPoint Consulting, Inc.
  
- This source code is covered under the following license: http://vizuly2.io/commercial-license/
+ This source code is covered under the following license: http://vizuly.io/commercial-license/
  
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
  THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS
@@ -9,7 +9,7 @@
  TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-// @version 2.1.220
+// @version 2.1.236
 
 /**
  * @class
@@ -169,6 +169,12 @@ vizuly2.viz.RingChart = function (parent) {
 		 *
 		 */
 		"dateRange": function () { return [d3.min(scope.series[0].data, function (d) { return scope.series[0].x(d)}), d3.max(scope.series[0].data, function (d) { return scope.series[0].x(d)})]},
+		/**
+		 * Determines what granularity to reneder elements along radial axis (i.e. Bar width thickness etc..)
+		 * @member {d3.timeWeek, d3.timeDay, etc.}
+		 * @default d3.timeWeek
+		 */
+		"timeGrain": d3.timeWeek,
 		/**
 		 * Label formatter for the x axis.  Can be customized to modify labels along axis.
 		 * @member {function}
@@ -436,7 +442,7 @@ vizuly2.viz.RingChart = function (parent) {
 	
 	// Create our Vizuly component
 	var viz = vizuly2.core.component(parent, scope);
-	viz.version = '2.1.220';
+	viz.version = '2.1.236';
 	
 	viz.PLOT_BAR_STACKED = 'BAR_STACKED';
 	viz.PLOT_LINE_AREA = 'LINE_AREA';
@@ -468,7 +474,6 @@ vizuly2.viz.RingChart = function (parent) {
 	var xScale = d3.scaleTime();
 	var lineAreaPlots, barPlots, scatterPlots;
 	var barTheta, startAngle, endAngle;
-	var timeGrain = d3.timeWeek;
 	var xLabelRadius = 1.025;
 	var padding;
 	
@@ -550,7 +555,8 @@ vizuly2.viz.RingChart = function (parent) {
 		
 		seriesPlots = [];
 		
-		var timeCount = timeGrain.count(xDomain[0], xDomain[1]);
+		var timeCount = scope.timeGrain.count(xDomain[0], xDomain[1]);
+		console.log("Time Count = " + timeCount)
 		var barTheta = (360 - scope.gutterAngle)/(timeCount);
 		padding = (outerRadius-innerRadius) * scope.ringPadding;
 		
